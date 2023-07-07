@@ -34,7 +34,7 @@
             </div>
 
             <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">How Do You Like It Cooked?</label>
+                <label for="exampleFormControlInput1" class="form-label">Center Cook</label>
                 <select @bind="CookedStyle" class="form-select">
                     <option selected>Cooking Preference</option>
                     @foreach (var style in Enum.GetValues(typeof(CookingStyle)))

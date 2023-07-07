@@ -1,86 +1,39 @@
 ﻿@using MudBlazor;
+@using SteakGrillingGuide.Components
 @using SteakGrillingGuide.Data;
 @using SteakGrillingGuide.Extensions;
 @inject IDialogService DialogService
 @inject SteakProvider SteakProvider
 @page "/"
 
-<div class="row mb-3">
-    <div class="col-6">
-        <button class="btn btn btn-success" @onclick="StartTimer">
-            <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" /> Start Timer
-        </button>
+<div class="row mb-3 border-bottom border-dark pb-3">
+    <div class="col-3">
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenDialog">
+            <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
+        </MudButton>
     </div>
-    <div class="col-6 text-end">
-        <button class="btn btn btn-secondary" @onclick="OpenDialog">
-            <MudIcon Icon="@Icons.Material.Outlined.AddBox" Title="Add" /> Add A Steak
-        </button>
+    <div class="col-6 text-center align-content-center justify-content-center">
+        @if (Steaks.Any())
+        {
+            <div>
+                Grill Time: @($"{Minutes:0}:{Seconds:00}")
+            </div>
+        }
     </div>
-</div>
-<div class="row">
-    @($"{Minutes:0}:{Seconds:00}")
+    <div class="col-3 text-end">
+        <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="StartTimer">
+            <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" />
+        </MudButton>
+    </div>
 </div>
 @if (Steaks.Any())
 {
-    <div>
-        Total Grill Time: @LongestTime minutes
-    </div>
-    foreach (var steak in Steaks)
-    {
-        var sideOneStart = steak.GetSideOneStartTime(LongestTime);
-        var sideTwoStart = steak.GetSideTwoStartTime(LongestTime);
-        var steakSetting = Settings.First(i => i.CookingStyle == steak.CookingStyle);
-        <div class="row border-bottom border-dark mb-2 p-2">
-            <h3>@steak.Name</h3>
-            <div>
-                <strong>Center Cook:</strong> @(steak.CookingStyle.GetCookingStyleName())
-            </div>
-            <div>
-                <strong>Thickness: </strong> @($"{steak.Thickness}")
-            </div>
-            <div class="w-100">
-                <strong>First Side:</strong>
-                <div class="row">
-                    <div class="col-4">
-                        Duration
-                        <br />
-                        @($"{steak.DurationSetting.FirstSide / 60:0}"):@($"{steak.DurationSetting.FirstSide % 60:00}")
-                    </div>
-                    <div class="col-4">
-                        Starts At
-                        <br />
-
-                        @($"{sideOneStart / 60:0}"):@($"{sideOneStart % 60:00}")
-                    </div>
-                    <div class="col-4">
-                        Percentage
-                        <br />
-                        @steak.GetFirstSidePercentage(counter, LongestTime)%
-                    </div>
-                </div>
-            </div>
-            <div>
-                <strong>Second Side:</strong> @steak.DurationSetting.SecondSide
-                <div class="row">
-                    <div class="col-4">
-                        Duration
-                        <br/>
-                        @($"{steak.DurationSetting.SecondSide / 60:0}"):@($"{steak.DurationSetting.SecondSide % 60:00}")
-                    </div>
-                    <div class="col-4">
-                        Starts At
-                        <br/>
-                        @($"{sideTwoStart / 60:0}"):@($"{sideTwoStart % 60:00}")
-                    </div>
-                    <div class="col-4">
-                        Percentage
-                        <br/>
-                        @steak.GetSecondSidePercentage(counter, LongestTime)%
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+    <MudExpansionPanels MultiExpansion="true">
+        @foreach (var steak in Steaks)
+        {
+            <SteakSummary SteakToCook="steak" Counter="counter" LongestTime="LongestTime" />
+        }
+    </MudExpansionPanels>
 }
 else
 {
@@ -108,23 +61,31 @@ else
         return base.OnInitializedAsync();
     }
 
-    private async Task HandleDialogClosed(Steaks steak)
+    private async Task HandleDialogClosed(Steaks addedSteak)
     {
-        if (string.IsNullOrWhiteSpace(steak.Name))
+        if (string.IsNullOrWhiteSpace(addedSteak.Name))
         {
-            steak.Name = $"Steak {Steaks.Count + 1}";
+            addedSteak.Name = $"Steak {Steaks.Count + 1}";
         }
-        Steaks.Add(steak);
+        Steaks.Add(addedSteak);
         LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
         counter = (int)(LongestTime * 60);
+        foreach(var steak in Steaks)
+        {
+            steak.SetStartTimes(LongestTime);
+        }
+        RemainingToMinuteSecond();
         StateHasChanged();
     }
 
     private void StartTimer()
     {
-        Timer = new System.Timers.Timer(1000);
-        Timer.Elapsed += CountDownTimer;
-        Timer.Enabled = true;
+        if (Timer == null|| !Timer.Enabled)
+        {
+            Timer = new System.Timers.Timer(1000);
+            Timer.Elapsed += CountDownTimer;
+            Timer.Enabled = true;
+        }
     }
 
     protected void RemainingToMinuteSecond()

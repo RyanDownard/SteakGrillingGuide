@@ -1,0 +1,89 @@
+﻿@using MudBlazor
+@using SteakGrillingGuide.Extensions;
+
+<MudExpansionPanel>
+    <TitleContent>
+        <h3 class="mb-0">@SteakToCook.Name</h3>
+        <div class="row">
+            <div class="col-9">
+                @(SteakToCook.CookingStyle.GetCookingStyleName()) - @($"{SteakToCook.Thickness}\"")
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-9">
+                @if(Counter <= SteakToCook.FirstSideStartTime)
+                {
+                    if(Counter <= SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                    {
+                        <MudProgressCircular Value="SteakToCook.GetFirstSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                    }
+                    else
+                    {
+                        <MudProgressCircular Value="SteakToCook.GetSecondSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                    }
+                }
+                else
+                {
+                    <MudProgressCircular Value="100" Color="Color.Success"/>
+                }
+            </div>
+        </div>
+
+    </TitleContent>
+    <ChildContent>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Side</th>
+                    <th>Starts At</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center">
+                        @if (Counter < SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                        {
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.KeyboardArrowRight" Color="Color.Success" />
+                        }
+                    </td>
+                    <td>
+                        First
+                    </td>
+                    <td>
+                        @(
+                            $"{SteakToCook.FirstSideStartTime / 60:0}"
+                            ):@(
+                          $"{SteakToCook.SecondSideStartTime % 60:00}"
+                          )
+                    </td>
+                    <td>
+                        @(
+                            $"{SideOneInSeconds / 60:0}"
+                            ):@(
+                          $"{SideOneInSeconds % 60:00}"
+                          )
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">
+                        @if (Counter < SteakToCook.SecondSideStartTime)
+                        {
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.KeyboardArrowRight" Color="Color.Success" />
+                        }
+                    </td>
+                    <td>
+                        Second
+                    </td>
+                    <td>
+                        @($"{SteakToCook.SecondSideStartTime / 60:0}"):@($"{SteakToCook.SecondSideStartTime % 60:00}")
+                    </td>
+                    <td>
+                        @($"{SideTwoInSeconds / 60:0}"):@($"{SideTwoInSeconds % 60:00}")
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </ChildContent>
+</MudExpansionPanel>

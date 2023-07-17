@@ -2,13 +2,14 @@
 @using SteakGrillingGuide.Components
 @using SteakGrillingGuide.Data;
 @using SteakGrillingGuide.Extensions;
+@using Plugin.LocalNotification;
 @inject IDialogService DialogService
 @inject SteakProvider SteakProvider
 @page "/"
 
 <div class="row mb-3 border-bottom border-dark pb-3">
     <div class="col-3">
-        <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenDialog">
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenSteakDialog">
             <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
         </MudButton>
     </div>
@@ -21,7 +22,7 @@
         }
     </div>
     <div class="col-3 text-end">
-        <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="StartTimer">
+        <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="OpenStartDialog">
             <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" />
         </MudButton>
     </div>
@@ -50,18 +51,36 @@ else
     private int counter { get; set; } = 60;
     private int Minutes { get; set; } = 0;
     private int Seconds { get; set; } = 0;
-    private EventCallback<Steaks> OnDialogClosed { get; set; }
+    private bool IgnoreInfoDialog = false;
+    private EventCallback<Steaks> OnSteakAdded { get; set; }
+    private EventCallback OnTimerStarted { get; set; }
 
     private static System.Timers.Timer Timer { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
         Settings = SteakProvider.SteakSettings;
-        OnDialogClosed = new EventCallback<Steaks>(this, (Steaks steak) => HandleDialogClosed(steak));
-        return base.OnInitializedAsync();
+        OnSteakAdded = new EventCallback<Steaks>(this, (Steaks steak) => HandleSteakAdded(steak));
+        OnTimerStarted = new EventCallback(this, () => StartTimer());
+        await DisplayInfoDialog();
     }
 
-    private async Task HandleDialogClosed(Steaks addedSteak)
+    private async Task DisplayInfoDialog()
+    {
+        string GetWarningSet = await SecureStorage.Default.GetAsync("IgnoreInfoDialog");
+        if (GetWarningSet != null)
+        {
+            IgnoreInfoDialog = bool.TryParse(GetWarningSet, out IgnoreInfoDialog);
+        }
+
+        if (!IgnoreInfoDialog)
+        {
+            DialogService.Show<AppInfoDialog>();
+        }
+
+    }
+
+    private async Task HandleSteakAdded(Steaks addedSteak)
     {
         if (string.IsNullOrWhiteSpace(addedSteak.Name))
         {
@@ -70,7 +89,7 @@ else
         Steaks.Add(addedSteak);
         LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
         counter = (int)(LongestTime * 60);
-        foreach(var steak in Steaks)
+        foreach (var steak in Steaks)
         {
             steak.SetStartTimes(LongestTime);
         }
@@ -78,10 +97,50 @@ else
         StateHasChanged();
     }
 
-    private void StartTimer()
+    private async Task StartTimer()
     {
-        if (Timer == null|| !Timer.Enabled)
+        //var verify = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+        if (Timer == null || !Timer.Enabled)
         {
+            int notificationId = 1;
+            double longestInSeconds = LongestTime * 60;
+            foreach(var steak in Steaks)
+            {
+                if(longestInSeconds != steak.FirstSideStartTime)
+                {
+                    double placeTimeInSeconds = longestInSeconds - steak.FirstSideStartTime;
+                    var applySteakRequest = new NotificationRequest
+                        {
+                            NotificationId = notificationId,
+                            Title = $"Place {steak.Name} on grill",
+                            Subtitle = $"{steak.Name} is ready to be placed on the grill",
+                             BadgeNumber = 1,
+                            Schedule = new NotificationRequestSchedule
+                            {
+                                NotifyTime = DateTime.Now.AddSeconds(placeTimeInSeconds)
+                            }
+                        };
+                    notificationId++;
+                    await LocalNotificationCenter.Current.Show(applySteakRequest);
+                }
+
+                double flipTimeInSeconds = (LongestTime * 60) - steak.SecondSideStartTime;
+                var flipSteakRequest = new NotificationRequest
+                    {
+                        NotificationId = notificationId,
+                        Title = $"Flip {steak.Name} on grill",
+                        Subtitle = $"{steak.Name} is ready to be flipped on the grill",
+                        BadgeNumber = 1,
+                        Schedule = new NotificationRequestSchedule
+                        {
+                            NotifyTime = DateTime.Now.AddSeconds(flipTimeInSeconds)
+                        }
+                    };
+                notificationId++;
+                await LocalNotificationCenter.Current.Show(flipSteakRequest);
+            }
+
+
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -108,10 +167,17 @@ else
         InvokeAsync(StateHasChanged);
     }
 
-    private void OpenDialog()
+    private void OpenSteakDialog()
     {
         var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-        var parameters = new DialogParameters { ["AddSteak"] = OnDialogClosed };
+        var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded };
         DialogService.Show<NewSteakDialog>("Add Steak", parameters, options);
+    }
+
+    private void OpenStartDialog()
+    {
+        var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
+        var parameters = new DialogParameters { ["StartTimer"] = OnTimerStarted, ["SteaksToPlaceAtStart"] = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime) };
+        DialogService.Show<BeginTimerDialog>("Start Grill", parameters, options);
     }
 }

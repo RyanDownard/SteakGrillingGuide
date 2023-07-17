@@ -1,0 +1,27 @@
+﻿@using MudBlazor;
+@using SteakGrillingGuide.Extensions;
+
+<MudDialog>
+    <DialogContent>
+        <div class="fw-bold">
+            You are about the start the timer for your steaks. Be sure your steaks and grill are ready. 
+            When ready, place the following steaks on the grill and hit start.
+        </div>
+        <ul class="list-group list-group-flush">
+            @foreach (var steak in SteaksToPlaceAtStart)
+            {
+                <li class="list-group-item">
+                    <div>
+                        @steak.Name
+                        <br/>
+                        @steak.CookingStyle.GetCookingStyleName() - @($"{steak.Thickness}\"")
+                    </div>
+                </li>
+            }
+        </ul>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Start!</MudButton>
+    </DialogActions>
+</MudDialog>

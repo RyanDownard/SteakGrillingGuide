@@ -13,9 +13,11 @@ namespace SteakGrillingGuide.Shared
 {
     public partial class  NewSteakDialog
     {
-        [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+        [CascadingParameter]
+        MudDialogInstance MudDialog { get; set; }
 
-        [Parameter] public EventCallback<Steaks> AddSteak { get; set; }
+        [Parameter] 
+        public EventCallback<Steaks> AddSteak { get; set; }
 
         [Inject]
         protected SteakProvider SteakProvider { get; set; }

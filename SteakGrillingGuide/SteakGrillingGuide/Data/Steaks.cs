@@ -7,6 +7,7 @@ public class Steaks
     public double FirstSideStartTime { get; set; }
     public double SecondSideStartTime { get; set; }
     public bool ShowDetails { get; set; } = false;
+    public bool ShowDeleteDrawer { get; set; } = false;
     public double Thickness { get; set; }
     public CookingStyle CookingStyle { get; set; }
     public DurationSettings DurationSetting { get; set; }
@@ -75,7 +76,9 @@ public class Steaks
         }
         else
         {
-            return 100;
+            var totalWait = (longestTime * 60) - FirstSideStartTime;
+            var remaining = counter - FirstSideStartTime;
+            return Math.Round((remaining / totalWait) * 100, MidpointRounding.AwayFromZero);
         }
     }
 

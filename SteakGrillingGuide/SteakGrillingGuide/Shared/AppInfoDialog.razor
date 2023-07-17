@@ -1,0 +1,33 @@
+﻿@using MudBlazor;
+
+<MudDialog>
+    <DialogContent>
+
+        <div class="mb-3 fw-bold">
+            Before you get started on your steaks, we have some suggestions for preparing and cooking your steak:
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                Sit steaks out at room temperature for 30 minutes prior to cooking
+            </li>
+            <li class="list-group-item">
+                Season steaks on both sides with favorite seasoning
+            </li>
+            <li class="list-group-item">
+                Pre heat grill to approximately 500 degrees
+            </li>
+            <li class="list-group-item">
+                Let steaks rest for 5 minutes after grilling prior to eating.
+            </li>
+            <li class="list-group-item">
+                Enjoy!
+            </li>
+        </ul>
+        <div>
+            <MudCheckBox CheckedChanged="((bool value) => ShowDialogPreferenceChanged(value))">Do Not Show Again.</MudCheckBox>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Close</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -3,32 +3,34 @@
 
 <MudExpansionPanel>
     <TitleContent>
-        <h3 class="mb-0">@SteakToCook.Name</h3>
         <div class="row">
             <div class="col-9">
-                @(SteakToCook.CookingStyle.GetCookingStyleName()) - @($"{SteakToCook.Thickness}\"")
+                <div class="fs-3">
+                    @SteakToCook.Name
+                </div>
+                <div>
+                    @SteakToCook.CookingStyle.GetCookingStyleName() - @($"{SteakToCook.Thickness}\"")
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-9">
-                @if(Counter <= SteakToCook.FirstSideStartTime)
+            <div class="col-3 justify-content-center align-content-center">
+                @if (Counter < LongestTime * 60)
                 {
-                    if(Counter <= SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                    if (Counter >= SteakToCook.FirstSideStartTime)
                     {
-                        <MudProgressCircular Value="SteakToCook.GetFirstSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetWaitPercentange(Counter, LongestTime)" Color="Color.Warning" />
+                    }
+                    else if (Counter <= SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                    {
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetFirstSidePercentage(Counter, LongestTime)" Color="Color.Success" />
                     }
                     else
                     {
-                        <MudProgressCircular Value="SteakToCook.GetSecondSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetSecondSidePercentage(Counter, LongestTime)" Color="Color.Success" />
                     }
                 }
-                else
-                {
-                    <MudProgressCircular Value="100" Color="Color.Success"/>
-                }
+
             </div>
         </div>
-
     </TitleContent>
     <ChildContent>
         <table class="table table-bordered">

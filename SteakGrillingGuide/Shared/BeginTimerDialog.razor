@@ -3,6 +3,12 @@
 
 <MudDialog>
     <DialogContent>
+        @if (!NotificationsEnabled)
+        {
+            <div class="fw-bold text-danger mb-2">
+                You do not have notifications enabled, if you close the app you will not be notified when steaks need changed. Keep the app open to receive updates on your steaks.
+            </div>
+        }
         <div class="fw-bold">
             You are about the start the timer for your steaks. Be sure your steaks and grill are ready. 
             When ready, place the following steaks on the grill and hit start.

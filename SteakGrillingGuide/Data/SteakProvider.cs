@@ -21,13 +21,13 @@ namespace SteakGrillingGuide.Data
                     Durations = new List<DurationSettings>()
                     {
                     //rare 
-                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 2, SecondSide = 2 },
-                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 4, SecondSide = 2 },
-                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 5, SecondSide = 3 },
-                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 5, SecondSide = 4 },
-                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 6, SecondSide = 4 },
-                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 7, SecondSide = 5 },
-                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 8, SecondSide = 6 },
+                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 120, SecondSide = 120 },
+                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 240, SecondSide = 120 },
+                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 300, SecondSide = 180 },
+                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 300, SecondSide = 240 },
+                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 360, SecondSide = 240 },
+                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 420, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 480, SecondSide = 360 },
                     }
                 };
                 SteakSettings.Add(settingSetup);
@@ -38,13 +38,13 @@ namespace SteakGrillingGuide.Data
                     Durations = new List<DurationSettings>()
                     {
                     //rare 
-                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 3, SecondSide = 2 },
-                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 4, SecondSide = 3 },
-                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 5, SecondSide = 4 },
-                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 6, SecondSide = 5 },
-                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 7, SecondSide = 5 },
-                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 8, SecondSide = 6 },
-                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 9, SecondSide = 8 },
+                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 180, SecondSide = 120 },
+                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 240, SecondSide = 180 },
+                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 300, SecondSide = 240 },
+                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 360, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 420, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 480, SecondSide = 360 },
+                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 540, SecondSide = 480 },
                     }
                 };
                 SteakSettings.Add(settingSetup);
@@ -55,13 +55,13 @@ namespace SteakGrillingGuide.Data
                     Durations = new List<DurationSettings>()
                     {
                     //rare 
-                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 4, SecondSide = 2 },
-                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 5, SecondSide = 3 },
-                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 6, SecondSide = 4 },
-                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 7, SecondSide = 5 },
-                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 7, SecondSide = 6 },
-                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 8, SecondSide = 7 },
-                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 10, SecondSide = 8 },
+                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 240, SecondSide = 120 },
+                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 300, SecondSide = 180 },
+                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 360, SecondSide = 240 },
+                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 420, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 420, SecondSide = 360 },
+                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 420, SecondSide = 420 },
+                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 600, SecondSide = 480 },
                     }
                 };
                 SteakSettings.Add(settingSetup);
@@ -72,13 +72,13 @@ namespace SteakGrillingGuide.Data
                     Durations = new List<DurationSettings>()
                     {
                     //rare 
-                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 5, SecondSide = 3 },
-                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 7, SecondSide = 5 },
-                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 8, SecondSide = 6 },
-                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 9, SecondSide = 7 },
-                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 10, SecondSide = 8 },
-                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 11, SecondSide = 9 },
-                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 13, SecondSide = 11 },
+                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 300, SecondSide = 180 },
+                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 420, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 480, SecondSide = 360 },
+                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 540, SecondSide = 420 },
+                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 600, SecondSide = 480 },
+                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 660, SecondSide = 540 },
+                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 780, SecondSide = 660 },
                     }
                 };
                 SteakSettings.Add(settingSetup);

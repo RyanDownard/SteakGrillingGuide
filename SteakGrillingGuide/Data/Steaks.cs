@@ -4,31 +4,33 @@ namespace SteakGrillingGuide.Data;
 public class Steaks
 {
     public string Name { get; set; }
-    public double FirstSideStartTime { get; set; }
-    public double SecondSideStartTime { get; set; }
+    public int FirstSideStartTime { get; set; }
+    public int SecondSideStartTime { get; set; }
     public bool ShowDetails { get; set; } = false;
     public bool ShowDeleteDrawer { get; set; } = false;
+    public int StartNotificationId { get; set; }
+    public int FlipNotificationId { get; set; }
     public double Thickness { get; set; }
     public CookingStyle CookingStyle { get; set; }
     public DurationSettings DurationSetting { get; set; }
 
 
-    public void SetStartTimes(double LongestTime)
+    public void SetStartTimes(int LongestTime)
     {
         if(LongestTime == DurationSetting.TotalTime)
         {
-            FirstSideStartTime = LongestTime * 60;
-            SecondSideStartTime = (DurationSetting.TotalTime * 60) - (DurationSetting.FirstSide * 60); 
+            FirstSideStartTime = LongestTime;
+            SecondSideStartTime = (DurationSetting.TotalTime) - (DurationSetting.FirstSide); 
         }
         else
         {
-            FirstSideStartTime = (DurationSetting.TotalTime * 60) % (LongestTime * 60);
-            var offset = (DurationSetting.TotalTime * 60) % (LongestTime * 60);
-            SecondSideStartTime = offset - (DurationSetting.FirstSide * 60);
+            FirstSideStartTime = (DurationSetting.TotalTime) % (LongestTime);
+            var offset = (DurationSetting.TotalTime) % (LongestTime);
+            SecondSideStartTime = offset - (DurationSetting.FirstSide);
         }
     }
 
-    public double GetFirstSidePercentage(int counter, double totalTime)
+    public double GetFirstSidePercentage(int counter, int totalTime)
     {
         double percentage = 0;
         //steak is not ready for the grill yet
@@ -43,7 +45,7 @@ public class Steaks
         }
         else
         {
-            percentage = Math.Round(((counter - (DurationSetting.SecondSide * 60)) / (DurationSetting.FirstSide * 60)) * 100, MidpointRounding.AwayFromZero);
+            percentage = Math.Round(((double)(counter - DurationSetting.SecondSide) / DurationSetting.FirstSide) * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
@@ -63,7 +65,7 @@ public class Steaks
         }
         else
         {
-            percentage = Math.Round((counter / (DurationSetting.SecondSide * 60)) * 100, MidpointRounding.AwayFromZero);
+            percentage = Math.Round(((double)counter / DurationSetting.SecondSide) * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
@@ -76,7 +78,7 @@ public class Steaks
         }
         else
         {
-            var totalWait = (longestTime * 60) - FirstSideStartTime;
+            var totalWait = (longestTime) - FirstSideStartTime;
             var remaining = counter - FirstSideStartTime;
             return Math.Round((remaining / totalWait) * 100, MidpointRounding.AwayFromZero);
         }

@@ -3,6 +3,7 @@
 @using SteakGrillingGuide.Data;
 @using SteakGrillingGuide.Extensions;
 @using Plugin.LocalNotification;
+@using System.Diagnostics;
 @inject IDialogService DialogService
 @inject SteakProvider SteakProvider
 @page "/"
@@ -46,12 +47,15 @@ else
 
 @code {
     protected List<Steaks> Steaks { get; set; } = new();
+    protected List<Steaks> PlaceSteakNotifications { get; set; } = new();
+    protected List<Steaks> FlipSteakNotifications { get; set; } = new();
     protected List<SteakSettings> Settings { get; set; }
-    protected double LongestTime { get; set; }
+    protected int LongestTime { get; set; }
     private int counter { get; set; } = 60;
     private int Minutes { get; set; } = 0;
     private int Seconds { get; set; } = 0;
     private bool IgnoreInfoDialog = false;
+    private bool NotificationDialogShown = false;
     private EventCallback<Steaks> OnSteakAdded { get; set; }
     private EventCallback OnTimerStarted { get; set; }
 
@@ -62,7 +66,21 @@ else
         Settings = SteakProvider.SteakSettings;
         OnSteakAdded = new EventCallback<Steaks>(this, (Steaks steak) => HandleSteakAdded(steak));
         OnTimerStarted = new EventCallback(this, () => StartTimer());
+        LocalNotificationCenter.Current.NotificationActionTapped += SteakNotificationTapped;
         await DisplayInfoDialog();
+    }
+
+    private void SteakNotificationTapped(Plugin.LocalNotification.EventArgs.NotificationActionEventArgs e)
+    {
+        //PlaceSteakNotifications.AddRange(Steaks.Where(i => i.StartNotificationId == e.Request.NotificationId));
+        //FlipSteakNotifications.AddRange(Steaks.Where(i => i.FlipNotificationId == e.Request.NotificationId));
+        //if (PlaceSteakNotifications.Any() || FlipSteakNotifications.Any())
+        //{
+        //    var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
+        //    var parameters = new DialogParameters { ["SteaksToPlace"] = PlaceSteakNotifications, ["SteaksToFlip"] = FlipSteakNotifications };
+        //    DialogService.Show<NotifiedSteaksDialog>("Steaks Ready!", parameters, options);
+        //    StateHasChanged();
+        //}
     }
 
     private async Task DisplayInfoDialog()
@@ -88,7 +106,7 @@ else
         }
         Steaks.Add(addedSteak);
         LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
-        counter = (int)(LongestTime * 60);
+        counter = LongestTime;
         foreach (var steak in Steaks)
         {
             steak.SetStartTimes(LongestTime);
@@ -99,47 +117,51 @@ else
 
     private async Task StartTimer()
     {
-        //var verify = await LocalNotificationCenter.Current.AreNotificationsEnabled();
         if (Timer == null || !Timer.Enabled)
         {
-            int notificationId = 1;
-            double longestInSeconds = LongestTime * 60;
-            foreach(var steak in Steaks)
+            var notificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+            if (notificationsEnabled)
             {
-                if(longestInSeconds != steak.FirstSideStartTime)
+                int notificationId = 1;
+                double longestInSeconds = LongestTime;
+                foreach (var steak in Steaks)
                 {
-                    double placeTimeInSeconds = longestInSeconds - steak.FirstSideStartTime;
-                    var applySteakRequest = new NotificationRequest
+                    if (longestInSeconds != steak.FirstSideStartTime)
+                    {
+                        double placeTimeInSeconds = longestInSeconds - steak.FirstSideStartTime;
+                        var applySteakRequest = new NotificationRequest
+                            {
+                                NotificationId = notificationId,
+                                Title = $"Place {steak.Name} on grill",
+                                Subtitle = $"{steak.Name} is ready to be placed on the grill",
+                                BadgeNumber = 1,
+                                Schedule = new NotificationRequestSchedule
+                                {
+                                    NotifyTime = DateTime.Now.AddSeconds(placeTimeInSeconds)
+                                }
+                            };
+                        steak.StartNotificationId = notificationId;
+                        notificationId++;
+                        await LocalNotificationCenter.Current.Show(applySteakRequest);
+                    }
+
+                    double flipTimeInSeconds = LongestTime - steak.SecondSideStartTime;
+                    var flipSteakRequest = new NotificationRequest
                         {
                             NotificationId = notificationId,
-                            Title = $"Place {steak.Name} on grill",
-                            Subtitle = $"{steak.Name} is ready to be placed on the grill",
-                             BadgeNumber = 1,
+                            Title = $"Flip {steak.Name} on grill",
+                            Subtitle = $"{steak.Name} is ready to be flipped on the grill",
+                            BadgeNumber = 1,
                             Schedule = new NotificationRequestSchedule
                             {
-                                NotifyTime = DateTime.Now.AddSeconds(placeTimeInSeconds)
+                                NotifyTime = DateTime.Now.AddSeconds(flipTimeInSeconds)
                             }
                         };
+                    steak.FlipNotificationId = notificationId;
                     notificationId++;
-                    await LocalNotificationCenter.Current.Show(applySteakRequest);
+                    await LocalNotificationCenter.Current.Show(flipSteakRequest);
                 }
-
-                double flipTimeInSeconds = (LongestTime * 60) - steak.SecondSideStartTime;
-                var flipSteakRequest = new NotificationRequest
-                    {
-                        NotificationId = notificationId,
-                        Title = $"Flip {steak.Name} on grill",
-                        Subtitle = $"{steak.Name} is ready to be flipped on the grill",
-                        BadgeNumber = 1,
-                        Schedule = new NotificationRequestSchedule
-                        {
-                            NotifyTime = DateTime.Now.AddSeconds(flipTimeInSeconds)
-                        }
-                    };
-                notificationId++;
-                await LocalNotificationCenter.Current.Show(flipSteakRequest);
             }
-
 
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
@@ -153,18 +175,31 @@ else
         Seconds = (int)(counter % 60);
     }
 
-    public void CountDownTimer(Object source, System.Timers.ElapsedEventArgs e)
+    public async void CountDownTimer(Object source, System.Timers.ElapsedEventArgs e)
     {
         if (counter > 0)
         {
             counter -= 1;
+            //PlaceSteakNotifications.AddRange(Steaks.Where(i => i.FirstSideStartTime == counter));
+            //FlipSteakNotifications.AddRange(Steaks.Where(i => i.SecondSideStartTime == counter));
+            //if (!NotificationDialogShown && (PlaceSteakNotifications.Any() || FlipSteakNotifications.Any()))
+            //{
+            //    var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
+            //    var parameters = new DialogParameters { ["SteaksToPlace"] = PlaceSteakNotifications, ["SteaksToFlip"] = FlipSteakNotifications };
+            //    await InvokeAsync(() => DialogService.Show<NotifiedSteaksDialog>("Steaks Ready!", parameters, options));
+            //    NotificationDialogShown = true;
+            //}
+            //else
+            //{
+            //    await InvokeAsync(StateHasChanged);
+            //}
         }
         else
         {
             Timer.Enabled = false;
         }
         RemainingToMinuteSecond();
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OpenSteakDialog()

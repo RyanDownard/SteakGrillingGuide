@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Plugin.LocalNotification;
 using SteakGrillingGuide.Data;
 
 namespace SteakGrillingGuide.Shared
@@ -14,6 +15,13 @@ namespace SteakGrillingGuide.Shared
         public IEnumerable<Steaks> SteaksToPlaceAtStart { get; set; }
         [Parameter]
         public EventCallback StartTimer { get; set; }
+
+        private bool NotificationsEnabled { get; set; } = false;
+
+        protected override async Task OnInitializedAsync()
+        {
+            NotificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+        }
         private async void Submit()
         {
              MudDialog.Close(DialogResult.Ok(true));

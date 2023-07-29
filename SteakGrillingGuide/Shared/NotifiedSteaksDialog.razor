@@ -1,0 +1,37 @@
+﻿@using MudBlazor;
+
+<MudDialog>
+    <DialogContent>
+        @if(SteaksToPlace != null && SteaksToPlace.Any())
+        {
+            <div>
+                Place the following steak(s):
+                <ul>
+                    @foreach(var steak in SteaksToPlace)
+                    {
+                        <li>
+                            @steak.Name
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+        @if (SteaksToFlip != null && SteaksToFlip.Any())
+        {
+            <div>
+                Flip the following steak(s):
+                <ul>
+                    @foreach (var steak in SteaksToFlip)
+                    {
+                        <li>
+                            @steak.Name
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Close</MudButton>
+    </DialogActions>
+</MudDialog>

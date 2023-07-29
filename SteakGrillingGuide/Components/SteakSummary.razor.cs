@@ -13,7 +13,7 @@ namespace SteakGrillingGuide.Components
         [Parameter]
         public Steaks SteakToCook { get; set; }
         [Parameter]
-        public double LongestTime { get; set; }
+        public int LongestTime { get; set; }
         [Parameter]
         public int Counter { get; set; }
 
@@ -22,8 +22,8 @@ namespace SteakGrillingGuide.Components
 
         protected override Task OnInitializedAsync()
         {
-            SideOneInSeconds = SteakToCook.DurationSetting.FirstSide * 60;
-            SideTwoInSeconds = SteakToCook.DurationSetting.SecondSide * 60;
+            SideOneInSeconds = SteakToCook.DurationSetting.FirstSide;
+            SideTwoInSeconds = SteakToCook.DurationSetting.SecondSide;
             return base.OnInitializedAsync();
         }
 

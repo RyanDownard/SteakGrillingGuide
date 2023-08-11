@@ -1,7 +1,7 @@
 ﻿@using MudBlazor
 @using SteakGrillingGuide.Extensions;
 
-<MudExpansionPanel>
+<MudExpansionPanel DisableGutters="true">
     <TitleContent>
         <div class="row">
             <div class="col-9">
@@ -33,6 +33,19 @@
         </div>
     </TitleContent>
     <ChildContent>
+        <div class="row mb-2">
+            <div class="col-6 text-center">
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="EditSteakCallback">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                </MudButton>
+                
+            </div>
+            <div class="col-6 text-center">
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="DeleteSteakCallback">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
+                </MudButton>
+            </div>
+        </div>
         <table class="table table-bordered">
             <thead>
                 <tr>

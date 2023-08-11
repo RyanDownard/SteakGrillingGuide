@@ -1,7 +1,7 @@
 ﻿
 namespace SteakGrillingGuide.Data;
 
-public class Steaks
+public class Steak
 {
     public string Name { get; set; }
     public int FirstSideStartTime { get; set; }

@@ -6,6 +6,7 @@
 @using System.Diagnostics;
 @inject IDialogService DialogService
 @inject SteakProvider SteakProvider
+@inject ISnackbar Snackbar;
 @page "/"
 
 <div class="row mb-3 border-bottom border-dark pb-3">
@@ -33,7 +34,7 @@
     <MudExpansionPanels MultiExpansion="true">
         @foreach (var steak in Steaks)
         {
-            <SteakSummary SteakToCook="steak" Counter="counter" LongestTime="LongestTime" />
+            <SteakSummary SteakToCook="steak" Counter="counter" LongestTime="LongestTime" EditSteak="OnSteakEdited" DeleteSteak="OnSteakDeleted" />
         }
     </MudExpansionPanels>
 }
@@ -46,9 +47,9 @@ else
 
 
 @code {
-    protected List<Steaks> Steaks { get; set; } = new();
-    protected List<Steaks> PlaceSteakNotifications { get; set; } = new();
-    protected List<Steaks> FlipSteakNotifications { get; set; } = new();
+    protected List<Steak> Steaks { get; set; } = new();
+    protected List<Steak> PlaceSteakNotifications { get; set; } = new();
+    protected List<Steak> FlipSteakNotifications { get; set; } = new();
     protected List<SteakSettings> Settings { get; set; }
     protected int LongestTime { get; set; }
     private int counter { get; set; } = 60;
@@ -56,15 +57,20 @@ else
     private int Seconds { get; set; } = 0;
     private bool IgnoreInfoDialog = false;
     private bool NotificationDialogShown = false;
-    private EventCallback<Steaks> OnSteakAdded { get; set; }
+    private EventCallback<Steak> OnSteakAdded { get; set; }
+    private EventCallback<Steak> OnSteakEdited { get; set; }
+    private EventCallback<Steak> OnSteakDeleted { get; set; }
     private EventCallback OnTimerStarted { get; set; }
+    private IDialogReference NotificationDialog { get; set; } = null;
 
     private static System.Timers.Timer Timer { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
         Settings = SteakProvider.SteakSettings;
-        OnSteakAdded = new EventCallback<Steaks>(this, (Steaks steak) => HandleSteakAdded(steak));
+        OnSteakAdded = new EventCallback<Steak>(this, (Steak steak) => HandleSteakAdded(steak));
+        OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
+        OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
         OnTimerStarted = new EventCallback(this, () => StartTimer());
         LocalNotificationCenter.Current.NotificationActionTapped += SteakNotificationTapped;
         await DisplayInfoDialog();
@@ -72,15 +78,6 @@ else
 
     private void SteakNotificationTapped(Plugin.LocalNotification.EventArgs.NotificationActionEventArgs e)
     {
-        //PlaceSteakNotifications.AddRange(Steaks.Where(i => i.StartNotificationId == e.Request.NotificationId));
-        //FlipSteakNotifications.AddRange(Steaks.Where(i => i.FlipNotificationId == e.Request.NotificationId));
-        //if (PlaceSteakNotifications.Any() || FlipSteakNotifications.Any())
-        //{
-        //    var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-        //    var parameters = new DialogParameters { ["SteaksToPlace"] = PlaceSteakNotifications, ["SteaksToFlip"] = FlipSteakNotifications };
-        //    DialogService.Show<NotifiedSteaksDialog>("Steaks Ready!", parameters, options);
-        //    StateHasChanged();
-        //}
     }
 
     private async Task DisplayInfoDialog()
@@ -95,23 +92,62 @@ else
         {
             DialogService.Show<AppInfoDialog>();
         }
-
     }
 
-    private async Task HandleSteakAdded(Steaks addedSteak)
+    private void UpdateTimingInfo()
+    {
+        if (Steaks.Any())
+        {
+            LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
+            counter = LongestTime;
+            foreach (var steak in Steaks)
+            {
+                steak.SetStartTimes(LongestTime);
+            }
+        }
+        else
+        {
+            LongestTime = 0;
+            counter = 0;
+        }
+
+        RemainingToMinuteSecond();
+    }
+
+    private async Task HandleSteakAdded(Steak addedSteak)
     {
         if (string.IsNullOrWhiteSpace(addedSteak.Name))
         {
             addedSteak.Name = $"Steak {Steaks.Count + 1}";
         }
-        Steaks.Add(addedSteak);
-        LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
-        counter = LongestTime;
-        foreach (var steak in Steaks)
+
+        if(!Steaks.Any(i => i == addedSteak))
         {
-            steak.SetStartTimes(LongestTime);
+            Steaks.Add(addedSteak);
         }
-        RemainingToMinuteSecond();
+
+
+        UpdateTimingInfo();
+
+        //Snackbar.Add("Place Brittney's Steak On Grill", Severity.Normal, config => { config.RequireInteraction = true; });
+        //Snackbar.Add("Flip Ryan's Steak", Severity.Normal, config => { config.RequireInteraction = true; });
+        //Snackbar.Add("Flip Brittney's Steak", Severity.Normal, config => { config.RequireInteraction = true; });
+        StateHasChanged();
+    }
+
+
+    private async Task HandleSteakEdited(Steak steakToEdit)
+    {
+        var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
+        var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded, ["Steak"] = steakToEdit };
+        DialogService.Show<UpsertSteakDialog>("Steak", parameters, options);
+        StateHasChanged();
+    }
+
+    private async Task HandleSteakDeleted(Steak steakToDelete)
+    {
+        Steaks.Remove(steakToDelete);
+        UpdateTimingInfo();
         StateHasChanged();
     }
 
@@ -161,8 +197,20 @@ else
                     notificationId++;
                     await LocalNotificationCenter.Current.Show(flipSteakRequest);
                 }
-            }
 
+                var endSteakRequest = new NotificationRequest
+                    {
+                        NotificationId = notificationId,
+                        Title = $"Steaks are done!",
+                        BadgeNumber = 1,
+                        Schedule = new NotificationRequestSchedule
+                        {
+                            NotifyTime = DateTime.Now.AddSeconds(LongestTime)
+                        }
+                    };
+                await LocalNotificationCenter.Current.Show(endSteakRequest);
+            }
+            
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -180,19 +228,6 @@ else
         if (counter > 0)
         {
             counter -= 1;
-            //PlaceSteakNotifications.AddRange(Steaks.Where(i => i.FirstSideStartTime == counter));
-            //FlipSteakNotifications.AddRange(Steaks.Where(i => i.SecondSideStartTime == counter));
-            //if (!NotificationDialogShown && (PlaceSteakNotifications.Any() || FlipSteakNotifications.Any()))
-            //{
-            //    var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-            //    var parameters = new DialogParameters { ["SteaksToPlace"] = PlaceSteakNotifications, ["SteaksToFlip"] = FlipSteakNotifications };
-            //    await InvokeAsync(() => DialogService.Show<NotifiedSteaksDialog>("Steaks Ready!", parameters, options));
-            //    NotificationDialogShown = true;
-            //}
-            //else
-            //{
-            //    await InvokeAsync(StateHasChanged);
-            //}
         }
         else
         {
@@ -206,7 +241,8 @@ else
     {
         var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
         var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded };
-        DialogService.Show<NewSteakDialog>("Add Steak", parameters, options);
+        DialogService.Show<UpsertSteakDialog>("Steak", parameters, options);
+
     }
 
     private void OpenStartDialog()

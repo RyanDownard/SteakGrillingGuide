@@ -9,9 +9,9 @@ public partial class NotifiedSteaksDialog
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; }
     [Parameter]
-    public List<Steaks> SteaksToPlace { get; set; }
+    public List<Steak> SteaksToPlace { get; set; }
     [Parameter]
-    public List<Steaks> SteaksToFlip { get; set; }
+    public List<Steak> SteaksToFlip { get; set; }
 
     void Submit() => MudDialog.Cancel();
 }

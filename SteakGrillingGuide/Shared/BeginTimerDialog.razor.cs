@@ -12,7 +12,7 @@ namespace SteakGrillingGuide.Shared
         [CascadingParameter] 
         MudDialogInstance MudDialog { get; set; }
         [Parameter]
-        public IEnumerable<Steaks> SteaksToPlaceAtStart { get; set; }
+        public IEnumerable<Steak> SteaksToPlaceAtStart { get; set; }
         [Parameter]
         public EventCallback StartTimer { get; set; }
 

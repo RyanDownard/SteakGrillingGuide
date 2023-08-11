@@ -11,13 +11,15 @@ using System.Threading.Tasks;
 
 namespace SteakGrillingGuide.Shared
 {
-    public partial class  NewSteakDialog
+    public partial class  UpsertSteakDialog
     {
         [CascadingParameter]
         MudDialogInstance MudDialog { get; set; }
 
         [Parameter] 
-        public EventCallback<Steaks> AddSteak { get; set; }
+        public EventCallback<Steak> AddSteak { get; set; }
+        [Parameter]
+        public Steak Steak { get; set; } = new Steak();
 
         [Inject]
         protected SteakProvider SteakProvider { get; set; }
@@ -29,12 +31,16 @@ namespace SteakGrillingGuide.Shared
         protected double? Thickness { get; set; } = null;
         protected int? CookedStyle { get; set; } = null;
 
-        Steaks Steak { get; set; } = new Steaks();
 
 
         protected override Task OnInitializedAsync()
         {
             Thicknesses = SteakProvider.Thicknesses;
+            if (!string.IsNullOrWhiteSpace(Steak.Name))
+            {
+                Thickness = Steak.Thickness;
+                CookedStyle = (int)Steak.CookingStyle;
+            }
             return base.OnInitializedAsync();
         }
 

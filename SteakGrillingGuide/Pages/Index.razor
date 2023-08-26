@@ -158,44 +158,45 @@ else
             var notificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
             if (notificationsEnabled)
             {
-                int notificationId = 1;
-                double longestInSeconds = LongestTime;
-                foreach (var steak in Steaks)
+                foreach(var steak in Steaks.Where(i => i.FirstSideStartTime == LongestTime))
                 {
-                    if (longestInSeconds != steak.FirstSideStartTime)
-                    {
-                        double placeTimeInSeconds = longestInSeconds - steak.FirstSideStartTime;
-                        var applySteakRequest = new NotificationRequest
-                            {
-                                NotificationId = notificationId,
-                                Title = $"Place {steak.Name} on grill",
-                                Subtitle = $"{steak.Name} is ready to be placed on the grill",
-                                BadgeNumber = 1,
-                                Schedule = new NotificationRequestSchedule
-                                {
-                                    NotifyTime = DateTime.Now.AddSeconds(placeTimeInSeconds)
-                                }
-                            };
-                        steak.StartNotificationId = notificationId;
-                        notificationId++;
-                        await LocalNotificationCenter.Current.Show(applySteakRequest);
-                    }
+                    steak.StartNotificationShown = true;
+                }
 
-                    double flipTimeInSeconds = LongestTime - steak.SecondSideStartTime;
-                    var flipSteakRequest = new NotificationRequest
+                int notificationId = 1;
+
+                foreach (var startTime in Steaks.GroupBy(i => i.FirstSideStartTime).Where(i => i.Key != LongestTime))
+                {
+                    var applySteakRequest = new NotificationRequest
                         {
                             NotificationId = notificationId,
-                            Title = $"Flip {steak.Name} on grill",
-                            Subtitle = $"{steak.Name} is ready to be flipped on the grill",
+                            Title = $"Steaks ready for the grill!",
+                            Subtitle = $"{string.Join(", ", startTime.Select(x => x.Name))} is ready to be placed on the grill",
                             BadgeNumber = 1,
                             Schedule = new NotificationRequestSchedule
                             {
-                                NotifyTime = DateTime.Now.AddSeconds(flipTimeInSeconds)
+                                NotifyTime = DateTime.Now.AddSeconds(LongestTime - startTime.Key)
                             }
                         };
-                    steak.FlipNotificationId = notificationId;
                     notificationId++;
-                    await LocalNotificationCenter.Current.Show(flipSteakRequest);
+                    await LocalNotificationCenter.Current.Show(applySteakRequest);
+                }
+
+                foreach (var flipTime in Steaks.GroupBy(i => i.SecondSideStartTime))
+                {
+                    var applySteakRequest = new NotificationRequest
+                        {
+                            NotificationId = notificationId,
+                            Title = $"Steaks ready for the grill!",
+                            Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be placed on the grill",
+                            BadgeNumber = 1,
+                            Schedule = new NotificationRequestSchedule
+                            {
+                                NotifyTime = DateTime.Now.AddSeconds(LongestTime - flipTime.Key)
+                            }
+                        };
+                    notificationId++;
+                    await LocalNotificationCenter.Current.Show(applySteakRequest);
                 }
 
                 var endSteakRequest = new NotificationRequest
@@ -209,8 +210,8 @@ else
                         }
                     };
                 await LocalNotificationCenter.Current.Show(endSteakRequest);
+
             }
-            
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -228,13 +229,30 @@ else
         if (counter > 0)
         {
             counter -= 1;
+            ShowSnackbarNotifications();
         }
         else
         {
             Timer.Enabled = false;
+            Snackbar.Add("Steaks are done!", Severity.Normal, config => { config.RequireInteraction = false; });
         }
         RemainingToMinuteSecond();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void ShowSnackbarNotifications()
+    {
+        foreach (var steak in Steaks.Where(i => i.FirstSideStartTime >= counter && !i.StartNotificationShown))
+        {
+            steak.StartNotificationShown = true;
+            Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; });
+        }
+
+        foreach (var steak in Steaks.Where(i => i.SecondSideStartTime >= counter && !i.FlipNotificationShown))
+        {
+            steak.FlipNotificationShown = true;
+            Snackbar.Add($"{steak.Name} ready to be flipped!", Severity.Normal, config => { config.RequireInteraction = false; });
+        }
     }
 
     private void OpenSteakDialog()

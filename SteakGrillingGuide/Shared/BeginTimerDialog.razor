@@ -6,7 +6,7 @@
         @if (!NotificationsEnabled)
         {
             <div class="fw-bold text-danger mb-2">
-                You do not have notifications enabled, if you close the app you will not be notified when steaks need changed. Keep the app open to receive updates on your steaks.
+                You do not have notifications enabled, this must be enabled to begin the timer.
             </div>
         }
         <div class="fw-bold">
@@ -28,6 +28,6 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Start!</MudButton>
+        <MudButton Disabled="@(!NotificationsEnabled)" Color="Color.Primary" OnClick="Submit">Start!</MudButton>
     </DialogActions>
 </MudDialog>

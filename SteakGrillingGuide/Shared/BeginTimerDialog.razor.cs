@@ -17,11 +17,17 @@ namespace SteakGrillingGuide.Shared
         public EventCallback StartTimer { get; set; }
 
         private bool NotificationsEnabled { get; set; } = false;
-
+         
         protected override async Task OnInitializedAsync()
         {
             NotificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
+            if (!NotificationsEnabled)
+            {
+                var permissionResults = await LocalNotificationCenter.Current.RequestNotificationPermission();
+                NotificationsEnabled = permissionResults;
+            }
         }
+
         private async void Submit()
         {
              MudDialog.Close(DialogResult.Ok(true));

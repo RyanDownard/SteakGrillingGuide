@@ -36,20 +36,6 @@ namespace SteakGrillingGuide.Components
             return base.OnInitializedAsync();
         }
 
-        public void OnSwipe(MudBlazor.SwipeDirection direction)
-        {
-            if (direction == MudBlazor.SwipeDirection.RightToLeft && !SteakToCook.ShowDeleteDrawer)
-            {
-                SteakToCook.ShowDeleteDrawer = true;
-                StateHasChanged();
-            }
-            else if (direction == MudBlazor.SwipeDirection.LeftToRight && SteakToCook.ShowDeleteDrawer)
-            {
-                SteakToCook.ShowDeleteDrawer = false;
-                StateHasChanged();
-            }
-        }
-
         private async Task EditSteakCallback()
         {
             await EditSteak.InvokeAsync(SteakToCook);

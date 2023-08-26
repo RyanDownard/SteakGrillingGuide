@@ -6,13 +6,12 @@ public class Steak
     public string Name { get; set; }
     public int FirstSideStartTime { get; set; }
     public int SecondSideStartTime { get; set; }
-    public bool ShowDetails { get; set; } = false;
-    public bool ShowDeleteDrawer { get; set; } = false;
-    public int StartNotificationId { get; set; }
-    public int FlipNotificationId { get; set; }
     public double Thickness { get; set; }
     public CookingStyle CookingStyle { get; set; }
     public DurationSettings DurationSetting { get; set; }
+    public bool ShowDetails { get; set; } = false;
+    public bool StartNotificationShown { get; set; } = false;
+    public bool FlipNotificationShown { get; set; } = false;
 
 
     public void SetStartTimes(int LongestTime)

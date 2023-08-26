@@ -33,19 +33,22 @@
         </div>
     </TitleContent>
     <ChildContent>
-        <div class="row mb-2">
-            <div class="col-6 text-center">
-                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="EditSteakCallback">
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
-                </MudButton>
-                
+        @if(Counter == LongestTime)
+        {
+            <div class="row mb-2">
+                <div class="col-6 text-center">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="EditSteakCallback">
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                    </MudButton>
+
+                </div>
+                <div class="col-6 text-center">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="DeleteSteakCallback">
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
+                    </MudButton>
+                </div>
             </div>
-            <div class="col-6 text-center">
-                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="DeleteSteakCallback">
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
-                </MudButton>
-            </div>
-        </div>
+        }
         <table class="table table-bordered">
             <thead>
                 <tr>

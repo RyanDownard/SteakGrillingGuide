@@ -4,6 +4,7 @@
 @using SteakGrillingGuide.Extensions;
 @using Plugin.LocalNotification;
 @using System.Diagnostics;
+@using System.Text.Json;
 @inject IDialogService DialogService
 @inject SteakProvider SteakProvider
 @inject ISnackbar Snackbar;
@@ -47,19 +48,22 @@ else
 
 
 @code {
-    protected List<Steak> Steaks { get; set; } = new();
-    protected List<Steak> PlaceSteakNotifications { get; set; } = new();
-    protected List<Steak> FlipSteakNotifications { get; set; } = new();
-    protected List<SteakSettings> Settings { get; set; }
-    protected int LongestTime { get; set; }
+    private List<Steak> Steaks { get; set; } = new();
+    private List<Steak> PlaceSteakNotifications { get; set; } = new();
+    private List<Steak> FlipSteakNotifications { get; set; } = new();
+    private List<SteakSettings> Settings { get; set; }
+    private RecoveryData? RecoveryData { get; set; }
+    private int LongestTime { get; set; }
     private int counter { get; set; } = 60;
     private int Minutes { get; set; } = 0;
     private int Seconds { get; set; } = 0;
     private bool IgnoreInfoDialog = false;
     private bool NotificationDialogShown = false;
+    private bool RecoveringFromClose = false;
     private EventCallback<Steak> OnSteakAdded { get; set; }
     private EventCallback<Steak> OnSteakEdited { get; set; }
     private EventCallback<Steak> OnSteakDeleted { get; set; }
+    private EventCallback<bool> OnRestored { get; set; }
     private EventCallback OnTimerStarted { get; set; }
     private IDialogReference NotificationDialog { get; set; } = null;
 
@@ -71,13 +75,27 @@ else
         OnSteakAdded = new EventCallback<Steak>(this, (Steak steak) => HandleSteakAdded(steak));
         OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
         OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
+        OnRestored = new EventCallback<bool>(this, (bool restore) => HandleSteakRestore(restore));
         OnTimerStarted = new EventCallback(this, () => StartTimer());
-        LocalNotificationCenter.Current.NotificationActionTapped += SteakNotificationTapped;
-        await DisplayInfoDialog();
+        await HandleRecoveryNeeded();
+        if (!RecoveringFromClose)
+        {
+            await DisplayInfoDialog();
+        }
     }
 
-    private void SteakNotificationTapped(Plugin.LocalNotification.EventArgs.NotificationActionEventArgs e)
+    private async Task HandleRecoveryNeeded()
     {
+
+        string storedRecovery = await SecureStorage.Default.GetAsync("ExistingGrillData");
+        if (!string.IsNullOrWhiteSpace(storedRecovery))
+        {
+            RecoveryData = JsonSerializer.Deserialize<RecoveryData>(storedRecovery);
+            var options = new DialogOptions { DisableBackdropClick = true };
+            var parameters = new DialogParameters { ["BeforeFinish"] = RecoveryData.FinishesAt > DateTime.Now, ["HandleDecision"] = OnRestored };
+            DialogService.Show<AppCrashedDialog>("Restore?", parameters, options);
+
+        }
     }
 
     private async Task DisplayInfoDialog()
@@ -126,12 +144,8 @@ else
             Steaks.Add(addedSteak);
         }
 
-
         UpdateTimingInfo();
 
-        //Snackbar.Add("Place Brittney's Steak On Grill", Severity.Normal, config => { config.RequireInteraction = true; });
-        //Snackbar.Add("Flip Ryan's Steak", Severity.Normal, config => { config.RequireInteraction = true; });
-        //Snackbar.Add("Flip Brittney's Steak", Severity.Normal, config => { config.RequireInteraction = true; });
         StateHasChanged();
     }
 
@@ -155,6 +169,15 @@ else
     {
         if (Timer == null || !Timer.Enabled)
         {
+            DateTime startFrom;
+            if(RecoveryData != null)
+            {
+                startFrom = RecoveryData.FinishesAt.AddSeconds(RecoveryData.Steaks.Max(x => x.DurationSetting.TotalTime) * -1);
+            }
+            else
+            {
+                startFrom = DateTime.Now;
+            }
             var notificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
             if (notificationsEnabled)
             {
@@ -175,7 +198,7 @@ else
                             BadgeNumber = 1,
                             Schedule = new NotificationRequestSchedule
                             {
-                                NotifyTime = DateTime.Now.AddSeconds(LongestTime - startTime.Key)
+                                NotifyTime = startFrom.AddSeconds(LongestTime - startTime.Key)
                             }
                         };
                     notificationId++;
@@ -187,12 +210,12 @@ else
                     var applySteakRequest = new NotificationRequest
                         {
                             NotificationId = notificationId,
-                            Title = $"Steaks ready for the grill!",
-                            Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be placed on the grill",
+                            Title = $"Steaks ready to be flipped!",
+                            Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be flipped on the grill",
                             BadgeNumber = 1,
                             Schedule = new NotificationRequestSchedule
                             {
-                                NotifyTime = DateTime.Now.AddSeconds(LongestTime - flipTime.Key)
+                                NotifyTime = startFrom.AddSeconds(LongestTime - flipTime.Key)
                             }
                         };
                     notificationId++;
@@ -206,12 +229,20 @@ else
                         BadgeNumber = 1,
                         Schedule = new NotificationRequestSchedule
                         {
-                            NotifyTime = DateTime.Now.AddSeconds(LongestTime)
+                            NotifyTime = startFrom.AddSeconds(LongestTime)
                         }
                     };
                 await LocalNotificationCenter.Current.Show(endSteakRequest);
 
             }
+
+            var recoveryData = new RecoveryData
+                {
+                    FinishesAt = DateTime.Now.AddSeconds(LongestTime),
+                    Steaks = Steaks
+                };
+            await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
+
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -235,6 +266,7 @@ else
         {
             Timer.Enabled = false;
             Snackbar.Add("Steaks are done!", Severity.Normal, config => { config.RequireInteraction = false; });
+            SecureStorage.Default.Remove("ExistingGrillData");
         }
         RemainingToMinuteSecond();
         await InvokeAsync(StateHasChanged);
@@ -268,5 +300,30 @@ else
         var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
         var parameters = new DialogParameters { ["StartTimer"] = OnTimerStarted, ["SteaksToPlaceAtStart"] = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime) };
         DialogService.Show<BeginTimerDialog>("Start Grill", parameters, options);
+    }
+
+    private async Task HandleSteakRestore(bool restore)
+    {
+        if (restore)
+        {
+            Steaks = RecoveryData!.Steaks;
+            if(RecoveryData.FinishesAt > DateTime.Now)
+            {
+                LongestTime = Steaks.Max(x => x.DurationSetting.TotalTime);
+                counter = (int)(RecoveryData!.FinishesAt - DateTime.Now).TotalSeconds;
+                await StartTimer();
+            }
+            else
+            {   
+                UpdateTimingInfo();
+                SecureStorage.Default.Remove("ExistingGrillData");
+            }
+
+            StateHasChanged();
+        }
+        else
+        {
+            SecureStorage.Default.Remove("ExistingGrillData");
+        }
     }
 }

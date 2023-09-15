@@ -17,7 +17,7 @@ namespace SteakGrillingGuide.Components
         [Parameter]
         public int LongestTime { get; set; }
         [Parameter]
-        public int Counter { get; set; }
+        public DateTime? StartTime { get; set; }
         [Parameter]
         public EventCallback<Steak> EditSteak { get; set; }
         [Parameter]
@@ -25,16 +25,6 @@ namespace SteakGrillingGuide.Components
 
         [Inject]
         IDialogService? DialogService { get; set; }
-
-        private double SideOneInSeconds { get; set; }
-        private double SideTwoInSeconds { get; set; }
-
-        protected override Task OnInitializedAsync()
-        {
-            SideOneInSeconds = SteakToCook.DurationSetting.FirstSide;
-            SideTwoInSeconds = SteakToCook.DurationSetting.SecondSide;
-            return base.OnInitializedAsync();
-        }
 
         private async Task EditSteakCallback()
         {

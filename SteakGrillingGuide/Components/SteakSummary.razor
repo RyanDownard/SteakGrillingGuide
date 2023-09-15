@@ -13,19 +13,19 @@
                 </div>
             </div>
             <div class="col-3 justify-content-center align-content-center">
-                @if (Counter < LongestTime)
+                @if (StartTime.HasValue)
                 {
-                    if (Counter >= SteakToCook.FirstSideStartTime)
+                    if (DateTime.Now < SteakToCook.FirstSideStartTime)
                     {
-                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetWaitPercentange(Counter, LongestTime)" Color="Color.Warning" />
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetWaitPercentange(StartTime.Value)" Color="Color.Warning" />
                     }
-                    else if (Counter <= SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                    else if (DateTime.Now >= SteakToCook.FirstSideStartTime && DateTime.Now < SteakToCook.SecondSideStartTime)
                     {
-                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetFirstSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetFirstSidePercentage()" Color="Color.Success" />
                     }
                     else
                     {
-                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetSecondSidePercentage(Counter, LongestTime)" Color="Color.Success" />
+                        <MudProgressCircular Size="Size.Small" Value="SteakToCook.GetSecondSidePercentage()" Color="Color.Success" />
                     }
                 }
 
@@ -33,7 +33,7 @@
         </div>
     </TitleContent>
     <ChildContent>
-        @if(Counter == LongestTime)
+        @if(!StartTime.HasValue)
         {
             <div class="row mb-2">
                 <div class="col-6 text-center">
@@ -61,7 +61,7 @@
             <tbody>
                 <tr>
                     <td class="text-center">
-                        @if (Counter < SteakToCook.FirstSideStartTime && Counter > SteakToCook.SecondSideStartTime)
+                        @if (DateTime.Now > SteakToCook.FirstSideStartTime && DateTime.Now < SteakToCook.SecondSideStartTime)
                         {
                             <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.KeyboardArrowRight" Color="Color.Success" />
                         }
@@ -70,23 +70,15 @@
                         First
                     </td>
                     <td>
-                        @(
-                            $"{SteakToCook.FirstSideStartTime / 60:0}"
-                            ):@(
-                          $"{SteakToCook.SecondSideStartTime % 60:00}"
-                          )
+                        @($"{SteakToCook.DurationSetting.TotalTime / 60:0}:{SteakToCook.DurationSetting.TotalTime % 60:00}")
                     </td>
                     <td>
-                        @(
-                            $"{SideOneInSeconds / 60:0}"
-                            ):@(
-                          $"{SideOneInSeconds % 60:00}"
-                          )
+                        @($"{SteakToCook.DurationSetting.FirstSide / 60:0}:{SteakToCook.DurationSetting.FirstSide % 60:00}")
                     </td>
                 </tr>
                 <tr>
                     <td class="text-center">
-                        @if (Counter < SteakToCook.SecondSideStartTime)
+                        @if (DateTime.Now > SteakToCook.SecondSideStartTime)
                         {
                             <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.KeyboardArrowRight" Color="Color.Success" />
                         }
@@ -95,10 +87,10 @@
                         Second
                     </td>
                     <td>
-                        @($"{SteakToCook.SecondSideStartTime / 60:0}"):@($"{SteakToCook.SecondSideStartTime % 60:00}")
+                        @($"{SteakToCook.DurationSetting.SecondSide / 60:0}:{SteakToCook.DurationSetting.SecondSide % 60:00}")
                     </td>
                     <td>
-                        @($"{SideTwoInSeconds / 60:0}"):@($"{SideTwoInSeconds % 60:00}")
+                        @($"{SteakToCook.DurationSetting.SecondSide / 60:0}:{SteakToCook.DurationSetting.SecondSide % 60:00}")
                     </td>
                 </tr>
             </tbody>

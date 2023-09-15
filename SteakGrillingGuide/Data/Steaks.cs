@@ -1,11 +1,13 @@
 ﻿
+using System.Diagnostics.Metrics;
+
 namespace SteakGrillingGuide.Data;
 
 public class Steak
 {
     public string Name { get; set; }
-    public int FirstSideStartTime { get; set; }
-    public int SecondSideStartTime { get; set; }
+    public DateTime? FirstSideStartTime { get; set; }
+    public DateTime? SecondSideStartTime { get; set; }
     public double Thickness { get; set; }
     public CookingStyle CookingStyle { get; set; }
     public DurationSettings DurationSetting { get; set; }
@@ -13,73 +15,76 @@ public class Steak
     public bool StartNotificationShown { get; set; } = false;
     public bool FlipNotificationShown { get; set; } = false;
 
-
-    public void SetStartTimes(int LongestTime)
+    public void SetStartTimes(int LongestTime, DateTime startingAt)
     {
-        if(LongestTime == DurationSetting.TotalTime)
+        if (LongestTime == DurationSetting.TotalTime)
         {
-            FirstSideStartTime = LongestTime;
-            SecondSideStartTime = (DurationSetting.TotalTime) - (DurationSetting.FirstSide); 
+            FirstSideStartTime = startingAt;
+            SecondSideStartTime = startingAt.AddSeconds(DurationSetting.FirstSide);
         }
         else
         {
-            FirstSideStartTime = (DurationSetting.TotalTime) % (LongestTime);
-            var offset = (DurationSetting.TotalTime) % (LongestTime);
-            SecondSideStartTime = offset - (DurationSetting.FirstSide);
+            var offset = LongestTime - DurationSetting.TotalTime;
+            FirstSideStartTime = startingAt.AddSeconds(offset);
+            SecondSideStartTime = startingAt.AddSeconds(offset + (DurationSetting.FirstSide));
         }
     }
 
-    public double GetFirstSidePercentage(int counter, int totalTime)
+    public double GetFirstSidePercentage()
     {
         double percentage = 0;
         //steak is not ready for the grill yet
-        if (counter > FirstSideStartTime)
+        if (DateTime.Now < FirstSideStartTime)
         {
             percentage = 100;
         }
         //everything is done, yay!
-        else if (counter <= SecondSideStartTime)
+        else if (DateTime.Now > SecondSideStartTime)
         {
             percentage = 0;
         }
         else
         {
-            percentage = Math.Round(((double)(counter - DurationSetting.SecondSide) / DurationSetting.FirstSide) * 100, MidpointRounding.AwayFromZero);
+            var totalTime = SecondSideStartTime - FirstSideStartTime;
+            var timeDifference = DateTime.Now - FirstSideStartTime;
+            percentage = 100 - Math.Round((timeDifference.Value.TotalSeconds / totalTime.Value.TotalSeconds) * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
 
-    public double GetSecondSidePercentage(int counter, double totalTime)
+    public double GetSecondSidePercentage()
     {
         double percentage = 0;
         //steak is not ready for the grill yet
-        if (counter > SecondSideStartTime)
+        if (DateTime.Now < SecondSideStartTime)
         {
             percentage = 100;
         }
         //everything is done, yay!
-        else if (counter == totalTime)
+        else if ((DateTime.Now - SecondSideStartTime).Value.TotalSeconds > DurationSetting.SecondSide)
         {
             percentage = 0;
         }
         else
         {
-            percentage = Math.Round(((double)counter / DurationSetting.SecondSide) * 100, MidpointRounding.AwayFromZero);
+            var timeDifference = DateTime.Now - SecondSideStartTime;
+            percentage = 100 - Math.Round((timeDifference.Value.TotalSeconds / DurationSetting.SecondSide) * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
 
-    public double GetWaitPercentange(int counter, double longestTime)
+    public double GetWaitPercentange(DateTime startTime)
     {
-        if(longestTime == DurationSetting.TotalTime || counter <= FirstSideStartTime)
+
+        if (DateTime.Now >= FirstSideStartTime)
         {
             return 0;
         }
         else
         {
-            var totalWait = (longestTime) - FirstSideStartTime;
-            var remaining = counter - FirstSideStartTime;
-            return Math.Round((remaining / totalWait) * 100, MidpointRounding.AwayFromZero);
+            var totalWait = (FirstSideStartTime.Value - startTime).TotalSeconds;
+            var totalLeft = (FirstSideStartTime.Value - DateTime.Now).TotalSeconds;
+            return Math.Round((totalLeft / totalWait) * 100, MidpointRounding.AwayFromZero);
         }
     }
 

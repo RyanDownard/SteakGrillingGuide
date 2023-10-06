@@ -11,41 +11,34 @@ namespace SteakGrillingGuide.Pages
     {
         [Inject]
         IDialogService DialogService { get; set; }
-        [Inject]
-        SteakProvider SteakProvider { get; set; }
+
         [Inject]
         ISnackbar Snackbar { get; set; }
+        private List<int> NotificationIds { get; set; } = new();
         private List<Steak> Steaks { get; set; } = new();
-        private List<Steak> PlaceSteakNotifications { get; set; } = new();
-        private List<Steak> FlipSteakNotifications { get; set; } = new();
-        private List<SteakSettings> Settings { get; set; }
         private RecoveryData? RecoveryData { get; set; }
         private DateTime? StartAt { get; set; }
         public DateTime? FinishAt { get; set; }
         private int LongestTime { get; set; }
-        private int counter { get; set; }
-        private int Minutes { get; set; } = 0;
-        private int Seconds { get; set; } = 0;
         private bool IgnoreInfoDialog = false;
-        private bool NotificationDialogShown = false;
         private bool RecoveringFromClose = false;
         private EventCallback<Steak> OnSteakAdded { get; set; }
         private EventCallback<Steak> OnSteakEdited { get; set; }
         private EventCallback<Steak> OnSteakDeleted { get; set; }
         private EventCallback<bool> OnRestored { get; set; }
         private EventCallback OnTimerStarted { get; set; }
-        private IDialogReference NotificationDialog { get; set; } = null;
+        private EventCallback OnTimerStopped { get; set; }
 
         private static System.Timers.Timer Timer { get; set; }
 
         protected async override Task OnInitializedAsync()
         {
-            Settings = SteakProvider.SteakSettings;
             OnSteakAdded = new EventCallback<Steak>(this, (Steak steak) => HandleSteakAdded(steak));
             OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
             OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
             OnRestored = new EventCallback<bool>(this, (bool restore) => HandleSteakRestore(restore));
             OnTimerStarted = new EventCallback(this, () => StartTimer());
+            OnTimerStopped = new EventCallback(this, () => StopTimer());
             await HandleRecoveryNeeded();
             if (!RecoveringFromClose)
             {
@@ -67,15 +60,15 @@ namespace SteakGrillingGuide.Pages
             }
         }
 
-        private async Task DisplayInfoDialog()
+        private async Task DisplayInfoDialog(bool manuallyCalled = false)
         {
             string GetWarningSet = await SecureStorage.Default.GetAsync("IgnoreInfoDialog");
             if (GetWarningSet != null)
             {
-                IgnoreInfoDialog = bool.TryParse(GetWarningSet, out IgnoreInfoDialog);
+                _ = bool.TryParse(GetWarningSet, out IgnoreInfoDialog);
             }
 
-            if (!IgnoreInfoDialog)
+            if (!IgnoreInfoDialog || manuallyCalled)
             {
                 DialogService.Show<AppInfoDialog>();
             }
@@ -145,74 +138,65 @@ namespace SteakGrillingGuide.Pages
                 {
                     steak.SetStartTimes(LongestTime, StartAt.Value);
                 }
-                counter = (int)(FinishAt.Value - StartAt.Value).TotalSeconds;
 
-                var notificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
-                if (notificationsEnabled)
+                foreach (var steak in Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime))
                 {
-                    foreach (var steak in Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime))
-                    {
-                        steak.StartNotificationShown = true;
-                    }
+                    steak.StartNotificationShown = true;
+                }
 
-                    int notificationId = 1;
+                int notificationId = 1;
 
-                    foreach (var startTime in Steaks.GroupBy(i => i.FirstSideStartTime).Where(i => i.Key != StartAt))
-                    {
-                        var applySteakRequest = new NotificationRequest
-                        {
-                            NotificationId = notificationId,
-                            Title = $"Steaks ready for the grill!",
-                            Subtitle = $"{string.Join(", ", startTime.Select(x => x.Name))} is ready to be placed on the grill",
-                            BadgeNumber = 1,
-                            Schedule = new NotificationRequestSchedule
-                            {
-                                NotifyTime = startTime.Key
-                            }
-                        };
-                        notificationId++;
-                        await LocalNotificationCenter.Current.Show(applySteakRequest);
-                    }
-
-                    foreach (var flipTime in Steaks.GroupBy(i => i.SecondSideStartTime))
-                    {
-                        var applySteakRequest = new NotificationRequest
-                        {
-                            NotificationId = notificationId,
-                            Title = $"Steaks ready to be flipped!",
-                            Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be flipped on the grill",
-                            BadgeNumber = 1,
-                            Schedule = new NotificationRequestSchedule
-                            {
-                                NotifyTime = flipTime.Key
-                            }
-                        };
-                        notificationId++;
-                        await LocalNotificationCenter.Current.Show(applySteakRequest);
-                    }
-
-                    var endSteakRequest = new NotificationRequest
+                foreach (var startTime in Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != StartAt).GroupBy(i => i.FirstSideStartTime))
+                {
+                    var applySteakRequest = new NotificationRequest
                     {
                         NotificationId = notificationId,
-                        Title = $"Steaks are done!",
+                        Title = $"Steaks ready for the grill!",
+                        Subtitle = $"{string.Join(", ", startTime.Select(x => x.Name))} is ready to be placed on the grill",
                         BadgeNumber = 1,
                         Schedule = new NotificationRequestSchedule
                         {
-                            NotifyTime = FinishAt
+                            NotifyTime = startTime.Key
                         }
                     };
-                    await LocalNotificationCenter.Current.Show(endSteakRequest);
-
+                    NotificationIds.Add(notificationId);
+                    notificationId++;
+                    await LocalNotificationCenter.Current.Show(applySteakRequest);
                 }
 
-                var recoveryData = new RecoveryData
+                foreach (var flipTime in Steaks.Where(i => !i.FlipNotificationShown).GroupBy(i => i.SecondSideStartTime))
                 {
-                    StartedAt = StartAt.Value,
-                    FinishesAt = FinishAt.Value,
-                    Steaks = Steaks
-                };
-                await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
+                    var applySteakRequest = new NotificationRequest
+                    {
+                        NotificationId = notificationId,
+                        Title = $"Steaks ready to be flipped!",
+                        Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be flipped on the grill",
+                        BadgeNumber = 1,
+                        Schedule = new NotificationRequestSchedule
+                        {
+                            NotifyTime = flipTime.Key
+                        }
+                    };
+                    NotificationIds.Add(notificationId);
+                    notificationId++;
+                    await LocalNotificationCenter.Current.Show(applySteakRequest);
+                }
 
+                var endSteakRequest = new NotificationRequest
+                {
+                    NotificationId = notificationId,
+                    Title = $"Steaks are done!",
+                    BadgeNumber = 1,
+                    Schedule = new NotificationRequestSchedule
+                    {
+                        NotifyTime = FinishAt
+                    }
+                };
+                NotificationIds.Add(notificationId);
+                await LocalNotificationCenter.Current.Show(endSteakRequest);
+
+
+                await SetRecoveryData();
                 Timer = new System.Timers.Timer(1000);
                 Timer.Elapsed += CountDownTimer;
                 Timer.Enabled = true;
@@ -223,7 +207,7 @@ namespace SteakGrillingGuide.Pages
         {
             if (FinishAt >= DateTime.Now)
             {
-                ShowSnackbarNotifications();
+                await ShowSnackbarNotifications();
             }
             else
             {
@@ -234,19 +218,38 @@ namespace SteakGrillingGuide.Pages
             await InvokeAsync(StateHasChanged);
         }
 
-        private void ShowSnackbarNotifications()
+        private async Task ShowSnackbarNotifications()
         {
+            bool steakNotificationUpdated = false;
             foreach (var steak in Steaks.Where(i => i.FirstSideStartTime < DateTime.Now && !i.StartNotificationShown))
             {
                 steak.StartNotificationShown = true;
                 Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; });
+                steakNotificationUpdated = true;
             }
 
             foreach (var steak in Steaks.Where(i => i.SecondSideStartTime < DateTime.Now && !i.FlipNotificationShown))
             {
                 steak.FlipNotificationShown = true;
                 Snackbar.Add($"{steak.Name} ready to be flipped!", Severity.Normal, config => { config.RequireInteraction = false; });
+                steakNotificationUpdated = true;
             }
+
+            if (steakNotificationUpdated)
+            {
+                await SetRecoveryData();
+            }
+        }
+
+        private async Task SetRecoveryData()
+        {
+            var recoveryData = new RecoveryData
+            {
+                StartedAt = StartAt.Value,
+                FinishesAt = FinishAt.Value,
+                Steaks = Steaks
+            };
+            await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
         }
 
         private void OpenSteakDialog()
@@ -255,6 +258,13 @@ namespace SteakGrillingGuide.Pages
             var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded };
             DialogService.Show<UpsertSteakDialog>("Steak", parameters, options);
 
+        }
+
+        private void OpenStopDialog()
+        {
+            var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
+            var parameters = new DialogParameters { ["StopTimer"] = OnTimerStopped };
+            DialogService.Show<StopTimerDialog>("Stop Timer", parameters, options);
         }
 
         private void OpenStartDialog()
@@ -272,7 +282,6 @@ namespace SteakGrillingGuide.Pages
                 if (RecoveryData.FinishesAt > DateTime.Now)
                 {
                     LongestTime = Steaks.Max(x => x.DurationSetting.TotalTime);
-                    counter = (int)(RecoveryData!.FinishesAt - DateTime.Now).TotalSeconds;
                     await StartTimer();
                 }
                 else
@@ -289,6 +298,29 @@ namespace SteakGrillingGuide.Pages
                 SecureStorage.Default.Remove("ExistingGrillData");
                 RecoveryData = null;
             }
+        }
+
+        private void StopTimer()
+        {
+            Timer.Enabled = false;
+            Timer = null;
+            StartAt = null;
+            FinishAt = null;
+            Steaks.ForEach(x => { x.StartNotificationShown = false; x.FlipNotificationShown = false; x.FirstSideStartTime = null; x.SecondSideStartTime = null; });
+            foreach(var notificationId in NotificationIds)
+            {
+                LocalNotificationCenter.Current.Clear(notificationId);
+            }
+            NotificationIds = new();
+        }
+
+        private void ResetApp()
+        {
+            Timer = null;
+            Steaks = new();
+            LongestTime = 0;
+            StartAt = null;
+            FinishAt = null;
         }
     }
 }

@@ -1,0 +1,10 @@
+﻿@using MudBlazor;
+<MudDialog>
+    <DialogContent>
+        You are about to stop the timer, this action cannot be undone. The timer will reset and clicking the start button will begin from the beginning again.
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Outlined">Cancel</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="Submit">Yes</MudButton>
+    </DialogActions>
+</MudDialog>

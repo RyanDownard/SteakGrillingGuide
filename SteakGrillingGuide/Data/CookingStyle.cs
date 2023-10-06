@@ -15,7 +15,9 @@ namespace SteakGrillingGuide.Data
         MediumRare = 1,
         [Description("Medium")]
         Medium = 2,
+        [Description("Medium Well")]
+        MediumWell = 3,
         [Description("Well Done")]
-        WellDone = 3
+        WellDone = 4
     }
 }

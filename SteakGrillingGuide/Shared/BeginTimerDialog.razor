@@ -27,7 +27,7 @@
         </ul>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Disabled="@(!NotificationsEnabled)" Color="Color.Primary" OnClick="Submit">Start!</MudButton>
+        <MudButton OnClick="Cancel" Variant="Variant.Outlined">Cancel</MudButton>
+        <MudButton Disabled="@(!NotificationsEnabled)" Variant="Variant.Outlined" Color="Color.Success" OnClick="Submit">Start!</MudButton>
     </DialogActions>
 </MudDialog>

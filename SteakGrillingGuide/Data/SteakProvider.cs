@@ -20,7 +20,6 @@ namespace SteakGrillingGuide.Data
                     CookingStyle = CookingStyle.Rare,
                     Durations = new List<DurationSettings>()
                     {
-                    //rare 
                     new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 120, SecondSide = 120 },
                     new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 240, SecondSide = 120 },
                     new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 300, SecondSide = 180 },
@@ -37,7 +36,6 @@ namespace SteakGrillingGuide.Data
                     CookingStyle = CookingStyle.MediumRare,
                     Durations = new List<DurationSettings>()
                     {
-                    //rare 
                     new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 180, SecondSide = 120 },
                     new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 240, SecondSide = 180 },
                     new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 300, SecondSide = 240 },
@@ -54,7 +52,6 @@ namespace SteakGrillingGuide.Data
                     CookingStyle = CookingStyle.Medium,
                     Durations = new List<DurationSettings>()
                     {
-                    //rare 
                     new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 240, SecondSide = 120 },
                     new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 300, SecondSide = 180 },
                     new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 360, SecondSide = 240 },
@@ -68,10 +65,25 @@ namespace SteakGrillingGuide.Data
 
                 settingSetup = new SteakSettings
                 {
+                    CookingStyle = CookingStyle.MediumWell,
+                    Durations = new List<DurationSettings>()
+                    {
+                    new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 240, SecondSide = 180 },
+                    new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 360, SecondSide = 240 },
+                    new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 420, SecondSide = 300 },
+                    new DurationSettings{ Thickness = Thicknesses[3], FirstSide = 480, SecondSide = 360 },
+                    new DurationSettings{ Thickness = Thicknesses[4], FirstSide = 480, SecondSide = 420 },
+                    new DurationSettings{ Thickness = Thicknesses[5], FirstSide = 600, SecondSide = 480 },
+                    new DurationSettings{ Thickness = Thicknesses[6], FirstSide = 720, SecondSide = 540 },
+                    }
+                };
+                SteakSettings.Add(settingSetup);
+
+                settingSetup = new SteakSettings
+                {
                     CookingStyle = CookingStyle.WellDone,
                     Durations = new List<DurationSettings>()
                     {
-                    //rare 
                     new DurationSettings{ Thickness = Thicknesses[0], FirstSide = 300, SecondSide = 180 },
                     new DurationSettings{ Thickness = Thicknesses[1], FirstSide = 420, SecondSide = 300 },
                     new DurationSettings{ Thickness = Thicknesses[2], FirstSide = 480, SecondSide = 360 },

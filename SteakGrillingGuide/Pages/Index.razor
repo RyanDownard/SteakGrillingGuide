@@ -3,34 +3,55 @@
 @using SteakGrillingGuide.Components
 
 <div class="row mb-3 border-bottom border-dark pb-3">
-    <div class="col-3">
-        <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenSteakDialog">
-            <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
-        </MudButton>
-    </div>
-    <div class="col-6 text-center align-content-center justify-content-center">
-        @if (Steaks.Any())
-        {
-            if (StartAt.HasValue && FinishAt.HasValue)
+    @if(Timer == null || Timer.Enabled)
+    {
+        <div class="col-3">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenSteakDialog">
+                <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
+            </MudButton>
+        </div>
+        <div class="col-3 text-end">
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="(Timer == null || !Timer.Enabled)" @onclick="OpenStopDialog">
+                <MudIcon Icon="@Icons.Material.Outlined.Pause" Title="Pause" />
+            </MudButton>
+        </div>
+        <div class="col-3 text-end">
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="(() => DisplayInfoDialog(true))">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Title="Info" />
+            </MudButton>
+        </div>
+        <div class="col-3 text-end">
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="OpenStartDialog">
+                <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" />
+            </MudButton>
+        </div>
+        <div class="offset-3 col-6 text-center align-content-center justify-content-center mt-3">
+            @if (Steaks.Any())
             {
-                var totalSeconds = (FinishAt.Value - DateTime.Now).TotalSeconds;
-                <div>
-                    Grill Time: @($"{(int)totalSeconds / 60:0}:{(int)totalSeconds % 60:00}")
-                </div>
+                if (StartAt.HasValue && FinishAt.HasValue)
+                {
+                    var totalSeconds = (FinishAt.Value - DateTime.Now).TotalSeconds;
+                    <div>
+                        Grill Time: @($"{(int)totalSeconds / 60:0}:{(int)totalSeconds % 60:00}")
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        Grill Time: @($"{(int)LongestTime / 60:0}:{(int)LongestTime % 60:00}")
+                    </div>
+                }
             }
-            else
-            {
-                <div>
-                    Grill Time: @($"{(int)LongestTime / 60:0}:{(int)LongestTime % 60:00}")
-                </div>
-            }
-        }
-    </div>
-    <div class="col-3 text-end">
-        <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="OpenStartDialog">
-            <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" />
-        </MudButton>
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="col text-center">
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="ResetApp">
+                <MudIcon Icon="@Icons.Material.Filled.Replay" Title="Reset"/> Reset
+            </MudButton>
+        </div>
+    }
 </div>
 @if (Steaks.Any())
 {

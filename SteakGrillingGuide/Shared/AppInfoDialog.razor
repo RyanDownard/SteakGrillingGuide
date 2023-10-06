@@ -24,10 +24,10 @@
             </li>
         </ul>
         <div>
-            <MudCheckBox CheckedChanged="((bool value) => ShowDialogPreferenceChanged(value))">Do Not Show Again.</MudCheckBox>
+            <MudCheckBox Checked="DontShowOnStart" CheckedChanged=" ((bool value)=> ShowDialogPreferenceChanged(value))">Do not show on start up.</MudCheckBox>
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="Submit">Close</MudButton>
+        <MudButton Variant="Variant.Outlined" OnClick="Submit">Close</MudButton>
     </DialogActions>
 </MudDialog>

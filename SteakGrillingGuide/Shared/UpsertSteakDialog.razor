@@ -15,7 +15,7 @@
             @if (!IsValid)
             {
                 <div class="alert alert-danger">
-                    Thickness and How You Like It Cooked must have a value.
+                    Thickness and Center Cook must have a value.
                 </div>
             }
             <div class="mb-3">
@@ -23,31 +23,27 @@
                 <input @bind-value="Steak.Name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Name (Optional)">
             </div>
             <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Steak Thickness</label>
-                <select @bind="Thickness" class="form-select">
-                    <option selected>Thickness</option>
+                <MudSelect Label="Thickness" @bind-Value="@Thickness" T="double?" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var thickness in Thicknesses)
                     {
-                        <option value="@thickness">@thickness</option>
+                        <MudSelectItem T="double?" Value="thickness"/>
                     }
-                </select>
+                </MudSelect>
             </div>
 
             <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Center Cook</label>
-                <select @bind="CookedStyle" class="form-select">
-                    <option selected>Cooking Preference</option>
+                <MudSelect @bind-Value="@CenterCook" Label="Center Cook" T="int?" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var style in Enum.GetValues(typeof(CookingStyle)))
                     {
-                        <option value="@((int)style)">@(((CookingStyle)style).GetCookingStyleName())</option>
+                        <MudSelectItem T="int?" Value="(int)style">@(((CookingStyle)style).GetCookingStyleName())</MudSelectItem>
                     }
-                </select>
+                </MudSelect>
             </div>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        <MudButton OnClick="Cancel" Variant="Variant.Outlined">Cancel</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Outlined" OnClick="Submit">Add</MudButton>
     </DialogActions>
 </MudDialog>
 

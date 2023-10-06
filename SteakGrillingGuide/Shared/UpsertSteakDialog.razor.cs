@@ -29,7 +29,7 @@ namespace SteakGrillingGuide.Shared
         protected bool IsValid { get; set; } = true;
 
         protected double? Thickness { get; set; } = null;
-        protected int? CookedStyle { get; set; } = null;
+        protected int? CenterCook { get; set; } = null;
 
 
 
@@ -39,7 +39,7 @@ namespace SteakGrillingGuide.Shared
             if (!string.IsNullOrWhiteSpace(Steak.Name))
             {
                 Thickness = Steak.Thickness;
-                CookedStyle = (int)Steak.CookingStyle;
+                CenterCook = (int)Steak.CookingStyle;
             }
             return base.OnInitializedAsync();
         }
@@ -48,14 +48,14 @@ namespace SteakGrillingGuide.Shared
         {
             try
             {
-                if (Thickness == null || CookedStyle == null)
+                if (Thickness == null || CenterCook == null)
                 {
                     IsValid = false;
                     return;
                 }
                 IsValid = true;
                 Steak.Thickness = Thickness.Value;
-                Steak.CookingStyle = (CookingStyle)CookedStyle.Value;
+                Steak.CookingStyle = (CookingStyle)CenterCook.Value;
                 Steak.DurationSetting = SteakProvider.SteakSettings.First(i => i.CookingStyle == Steak.CookingStyle).Durations.First(i => i.Thickness == Steak.Thickness);
                 await AddSteak.InvokeAsync(Steak);
                 MudDialog.Close(DialogResult.Ok(true));

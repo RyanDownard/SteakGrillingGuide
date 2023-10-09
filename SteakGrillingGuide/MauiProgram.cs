@@ -27,6 +27,7 @@ public static class MauiProgram
 
 		builder.Services.AddMudServices();
 		builder.Services.AddSingleton<SteakProvider>();
+		builder.Services.AddSingleton<AppLifecycleService>();
 
 		return builder.Build();
 	}

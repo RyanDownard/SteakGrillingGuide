@@ -9,6 +9,8 @@ namespace SteakGrillingGuide.Shared
 {
     public partial class BeginTimerDialog
     {
+        [Inject]
+        private AppLifecycleService lifecycleService { get; set; }
         [CascadingParameter] 
         MudDialogInstance MudDialog { get; set; }
         [Parameter]
@@ -20,12 +22,27 @@ namespace SteakGrillingGuide.Shared
          
         protected override async Task OnInitializedAsync()
         {
+            await CheckNotificationPermissions();
+        }
+
+        protected override Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                lifecycleService.Resumed += async () => await CheckNotificationPermissions();
+            }
+            return base.OnAfterRenderAsync(firstRender);
+        }
+
+        private async Task CheckNotificationPermissions() 
+        {
             NotificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
             if (!NotificationsEnabled)
             {
                 var permissionResults = await LocalNotificationCenter.Current.RequestNotificationPermission();
                 NotificationsEnabled = permissionResults;
             }
+            StateHasChanged();
         }
 
         private async void Submit()

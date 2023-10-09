@@ -141,6 +141,7 @@ namespace SteakGrillingGuide.Pages
 
                 foreach (var steak in Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime))
                 {
+                    Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; });
                     steak.StartNotificationShown = true;
                 }
 

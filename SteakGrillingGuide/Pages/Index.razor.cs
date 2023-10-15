@@ -141,7 +141,7 @@ namespace SteakGrillingGuide.Pages
 
                 foreach (var steak in Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime))
                 {
-                    Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; });
+                    Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
                     steak.StartNotificationShown = true;
                 }
 
@@ -153,7 +153,7 @@ namespace SteakGrillingGuide.Pages
                     {
                         NotificationId = notificationId,
                         Title = $"Steaks ready for the grill!",
-                        Subtitle = $"{string.Join(", ", startTime.Select(x => x.Name))} is ready to be placed on the grill",
+                        Subtitle = $"Place {string.Join(", ", startTime.Select(x => $"{x.Name}'s"))} steak(s) on the grill",
                         BadgeNumber = 1,
                         Schedule = new NotificationRequestSchedule
                         {
@@ -171,7 +171,7 @@ namespace SteakGrillingGuide.Pages
                     {
                         NotificationId = notificationId,
                         Title = $"Steaks ready to be flipped!",
-                        Subtitle = $"{string.Join(", ", flipTime.Select(x => x.Name))} is ready to be flipped on the grill",
+                        Subtitle = $"Flip {string.Join(", ", flipTime.Select(x => x.Name))} steak(s)",
                         BadgeNumber = 1,
                         Schedule = new NotificationRequestSchedule
                         {
@@ -225,14 +225,14 @@ namespace SteakGrillingGuide.Pages
             foreach (var steak in Steaks.Where(i => i.FirstSideStartTime < DateTime.Now && !i.StartNotificationShown))
             {
                 steak.StartNotificationShown = true;
-                Snackbar.Add($"{steak.Name} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; });
+                Snackbar.Add($"Place {steak.Name}'s steak on the grill!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
                 steakNotificationUpdated = true;
             }
 
             foreach (var steak in Steaks.Where(i => i.SecondSideStartTime < DateTime.Now && !i.FlipNotificationShown))
             {
                 steak.FlipNotificationShown = true;
-                Snackbar.Add($"{steak.Name} ready to be flipped!", Severity.Normal, config => { config.RequireInteraction = false; });
+                Snackbar.Add($"Flip {steak.Name}'s steak!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
                 steakNotificationUpdated = true;
             }
 
@@ -272,7 +272,7 @@ namespace SteakGrillingGuide.Pages
         {
             var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
             var parameters = new DialogParameters { ["StartTimer"] = OnTimerStarted, ["SteaksToPlaceAtStart"] = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime) };
-            DialogService.Show<BeginTimerDialog>("Start Grill", parameters, options);
+            DialogService.Show<BeginTimerDialog>("Start Grilling", parameters, options);
         }
 
         private async Task HandleSteakRestore(bool restore)
@@ -313,6 +313,8 @@ namespace SteakGrillingGuide.Pages
                 LocalNotificationCenter.Current.Clear(notificationId);
             }
             NotificationIds = new();
+            SecureStorage.Default.Remove("ExistingGrillData");
+            RecoveryData = null;
         }
 
         private void ResetApp()
@@ -322,6 +324,9 @@ namespace SteakGrillingGuide.Pages
             LongestTime = 0;
             StartAt = null;
             FinishAt = null;
+            NotificationIds = new();
+            SecureStorage.Default.Remove("ExistingGrillData");
+            RecoveryData = null;
         }
     }
 }

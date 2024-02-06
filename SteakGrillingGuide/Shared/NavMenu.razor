@@ -13,8 +13,8 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <div class="nav-link" @onclick="DisplayAboutUs">
-                <span class="oi oi-home" aria-hidden="true"></span> About Us
+            <div class="navbar-text text-white text-end me-4" @onclick="DisplayAboutDialog">
+                <MudIcon Class="me-3" Icon="@Icons.Material.Filled.Info" Title="Info" />About Steak Grilling Guide
             </div>
         </div>
     </nav>
@@ -30,9 +30,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private void DisplayAboutUs()
+    private void DisplayAboutDialog()
     {
         var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-        DialogService.Show<AboutUsDialog>("About Us", options);
+        DialogService.Show<AboutDialog>("About", options);
     }
 }

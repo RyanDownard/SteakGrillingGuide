@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SteakGrillingGuide.Shared
 {
-    public partial class AboutUsDialog
+    public partial class AboutDialog
     {
         [CascadingParameter]
         MudDialogInstance MudDialog { get; set; }

@@ -3,7 +3,7 @@
 @using SteakGrillingGuide.Components
 
 <div class="row mb-3 border-bottom border-dark pb-3">
-    @if(Timer == null || Timer.Enabled)
+    @if(!RunComplete)
     {
         <div class="col-3">
             <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="(Timer != null && Timer.Enabled)" @onclick="OpenSteakDialog">

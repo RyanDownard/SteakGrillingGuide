@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui.LifecycleEvents;
 using MudBlazor.Services;
 using Plugin.LocalNotification;
 using SteakGrillingGuide.Data;
@@ -25,7 +26,8 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		builder.Services.AddMudServices();
+
+        builder.Services.AddMudServices();
 		builder.Services.AddSingleton<SteakProvider>();
 		builder.Services.AddSingleton<AppLifecycleService>();
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933484501686",
+    "project_id": "steakgrillingguide",
+    "storage_bucket": "steakgrillingguide.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933484501686:android:d02279baa4b89fbecbe417",
+        "android_client_info": {
+          "package_name": "com.downardapps.steakgrillingguide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHtUf9G9_OfGRPvxNI3iFpnHgYRWd7etw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

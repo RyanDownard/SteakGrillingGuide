@@ -16,7 +16,6 @@ namespace SteakGrillingGuide.Pages
         private AppLifecycleService lifecycleService { get; set; }
         [Inject]
         ISnackbar Snackbar { get; set; }
-        private List<int> NotificationIds { get; set; } = new();
         private List<Steak> Steaks { get; set; } = new();
         private RecoveryData? RecoveryData { get; set; }
         private DateTime? StartAt { get; set; }
@@ -36,6 +35,8 @@ namespace SteakGrillingGuide.Pages
         private DateTime? SnackbarErrorsAt  { get; set; } = null;
 
         private string SnackbarError { get; set; } = string.Empty;
+
+        private bool RunComplete = false;
 
         protected async override Task OnInitializedAsync()
         {
@@ -67,7 +68,8 @@ namespace SteakGrillingGuide.Pages
 
         private void HandleResume()
         {
-            if(Timer != null)
+            LocalNotificationCenter.Current.ClearAll();
+            if (Timer != null)
             {
                 Timer.Start();
             }
@@ -186,13 +188,10 @@ namespace SteakGrillingGuide.Pages
                     Snackbar.Add($"{string.Join(", ", toBePlaced.Select(x => $"{x.Name}'s"))} {(toBePlaced.Count() > 1 ? "steaks" : "steak")} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
                 }
 
-                int notificationId = 1;
-
                 foreach (var startTime in Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != StartAt).GroupBy(i => i.FirstSideStartTime))
                 {
                     var applySteakRequest = new NotificationRequest
                     {
-                        NotificationId = notificationId,
                         Title = $"Steaks ready for the grill!",
                         Subtitle = $"Place {string.Join(", ", startTime.Select(x => $"{x.Name}'s"))} {(startTime.Count() > 1 ? "steaks" : "steak")} on the grill",
                         BadgeNumber = 1,
@@ -202,8 +201,6 @@ namespace SteakGrillingGuide.Pages
                             NotifyTime = startTime.Key, Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
                         }
                     };
-                    NotificationIds.Add(notificationId);
-                    notificationId++;
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
 
                 }
@@ -212,7 +209,6 @@ namespace SteakGrillingGuide.Pages
                 {
                     var applySteakRequest = new NotificationRequest
                     {
-                        NotificationId = notificationId,
                         Title = $"Steaks ready to be flipped!",
                         Subtitle = $"Flip {string.Join(", ", flipTime.Select(x => x.Name))} {(flipTime.Count() > 1 ? "steaks" : "steak")}",
                         BadgeNumber = 1, CategoryType = NotificationCategoryType.Alarm,
@@ -222,14 +218,11 @@ namespace SteakGrillingGuide.Pages
                             Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
                         }
                     };
-                    NotificationIds.Add(notificationId);
-                    notificationId++;
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
                 }
 
                 var endSteakRequest = new NotificationRequest
                 {
-                    NotificationId = notificationId,
                     Title = $"Steaks are done!",
                     BadgeNumber = 1,
                     Schedule = new NotificationRequestSchedule
@@ -237,7 +230,6 @@ namespace SteakGrillingGuide.Pages
                         NotifyTime = FinishAt
                     }
                 };
-                NotificationIds.Add(notificationId);
                 await LocalNotificationCenter.Current.Show(endSteakRequest);
 
 
@@ -257,6 +249,8 @@ namespace SteakGrillingGuide.Pages
             else
             {
                 Timer.Enabled = false;
+                Timer = null;
+                RunComplete = true;
                 Snackbar.Add("Steaks are done!", Severity.Normal, config => { config.RequireInteraction = false; });
                 SecureStorage.Default.Remove("ExistingGrillData");
             }
@@ -399,11 +393,7 @@ namespace SteakGrillingGuide.Pages
             StartAt = null;
             FinishAt = null;
             Steaks.ForEach(x => { x.StartNotificationShown = false; x.FlipNotificationShown = false; x.FirstSideStartTime = null; x.SecondSideStartTime = null; });
-            foreach (var notificationId in NotificationIds)
-            {
-                LocalNotificationCenter.Current.Clear(notificationId);
-            }
-            NotificationIds = new();
+            LocalNotificationCenter.Current.CancelAll();
             SecureStorage.Default.Remove("ExistingGrillData");
             RecoveryData = null;
         }
@@ -415,9 +405,9 @@ namespace SteakGrillingGuide.Pages
             LongestTime = 0;
             StartAt = null;
             FinishAt = null;
-            NotificationIds = new();
             SecureStorage.Default.Remove("ExistingGrillData");
             RecoveryData = null;
+            RunComplete = false;
         }
     }
 }

@@ -19,12 +19,19 @@ namespace SteakGrillingGuide.Components
         [Parameter]
         public DateTime? StartTime { get; set; }
         [Parameter]
+        public EventCallback<Steak> SaveSteak { get; set; }
+        [Parameter]
         public EventCallback<Steak> EditSteak { get; set; }
         [Parameter]
         public EventCallback<Steak> DeleteSteak { get; set; }
 
         [Inject]
         IDialogService? DialogService { get; set; }
+
+        private async Task SaveSteakCallback()
+        {
+            await SaveSteak.InvokeAsync(SteakToCook);
+        }
 
         private async Task EditSteakCallback()
         {

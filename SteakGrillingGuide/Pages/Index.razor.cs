@@ -5,6 +5,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using SteakGrillingGuide.Shared;
 using Plugin.LocalNotification.AndroidOption;
+using Microsoft.JSInterop;
+using Microsoft.JSInterop.Implementation;
 
 namespace SteakGrillingGuide.Pages
 {
@@ -16,6 +18,10 @@ namespace SteakGrillingGuide.Pages
         private AppLifecycleService lifecycleService { get; set; }
         [Inject]
         ISnackbar Snackbar { get; set; }
+        [Inject]
+        SteakProvider SteakProvider { get; set; }
+        [Inject]
+        IJSRuntime JSRunTime { get; set; }
         private List<Steak> Steaks { get; set; } = new();
         private RecoveryData? RecoveryData { get; set; }
         private DateTime? StartAt { get; set; }
@@ -26,6 +32,7 @@ namespace SteakGrillingGuide.Pages
         private EventCallback<Steak> OnSteakAdded { get; set; }
         private EventCallback<Steak> OnSteakEdited { get; set; } 
         private EventCallback<Steak> OnSteakDeleted { get; set; }
+        private EventCallback<Steak> OnSteakSaved { get; set; }
         private EventCallback<bool> OnRestored { get; set; }
         private EventCallback OnTimerStarted { get; set; }
         private EventCallback OnTimerStopped { get; set; }
@@ -37,25 +44,30 @@ namespace SteakGrillingGuide.Pages
         private string SnackbarError { get; set; } = string.Empty;
 
         private bool RunComplete = false;
+        private IJSObjectReference Module { get; set; }
+        private Steak UpsertingSteak { get; set; }
+        private bool RecoveryBeforeFinished { get; set; } = false;
+        private IEnumerable<Steak> SteaksToStart { get; set; } = [];
+        private IEnumerable<SavedSteak> UserSavedSteaks { get; set; } = [];
 
         protected async override Task OnInitializedAsync()
         {
             GenerateCallBacks();
-            await HandleRecoveryNeeded();
             if (!RecoveringFromClose)
             {
                 await DisplayInfoDialog();
             }
         }
 
-        protected override Task OnAfterRenderAsync(bool firstRender)
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
                 lifecycleService.Resumed += () => HandleResume();
                 lifecycleService.Paused += () => HandlePause();
+                Module = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
+                await HandleRecoveryNeeded();
             }
-            return base.OnAfterRenderAsync(firstRender);
         }
 
         private void HandlePause()
@@ -78,6 +90,7 @@ namespace SteakGrillingGuide.Pages
         private void GenerateCallBacks()
         {
             OnSteakAdded = new EventCallback<Steak>(this, (Steak steak) => HandleSteakAdded(steak));
+            OnSteakSaved = new EventCallback<Steak>(this, (Steak steak) => SavePersonSteak(steak));
             OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
             OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
             OnRestored = new EventCallback<bool>(this, (bool restore) => HandleSteakRestore(restore));
@@ -92,10 +105,8 @@ namespace SteakGrillingGuide.Pages
             if (!string.IsNullOrWhiteSpace(storedRecovery))
             {
                 RecoveryData = JsonSerializer.Deserialize<RecoveryData>(storedRecovery);
-                var options = new DialogOptions { DisableBackdropClick = true };
-                var parameters = new DialogParameters { ["BeforeFinish"] = RecoveryData.FinishesAt > DateTime.Now, ["HandleDecision"] = OnRestored };
-                DialogService.Show<AppCrashedDialog>("Restore?", parameters, options);
-
+                RecoveryBeforeFinished = RecoveryData.FinishesAt > DateTime.Now;
+                await Module.InvokeVoidAsync("showModalById", "#appCrashedModal");
             }
         }
 
@@ -109,7 +120,7 @@ namespace SteakGrillingGuide.Pages
 
             if (!IgnoreInfoDialog || manuallyCalled)
             {
-                DialogService.Show<AppInfoDialog>();
+                await Module!.InvokeVoidAsync("showModalById", "#suggestionsModal");
             }
         }
 
@@ -137,7 +148,11 @@ namespace SteakGrillingGuide.Pages
                 Steaks.Add(addedSteak);
             }
 
+            await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");
+
             UpdateTimingInfo();
+
+            UpsertingSteak = null;
 
             StateHasChanged();
         }
@@ -145,10 +160,10 @@ namespace SteakGrillingGuide.Pages
 
         private async Task HandleSteakEdited(Steak steakToEdit)
         {
-            var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-            var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded, ["Steak"] = steakToEdit };
-            DialogService.Show<UpsertSteakDialog>("Steak", parameters, options);
+            UpsertingSteak = steakToEdit;
+            UserSavedSteaks = await SteakProvider.GetSavedSteaks();
             StateHasChanged();
+            await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
         }
 
         private async Task HandleSteakDeleted(Steak steakToDelete)
@@ -160,6 +175,7 @@ namespace SteakGrillingGuide.Pages
 
         private async Task StartTimer()
         {
+            await Module!.InvokeVoidAsync("hideModalById", "#beginTimerModal");
             if (Timer == null || !Timer.Enabled)
             {
                 if (RecoveryData != null)
@@ -349,30 +365,28 @@ namespace SteakGrillingGuide.Pages
             await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
         }
 
-        private void OpenSteakDialog()
+        private async void OpenSteakDialog()
         {
-            var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-            var parameters = new DialogParameters { ["AddSteak"] = OnSteakAdded };
-            DialogService.Show<UpsertSteakDialog>("Steak", parameters, options);
-
+            UpsertingSteak = new();
+            UserSavedSteaks = await SteakProvider.GetSavedSteaks();
+            StateHasChanged();
+            await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
         }
 
-        private void OpenStopDialog()
+        private async void OpenStopDialog()
         {
-            var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-            var parameters = new DialogParameters { ["StopTimer"] = OnTimerStopped };
-            DialogService.Show<StopTimerDialog>("Stop Timer", parameters, options);
+            await Module!.InvokeVoidAsync("showModalById", "#stopTimerModal");
         }
 
-        private void OpenStartDialog()
+        private async void OpenStartDialog()
         {
-            var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-            var parameters = new DialogParameters { ["StartTimer"] = OnTimerStarted, ["SteaksToPlaceAtStart"] = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime) };
-            DialogService.Show<BeginTimerDialog>("Start Grilling", parameters, options);
+            SteaksToStart = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime);
+            await Module!.InvokeVoidAsync("showModalById", "#beginTimerModal");
         }
 
         private async Task HandleSteakRestore(bool restore)
         {
+            await Module!.InvokeVoidAsync("hideModalById", "#appCrashedModal");
             if (restore)
             {
                 Steaks = RecoveryData!.Steaks;
@@ -397,7 +411,32 @@ namespace SteakGrillingGuide.Pages
             }
         }
 
-        private void StopTimer()
+        private async Task SavePersonSteak(Steak steak)
+        {
+            var saved = await SteakProvider.SavePersonSteak(steak);
+            if (saved)
+            {
+                Snackbar.Add($"{steak.Name} saved to device!", Severity.Normal, config =>
+                {
+                    config.RequireInteraction = false;
+                    config.VisibleStateDuration = 10000;
+                    config.ShowTransitionDuration = 500;
+                    config.HideTransitionDuration = 500;
+                });
+            }
+            else
+            {
+                Snackbar.Add($"Failed {steak.Name} saved to device, please try again", Severity.Error, config =>
+                {
+                    config.RequireInteraction = false;
+                    config.VisibleStateDuration = 10000;
+                    config.ShowTransitionDuration = 500;
+                    config.HideTransitionDuration = 500;
+                });
+            }
+        }
+
+        private async void StopTimer()
         {
             Timer.Enabled = false;
             Timer = null;
@@ -407,6 +446,7 @@ namespace SteakGrillingGuide.Pages
             LocalNotificationCenter.Current.CancelAll();
             SecureStorage.Default.Remove("ExistingGrillData");
             RecoveryData = null;
+            await Module!.InvokeVoidAsync("hideModalById", "#stopTimerModal");
         }
 
         private void ResetApp()

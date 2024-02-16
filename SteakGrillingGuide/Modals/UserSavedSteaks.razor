@@ -1,0 +1,121 @@
+﻿@using MudBlazor
+@using SteakGrillingGuide.Data
+@using SteakGrillingGuide.Extensions
+
+<div class="modal fade" id="savedSteaksModal" tabindex="-1" aria-labelledby="savedSteaksModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="savedSteaksModalLabel">Your Saved Steaks</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (UserSteaks == null)
+                {
+                    <div>Retrieving steaks...</div>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Outlined" Class="mb-3 ml-2" Color="Color.Default" OnClick="CreateSavedSteak">
+                        <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
+                    </MudButton>
+                    @if (UserSteaks.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var steak in UserSteaks)
+                            {
+                                <li class="list-group-item">
+                                    @steak.Name - @steak.CookingStyle.GetCookingStyleName()
+                                    <span class="float-end">
+                                        <MudIcon Size="Size.Small" @onclick="(() => EditSavedSteak(steak))" Class="me-3" Color="Color.Warning" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                                        <MudIcon Size="Size.Small" @onclick="(() => ShowDeletingModal(steak))" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div>
+                            No steaks saved yet
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteSteakModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="HideDeletingModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (DeletingSteak == null)
+                {
+                    <div>Awaiting steak selection</div>
+                }
+                else
+                {
+                <div>
+                    Are you sure you want to delete @DeletingSteak.Name - @DeletingSteak.CookingStyle.GetCookingStyleName()
+                </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="HideDeletingModal" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" @onclick="DeleteSavedSteak">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="upsertSavedModal" tabindex="-1" aria-labelledby="upsertSavedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                
+                <h1 class="modal-title fs-5" id="savedSteaksModalLabel">Your Saved Steaks</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" @onclick="HideUpsertModal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (UpsertingSteak == null)
+                {
+                    <div>Awaiting steak selection</div>
+                }
+                else
+                {
+                    if (!IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            Name and Center Cook must have a value.
+                        </div>
+                    }
+                    <div class="mb-3">
+                        <input @bind-value="UpsertingSteak.Name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Name">
+                    </div>
+
+                    <div class="mb-3">
+                        <select class="form-select" name="CenterCook" id="CenterCook" @bind="@CenterCook">
+                            <option value="">Select Center Cook</option>
+                            @foreach (var style in Enum.GetValues(typeof(CookingStyle)))
+                            {
+                                <option value="@((int)style)">@(((CookingStyle)style).GetCookingStyleName())</option>
+                            }
+                        </select>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="HideUpsertModal" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" @onclick="UpsertSavedSteak">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>

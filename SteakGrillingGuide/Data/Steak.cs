@@ -14,6 +14,7 @@ public class Steak
     public bool ShowDetails { get; set; } = false;
     public bool StartNotificationShown { get; set; } = false;
     public bool FlipNotificationShown { get; set; } = false;
+    public SavedSteak SavedSteak { get; set; }
 
     public void SetStartTimes(int LongestTime, DateTime startingAt)
     {

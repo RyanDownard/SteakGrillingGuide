@@ -1,0 +1,27 @@
+﻿<div class="modal fade" id="appCrashedModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appCrashedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="appCrashedModalLabel">Uh oh!</h1>
+            </div>
+            <div class="modal-body">
+                @if (BeforeFinish)
+                {
+                    <div>
+                        It looks like the app closed unexpectedly. We have saved your information before the app closed and it looks like there is still time remaining. Would you like to restore and start the timer?
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        It looks like the app closed unexpectedly. We have saved your information before the app closed, but the time for when the steaks would finish has passed. Would you like to restore just the steaks?
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">No</button>
+                <button type="button" class="btn btn-primary" @onclick="Submit">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>

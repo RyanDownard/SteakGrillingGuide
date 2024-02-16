@@ -1,4 +1,6 @@
 ﻿@using MudBlazor;
+@using SteakGrillingGuide.Data
+@using SteakGrillingGuide.Modals
 @inject IDialogService DialogService
 
 <div class="ps-3 navbar navbar-dark">
@@ -13,26 +15,55 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
+            <div class="navbar-text text-white text-end me-4" @onclick="DisplaySavedSteaksDialog">
+                <MudIcon Class="me-3" Icon="@Icons.Material.Filled.SaveAs" Title="Info" />Your saved steaks
+            </div>
+        </div>
+        <div class="nav-item px-3">
             <div class="navbar-text text-white text-end me-4" @onclick="DisplayAboutDialog">
-                <MudIcon Class="me-3" Icon="@Icons.Material.Filled.Info" Title="Info" />About Steak Grilling Guide
+                <MudIcon Class="me-3" Icon="@Icons.Material.Filled.Info" Title="Info" /> About Steak Grilling Guide
             </div>
         </div>
     </nav>
 </div>
 
+<About/>
+<UserSavedSteaks UserSteaks="SavedSteaks"/>
+
 @code {
+    [Inject]
+    protected IJSRuntime JSRunTime { get; set; }
+    [Inject]
+    protected SteakProvider SteakProvider{ get; set; }
+    protected IEnumerable<SavedSteak> SavedSteaks { get; set; }
+
+    protected IJSObjectReference Module { get; set; }
+
     private bool collapseNavMenu = true;
-     
+
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Module = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
+        }
+    }
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private void DisplayAboutDialog()
+    private async Task DisplayAboutDialog()
     {
-        var options = new DialogOptions { DisableBackdropClick = true, FullWidth = true };
-        DialogService.Show<AboutDialog>("About", options);
+        await Module!.InvokeVoidAsync("showModalById", "#aboutUsModal");
+    }
+
+    private async Task DisplaySavedSteaksDialog()
+    {
+        SavedSteaks = await SteakProvider.GetSavedSteaks();
+        await Module!.InvokeVoidAsync("showModalById", "#savedSteaksModal");
     }
 }

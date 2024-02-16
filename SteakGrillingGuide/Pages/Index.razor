@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using MudBlazor;
 @using SteakGrillingGuide.Components
+@using SteakGrillingGuide.Modals
 
 <div class="row mb-3 border-bottom border-dark pb-3">
     @if(!RunComplete)
@@ -64,7 +65,7 @@
     <MudExpansionPanels MultiExpansion="true">
         @foreach (var steak in Steaks)
         {
-            <SteakSummary SteakToCook="steak" LongestTime="LongestTime" StartTime="StartAt" EditSteak="OnSteakEdited" DeleteSteak="OnSteakDeleted" />
+            <SteakSummary SteakToCook="steak" LongestTime="LongestTime" StartTime="StartAt" SaveSteak="OnSteakSaved" EditSteak="OnSteakEdited" DeleteSteak="OnSteakDeleted" />
         }
     </MudExpansionPanels>
 }
@@ -74,3 +75,8 @@ else
         No steaks added yet.
     </div>
 }
+<UpsertSteak AddSteak="OnSteakAdded" Steak="UpsertingSteak" UserSavedSteaks="UserSavedSteaks"/>
+<Suggestions/>
+<AppCrashed BeforeFinish="RecoveryBeforeFinished" HandleDecision="OnRestored"/>
+<BeginTimer StartTimer="OnTimerStarted" SteaksToPlaceAtStart="SteaksToStart"/>
+<StopTimer StopTimerCallback="OnTimerStopped" />

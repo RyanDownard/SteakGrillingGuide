@@ -40,15 +40,7 @@
 		<ProvisioningType>automatic</ProvisioningType>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
-		<GoogleServicesJson Include="google-services.json" />
-		<PackageReference Include="Xamarin.Firebase.Core" Version="121.1.1" />
-		<PackageReference Include="Xamarin.Firebase.Analytics" Version="121.1.1" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-ios'">
-		<BundleResource Include="GoogleService-Info.plist" />
-		<PackageReference Include="Xamarin.Firebase.iOS.Analytics" Version="8.10.0.1" />
 	</ItemGroup>
 
 
@@ -84,18 +76,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <GoogleServicesJson Include="google-services.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Enums.NET" Version="4.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="MudBlazor" Version="6.10.0" />
 		<PackageReference Include="Plugin.LocalNotification" Version="10.1.8" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Resource Include="GoogleService-Info.plist" />
 	</ItemGroup>
 
 </Project>

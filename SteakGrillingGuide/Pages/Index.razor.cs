@@ -24,7 +24,7 @@ namespace SteakGrillingGuide.Pages
         private bool IgnoreInfoDialog = false;
         private bool RecoveringFromClose = false;
         private EventCallback<Steak> OnSteakAdded { get; set; }
-        private EventCallback<Steak> OnSteakEdited { get; set; }
+        private EventCallback<Steak> OnSteakEdited { get; set; } 
         private EventCallback<Steak> OnSteakDeleted { get; set; }
         private EventCallback<bool> OnRestored { get; set; }
         private EventCallback OnTimerStarted { get; set; }
@@ -188,30 +188,36 @@ namespace SteakGrillingGuide.Pages
                     Snackbar.Add($"{string.Join(", ", toBePlaced.Select(x => $"{x.Name}'s"))} {(toBePlaced.Count() > 1 ? "steaks" : "steak")} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
                 }
 
+                int notificationId = 1;
+
                 foreach (var startTime in Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != StartAt).GroupBy(i => i.FirstSideStartTime))
                 {
                     var applySteakRequest = new NotificationRequest
                     {
+                        NotificationId = notificationId,
                         Title = $"Steaks ready for the grill!",
                         Subtitle = $"Place {string.Join(", ", startTime.Select(x => $"{x.Name}'s"))} {(startTime.Count() > 1 ? "steaks" : "steak")} on the grill",
                         BadgeNumber = 1,
                         CategoryType = NotificationCategoryType.Alarm,
                         Schedule = new NotificationRequestSchedule
                         {
-                            NotifyTime = startTime.Key, Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
+                            NotifyTime = startTime.Key,
+                            Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
                         }
                     };
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
-
+                    notificationId++;
                 }
 
                 foreach (var flipTime in Steaks.Where(i => !i.FlipNotificationShown).GroupBy(i => i.SecondSideStartTime))
                 {
                     var applySteakRequest = new NotificationRequest
                     {
+                        NotificationId = notificationId,
                         Title = $"Steaks ready to be flipped!",
                         Subtitle = $"Flip {string.Join(", ", flipTime.Select(x => x.Name))} {(flipTime.Count() > 1 ? "steaks" : "steak")}",
-                        BadgeNumber = 1, CategoryType = NotificationCategoryType.Alarm,
+                        BadgeNumber = 1,
+                        CategoryType = NotificationCategoryType.Alarm,
                         Schedule = new NotificationRequestSchedule
                         {
                             NotifyTime = flipTime.Key,
@@ -219,17 +225,22 @@ namespace SteakGrillingGuide.Pages
                         }
                     };
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
+                    notificationId++;
                 }
 
                 var endSteakRequest = new NotificationRequest
                 {
+                    NotificationId = notificationId,   
                     Title = $"Steaks are done!",
                     BadgeNumber = 1,
+                    CategoryType = NotificationCategoryType.Alarm,
                     Schedule = new NotificationRequestSchedule
                     {
-                        NotifyTime = FinishAt
+                        NotifyTime = FinishAt,
+                        Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }    
                     }
                 };
+
                 await LocalNotificationCenter.Current.Show(endSteakRequest);
 
 

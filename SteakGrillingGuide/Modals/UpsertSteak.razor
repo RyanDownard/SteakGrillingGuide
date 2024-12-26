@@ -25,7 +25,7 @@
                     {
                         <div class="mb-3">
                             <select class="form-select" name="SavedSteak" id="SavedSteak" @onchange="SavedSteakChanged">
-                                @if(Steak == null || Steak.SavedSteak == null)
+                                @if (Steak == null || Steak.SavedSteak == null)
                                 {
                                     <option value="" selected>Select Saved Steak</option>
                                 }
@@ -35,7 +35,7 @@
                                 }
                                 @foreach (var savedSteak in UserSavedSteaks)
                                 {
-                                    if(Steak != null && Steak.SavedSteak != null && Steak.SavedSteak.SavedSteakId == savedSteak.SavedSteakId)
+                                    if (Steak != null && Steak.SavedSteak != null && Steak.SavedSteak.SavedSteakId == savedSteak.SavedSteakId)
                                     {
                                         <option value="@savedSteak.SavedSteakId" selected>@($"{savedSteak.Name} - {savedSteak.CookingStyle.GetCookingStyleName()}")</option>
                                     }

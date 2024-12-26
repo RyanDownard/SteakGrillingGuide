@@ -32,6 +32,7 @@ namespace SteakGrillingGuide.Pages
         private EventCallback<Steak> OnSteakAdded { get; set; }
         private EventCallback<Steak> OnSteakEdited { get; set; } 
         private EventCallback<Steak> OnSteakDeleted { get; set; }
+        private EventCallback<Steak> OnDeleteConfirmed { get; set; }
         private EventCallback<Steak> OnSteakSaved { get; set; }
         private EventCallback<bool> OnRestored { get; set; }
         private EventCallback OnTimerStarted { get; set; }
@@ -49,14 +50,11 @@ namespace SteakGrillingGuide.Pages
         private bool RecoveryBeforeFinished { get; set; } = false;
         private IEnumerable<Steak> SteaksToStart { get; set; } = [];
         private IEnumerable<SavedSteak> UserSavedSteaks { get; set; } = [];
+        private Steak SteakToDelete { get; set; }
 
         protected async override Task OnInitializedAsync()
         {
             GenerateCallBacks();
-            if (!RecoveringFromClose)
-            {
-                await DisplayInfoDialog();
-            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,6 +64,12 @@ namespace SteakGrillingGuide.Pages
                 lifecycleService.Resumed += () => HandleResume();
                 lifecycleService.Paused += () => HandlePause();
                 Module = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
+
+                if (!RecoveringFromClose)
+                {
+                    await DisplayInfoDialog();
+                }
+
                 await HandleRecoveryNeeded();
             }
         }
@@ -93,6 +97,7 @@ namespace SteakGrillingGuide.Pages
             OnSteakSaved = new EventCallback<Steak>(this, (Steak steak) => SavePersonSteak(steak));
             OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
             OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
+            OnDeleteConfirmed = new EventCallback<Steak>(this, (Steak steak) => DeleteConfirmed(steak));
             OnRestored = new EventCallback<bool>(this, (bool restore) => HandleSteakRestore(restore));
             OnTimerStarted = new EventCallback(this, () => StartTimer());
             OnTimerStopped = new EventCallback(this, () => StopTimer());
@@ -168,7 +173,15 @@ namespace SteakGrillingGuide.Pages
 
         private async Task HandleSteakDeleted(Steak steakToDelete)
         {
+            SteakToDelete = steakToDelete;
+            await Module.InvokeVoidAsync("showModalById", "#confirmDeleteModal");
+        }
+
+        private async Task DeleteConfirmed(Steak steakToDelete)
+        {
+            await Module.InvokeVoidAsync("hideModalById", "#confirmDeleteModal");
             Steaks.Remove(steakToDelete);
+            SteakToDelete = null;
             UpdateTimingInfo();
             StateHasChanged();
         }
@@ -214,11 +227,11 @@ namespace SteakGrillingGuide.Pages
                         Title = $"Steaks ready for the grill!",
                         Subtitle = $"Place {string.Join(", ", startTime.Select(x => $"{x.Name}'s"))} {(startTime.Count() > 1 ? "steaks" : "steak")} on the grill",
                         BadgeNumber = 1,
-                        CategoryType = NotificationCategoryType.Alarm,
+                        Silent = false,
+                        CategoryType = NotificationCategoryType.Status,
                         Schedule = new NotificationRequestSchedule
                         {
                             NotifyTime = startTime.Key,
-                            Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
                         }
                     };
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
@@ -233,11 +246,15 @@ namespace SteakGrillingGuide.Pages
                         Title = $"Steaks ready to be flipped!",
                         Subtitle = $"Flip {string.Join(", ", flipTime.Select(x => x.Name))} {(flipTime.Count() > 1 ? "steaks" : "steak")}",
                         BadgeNumber = 1,
-                        CategoryType = NotificationCategoryType.Alarm,
+                        Silent = false,
+                        CategoryType = NotificationCategoryType.Status,
+                        iOS = new Plugin.LocalNotification.iOSOption.iOSOptions
+                        {
+                            PlayForegroundSound = true
+                        },
                         Schedule = new NotificationRequestSchedule
                         {
-                            NotifyTime = flipTime.Key,
-                            Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }
+                            NotifyTime = flipTime.Key
                         }
                     };
                     await LocalNotificationCenter.Current.Show(applySteakRequest);
@@ -246,19 +263,19 @@ namespace SteakGrillingGuide.Pages
 
                 var endSteakRequest = new NotificationRequest
                 {
-                    NotificationId = notificationId,   
+                    NotificationId = notificationId,
                     Title = $"Steaks are done!",
                     BadgeNumber = 1,
-                    CategoryType = NotificationCategoryType.Alarm,
+                    Silent = false,
+                    CategoryType = NotificationCategoryType.Status,
                     Schedule = new NotificationRequestSchedule
                     {
-                        NotifyTime = FinishAt,
-                        Android = new AndroidScheduleOptions() { AlarmType = AndroidAlarmType.ElapsedRealtimeWakeup }    
+                        NotifyTime = FinishAt
                     }
                 };
 
                 await LocalNotificationCenter.Current.Show(endSteakRequest);
-
+   
 
                 await SetRecoveryData();
                 Timer = new System.Timers.Timer(1000);
@@ -414,8 +431,9 @@ namespace SteakGrillingGuide.Pages
         private async Task SavePersonSteak(Steak steak)
         {
             var saved = await SteakProvider.SavePersonSteak(steak);
-            if (saved)
+            if (saved != null)
             {
+                steak.SavedSteak = saved;
                 Snackbar.Add($"{steak.Name} saved to device!", Severity.Normal, config =>
                 {
                     config.RequireInteraction = false;

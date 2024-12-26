@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using MudBlazor;
 using SteakGrillingGuide.Data;
 using System.Reflection;
 
@@ -152,7 +153,11 @@ public partial class UpsertSteak
 
     private async Task SaveSteakAsNew()
     {
-        await SteakProvider.SavePersonSteak(Steak);
+        var savedSteak = await SteakProvider.SavePersonSteak(Steak);
+        if(savedSteak != null)
+        {
+            Steak.SavedSteak = savedSteak;
+        }
         await Module!.InvokeVoidAsync("hideModalById", "#changesMadeModal");
         await FinishAddingSteak();
     }

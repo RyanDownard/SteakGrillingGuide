@@ -1,0 +1,24 @@
+﻿<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                Confirm
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if(Steak == null)
+                {
+                    <div>Awaiting for steak info</div>
+                }
+                else
+                {
+                    <div>"Are you sure you want to delete @Steak.Name?"</div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="KeepSteak" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" @onclick="DeleteSteak">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>

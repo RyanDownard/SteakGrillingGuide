@@ -114,14 +114,29 @@ public partial class UserSavedSteaks
 
     protected async Task SaveNewSavedSteak()
     {
-        await SteakProvider.SavePersonSteak(new Steak { Name = UpsertingSteak.Name, CookingStyle = (CookingStyle)CenterCook });
-        Snackbar.Add($"{UpsertingSteak.Name} saved to device!", Severity.Normal, config =>
+        var saved = await SteakProvider.SavePersonSteak(new Steak { Name = UpsertingSteak.Name, CookingStyle = (CookingStyle)CenterCook });
+
+        if(saved != null)
         {
-            config.RequireInteraction = false;
-            config.VisibleStateDuration = 5000;
-            config.ShowTransitionDuration = 500;
-            config.HideTransitionDuration = 500;
-        });
+            Snackbar.Add($"{UpsertingSteak.Name} saved to device!", Severity.Normal, config =>
+            {
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 5000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
+        }
+        else
+        {
+            Snackbar.Add($"Failed to save steak to device, please try again.", Severity.Error, config =>
+            {
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 5000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
+        }
+
         UpsertingSteak = null;
         CenterCook = null;
         UserSteaks = await SteakProvider.GetSavedSteaks();

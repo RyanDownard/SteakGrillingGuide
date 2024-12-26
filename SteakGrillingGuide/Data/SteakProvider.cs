@@ -100,9 +100,9 @@ namespace SteakGrillingGuide.Data
             SteakSettings.Add(settingSetup);
         }
 
-        public async Task<bool> SavePersonSteak(Steak steakToSave)
+        public async Task<SavedSteak> SavePersonSteak(Steak steakToSave)
         {
-            bool savedSuccessfully = false;
+            SavedSteak savedSteak;
             try
             {
                 var savedSteaks = await GetSteaksFromStorage();
@@ -110,7 +110,7 @@ namespace SteakGrillingGuide.Data
                 if (savedSteaks.Any(i => i.Name == steakToSave.Name && i.CookingStyle == steakToSave.CookingStyle))
                 {
                     //user already has this steak saved, prevent duplicates
-                    return true;
+                    return savedSteaks.FirstOrDefault(i => i.Name == steakToSave.Name && i.CookingStyle == steakToSave.CookingStyle);
                 }
 
                 var asSavedClass = new SavedSteak
@@ -124,14 +124,15 @@ namespace SteakGrillingGuide.Data
 
                 await SaveSteaksToStorage(savedSteaks);
 
-                savedSuccessfully = true;
+                savedSteak = asSavedClass;
             }
             catch (Exception ex)
             {
                 //TODO logging on saving the steak failed 
+                return null;
             }
 
-            return savedSuccessfully;
+            return savedSteak;
         }
 
         public async Task<IEnumerable<SavedSteak>> GetSavedSteaks()

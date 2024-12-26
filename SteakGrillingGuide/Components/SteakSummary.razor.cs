@@ -25,9 +25,6 @@ namespace SteakGrillingGuide.Components
         [Parameter]
         public EventCallback<Steak> DeleteSteak { get; set; }
 
-        [Inject]
-        IDialogService? DialogService { get; set; }
-
         private async Task SaveSteakCallback()
         {
             await SaveSteak.InvokeAsync(SteakToCook);
@@ -40,11 +37,7 @@ namespace SteakGrillingGuide.Components
 
         private async Task DeleteSteakCallback()
         {
-            var response = await DialogService.ShowMessageBox("Delete Steak?", $"Are you sure you want to delete {SteakToCook.Name}?", "Yes", "No");
-            if (response.Value)
-            {
-                await DeleteSteak.InvokeAsync(SteakToCook);
-            }
+            await DeleteSteak.InvokeAsync(SteakToCook);
         }
     }
 }

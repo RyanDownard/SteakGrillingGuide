@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using SteakGrillingGuide.Data;
+using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Modals;
 

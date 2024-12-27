@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using MudBlazor;
 using SteakGrillingGuide.Data;
-using System.Reflection;
+using SteakGrillingGuide.Enums;
+using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Modals;
 
@@ -48,7 +48,7 @@ public partial class UpsertSteak
         if (Steak != null && !string.IsNullOrWhiteSpace(Steak.Name))
         {
             Thickness = Steak.Thickness;
-            CenterCook = (int)Steak.CookingStyle;
+            CenterCook = (int)Steak.CenterCook;
             IsNewSteak = false;
         }
         else
@@ -73,10 +73,10 @@ public partial class UpsertSteak
             }
             IsValid = true;
             Steak.Thickness = Thickness.Value;
-            Steak.CookingStyle = (CookingStyle)CenterCook.Value;
-            Steak.DurationSetting = SteakProvider.SteakSettings.First(i => i.CookingStyle == Steak.CookingStyle).Durations.First(i => i.Thickness == Steak.Thickness);
+            Steak.CenterCook = (CenterCook)CenterCook.Value;
+            Steak.DurationSetting = SteakProvider.SteakSettings.First(i => i.CenterCook == Steak.CenterCook).Durations.First(i => i.Thickness == Steak.Thickness);
 
-            if(Steak.SavedSteak != null && (Steak.Name != Steak.SavedSteak.Name || Steak.CookingStyle != Steak.SavedSteak.CookingStyle))
+            if(Steak.SavedSteak != null && (Steak.Name != Steak.SavedSteak.Name || Steak.CenterCook != Steak.SavedSteak.CenterCook))
             {
 
                 await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");
@@ -98,8 +98,8 @@ public partial class UpsertSteak
         {
             Steak.SavedSteak = UserSavedSteaks.First(i => i.SavedSteakId == new Guid(e.Value.ToString()));
             Steak.Name = Steak.SavedSteak.Name;
-            Steak.CookingStyle = Steak.SavedSteak.CookingStyle;
-            CenterCook = (int)Steak.SavedSteak.CookingStyle;
+            Steak.CenterCook = Steak.SavedSteak.CenterCook;
+            CenterCook = (int)Steak.SavedSteak.CenterCook;
         }
         else
         {
@@ -108,7 +108,7 @@ public partial class UpsertSteak
                 Steak.Name = "";
             }
 
-            if(Steak.CookingStyle== Steak.SavedSteak.CookingStyle)
+            if(Steak.CenterCook== Steak.SavedSteak.CenterCook)
             {
                 CenterCook = null;
             }
@@ -143,7 +143,7 @@ public partial class UpsertSteak
         var updatedInfo = new SavedSteak()
         {
             Name = Steak.Name,
-            CookingStyle = Steak.CookingStyle
+            CenterCook = Steak.CenterCook
         };
 
         await SteakProvider.UpdateSavedSteak(Steak.SavedSteak, updatedInfo);

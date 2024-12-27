@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Microsoft.Maui;
-using MudBlazor; 
+using MudBlazor;
 using SteakGrillingGuide.Data;
+using SteakGrillingGuide.Enums;
+using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Modals;
 
@@ -69,7 +70,7 @@ public partial class UserSavedSteaks
     {
         BeforeSaved = savedSteak;
         UpsertingSteak = savedSteak;
-        CenterCook = (int)savedSteak.CookingStyle;
+        CenterCook = (int)savedSteak.CenterCook;
         await Module!.InvokeVoidAsync("hideModalById", "#savedSteaksModal");
         await Module!.InvokeVoidAsync("showModalById", "#upsertSavedModal");
     }
@@ -82,7 +83,7 @@ public partial class UserSavedSteaks
             IsValid = false;
             return;
         }
-        UpsertingSteak.CookingStyle = (CookingStyle)CenterCook;
+        UpsertingSteak.CenterCook = (CenterCook)CenterCook;
 
         if(UpsertingSteak.SavedSteakId == Guid.Empty)
         {
@@ -114,7 +115,7 @@ public partial class UserSavedSteaks
 
     protected async Task SaveNewSavedSteak()
     {
-        var saved = await SteakProvider.SavePersonSteak(new Steak { Name = UpsertingSteak.Name, CookingStyle = (CookingStyle)CenterCook });
+        var saved = await SteakProvider.SavePersonSteak(new Steak { Name = UpsertingSteak.Name, CenterCook = (CenterCook)CenterCook });
 
         if(saved != null)
         {

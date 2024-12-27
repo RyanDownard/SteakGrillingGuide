@@ -1,5 +1,6 @@
 ﻿@using MudBlazor
 @using SteakGrillingGuide.Data
+@using SteakGrillingGuide.Enums
 @using SteakGrillingGuide.Extensions
 
 <div class="modal fade" id="savedSteaksModal" tabindex="-1" aria-labelledby="savedSteaksModalLabel" aria-hidden="true">
@@ -25,7 +26,7 @@
                             @foreach (var steak in UserSteaks)
                             {
                                 <li class="list-group-item">
-                                    @steak.Name - @steak.CookingStyle.GetCookingStyleName()
+                                    @steak.Name - @steak.CenterCook.GetCookingStyleName()
                                     <span class="float-end">
                                         <MudIcon Size="Size.Small" @onclick="(() => EditSavedSteak(steak))" Class="me-3" Color="Color.Warning" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
                                         <MudIcon Size="Size.Small" @onclick="(() => ShowDeletingModal(steak))" Color="Color.Error" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
@@ -64,7 +65,7 @@
                 else
                 {
                 <div>
-                    Are you sure you want to delete @DeletingSteak.Name - @DeletingSteak.CookingStyle.GetCookingStyleName()
+                    Are you sure you want to delete @DeletingSteak.Name - @DeletingSteak.CenterCook.GetCookingStyleName()
                 </div>
                 }
             </div>
@@ -104,9 +105,9 @@
                     <div class="mb-3">
                         <select class="form-select" name="CenterCook" id="CenterCook" @bind="@CenterCook">
                             <option value="">Select Center Cook</option>
-                            @foreach (var style in Enum.GetValues(typeof(CookingStyle)))
+                            @foreach (var style in Enum.GetValues(typeof(CenterCook)))
                             {
-                                <option value="@((int)style)">@(((CookingStyle)style).GetCookingStyleName())</option>
+                                <option value="@((int)style)">@(((CenterCook)style).GetCookingStyleName())</option>
                             }
                         </select>
                     </div>

@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Plugin.LocalNotification;
 using SteakGrillingGuide.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Modals;
 

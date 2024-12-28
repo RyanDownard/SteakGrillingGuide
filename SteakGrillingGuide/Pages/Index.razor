@@ -77,7 +77,7 @@ else
 }
 <UpsertSteak AddSteak="OnSteakAdded" Steak="UpsertingSteak" UserSavedSteaks="UserSavedSteaks"/>
 <Suggestions/>
-<AppCrashed BeforeFinish="RecoveryBeforeFinished" HandleDecision="OnRestored"/>
+<AppCrashed HandleDecision="HandleSteakRestore" />
 <BeginTimer StartTimer="OnTimerStarted" SteaksToPlaceAtStart="SteaksToStart"/>
 <StopTimer StopTimerCallback="OnTimerStopped" />
 <ConfirmDelete Steak="SteakToDelete" UserConfirmed="OnDeleteConfirmed"/>

@@ -10,7 +10,7 @@ namespace SteakGrillingGuide.Modals;
 public partial class UserSavedSteaks
 {
     [Inject]
-    protected SteakProvider SteakProvider { get; set; } = null!;
+    protected SteakService SteakProvider { get; set; } = null!;
     [Inject]
     protected IJSRuntime JSRuntime { get; set; }
     [Inject]

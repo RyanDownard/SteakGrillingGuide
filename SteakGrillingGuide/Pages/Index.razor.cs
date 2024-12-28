@@ -17,28 +17,26 @@ public partial class Index
     [Inject]
     ISnackbar Snackbar { get; set; }
     [Inject]
-    SteakProvider SteakProvider { get; set; }
+    SteakService SteakService { get; set; }
     [Inject]
     IJSRuntime JSRunTime { get; set; }
     private List<Steak> Steaks { get; set; } = new();
-    private RecoveryData? RecoveryData { get; set; }
     private DateTime? StartAt { get; set; }
     public DateTime? FinishAt { get; set; }
     private int LongestTime { get; set; }
     private bool IgnoreInfoDialog = false;
     private bool RecoveringFromClose = false;
     private EventCallback<Steak> OnSteakAdded { get; set; }
-    private EventCallback<Steak> OnSteakEdited { get; set; } 
+    private EventCallback<Steak> OnSteakEdited { get; set; }
     private EventCallback<Steak> OnSteakDeleted { get; set; }
     private EventCallback<Steak> OnDeleteConfirmed { get; set; }
     private EventCallback<Steak> OnSteakSaved { get; set; }
-    private EventCallback<bool> OnRestored { get; set; }
     private EventCallback OnTimerStarted { get; set; }
     private EventCallback OnTimerStopped { get; set; }
 
     private static System.Timers.Timer Timer { get; set; }
 
-    private DateTime? SnackbarErrorsAt  { get; set; } = null;
+    private DateTime? SnackbarErrorsAt { get; set; } = null;
 
     private string SnackbarError { get; set; } = string.Empty;
 
@@ -67,14 +65,12 @@ public partial class Index
             {
                 await DisplayInfoDialog();
             }
-
-            await HandleRecoveryNeeded();
         }
     }
 
     private void HandlePause()
     {
-        if(Timer != null)
+        if (Timer != null)
         {
             Timer.Stop();
         }
@@ -96,21 +92,8 @@ public partial class Index
         OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
         OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
         OnDeleteConfirmed = new EventCallback<Steak>(this, (Steak steak) => DeleteConfirmed(steak));
-        OnRestored = new EventCallback<bool>(this, (bool restore) => HandleSteakRestore(restore));
         OnTimerStarted = new EventCallback(this, () => StartTimer());
         OnTimerStopped = new EventCallback(this, () => StopTimer());
-    }
-
-    private async Task HandleRecoveryNeeded()
-    {
-
-        string storedRecovery = await SecureStorage.Default.GetAsync("ExistingGrillData");
-        if (!string.IsNullOrWhiteSpace(storedRecovery))
-        {
-            RecoveryData = JsonSerializer.Deserialize<RecoveryData>(storedRecovery);
-            RecoveryBeforeFinished = RecoveryData.FinishesAt > DateTime.Now;
-            await Module.InvokeVoidAsync("showModalById", "#appCrashedModal");
-        }
     }
 
     private async Task DisplayInfoDialog(bool manuallyCalled = false)
@@ -164,7 +147,7 @@ public partial class Index
     private async Task HandleSteakEdited(Steak steakToEdit)
     {
         UpsertingSteak = steakToEdit;
-        UserSavedSteaks = await SteakProvider.GetSavedSteaks();
+        UserSavedSteaks = await SteakService.GetSavedSteaks();
         StateHasChanged();
         await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
     }
@@ -189,12 +172,7 @@ public partial class Index
         await Module!.InvokeVoidAsync("hideModalById", "#beginTimerModal");
         if (Timer == null || !Timer.Enabled)
         {
-            if (RecoveryData != null)
-            {
-                StartAt = RecoveryData.StartedAt;
-                FinishAt = RecoveryData.FinishesAt;
-            }
-            else
+            if (!StartAt.HasValue || !FinishAt.HasValue)
             {
                 StartAt = DateTime.Now;
                 FinishAt = DateTime.Now.AddSeconds(LongestTime);
@@ -205,15 +183,6 @@ public partial class Index
                 steak.SetStartTimes(LongestTime, StartAt.Value);
             }
 
-            if (RecoveryData == null)
-            {
-                var toBePlaced = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime);
-                foreach (var steak in Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime))
-                {
-                    steak.StartNotificationShown = true;
-                }
-                Snackbar.Add($"{string.Join(", ", toBePlaced.Select(x => $"{x.Name}'s"))} {(toBePlaced.Count() > 1 ? "steaks" : "steak")} ready to be placed!", Severity.Normal, config => { config.RequireInteraction = false; config.VisibleStateDuration = 10000; });
-            }
 
             int notificationId = 1;
 
@@ -269,7 +238,7 @@ public partial class Index
             await LocalNotificationCenter.Current.Show(endSteakRequest);
 
 
-            await SetRecoveryData();
+            await SteakService.SetRecoveryData(Steaks, StartAt.Value, FinishAt.Value);
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -342,7 +311,7 @@ public partial class Index
             {
                 SnackbarErrorsAt = DateTime.Now;
                 string errorMessage = toBePlaced.Any() ? $"The following steaks need placed: <br/>{string.Join(", ", toBePlaced)}" : "";
-                if(toBePlaced.Any() && toBePlaced.Any())
+                if (toBePlaced.Any() && toBePlaced.Any())
                 {
                     errorMessage += $"\n\n";
                 }
@@ -359,25 +328,14 @@ public partial class Index
 
         if (steakNotificationUpdated)
         {
-            await SetRecoveryData();
+            await SteakService.SetRecoveryData(Steaks, StartAt.Value, FinishAt.Value);
         }
-    }
-
-    private async Task SetRecoveryData()
-    {
-        var recoveryData = new RecoveryData
-        {
-            StartedAt = StartAt.Value,
-            FinishesAt = FinishAt.Value,
-            Steaks = Steaks
-        };
-        await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
     }
 
     private async void OpenSteakDialog()
     {
         UpsertingSteak = new();
-        UserSavedSteaks = await SteakProvider.GetSavedSteaks();
+        UserSavedSteaks = await SteakService.GetSavedSteaks();
         StateHasChanged();
         await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
     }
@@ -393,36 +351,20 @@ public partial class Index
         await Module!.InvokeVoidAsync("showModalById", "#beginTimerModal");
     }
 
-    private async Task HandleSteakRestore(bool restore)
+    private async Task HandleSteakRestore(RecoveryData recoveryData)
     {
-        await Module!.InvokeVoidAsync("hideModalById", "#appCrashedModal");
-        if (restore)
-        {
-            Steaks = RecoveryData!.Steaks;
-            if (RecoveryData.FinishesAt > DateTime.Now)
-            {
-                LongestTime = Steaks.Max(x => x.DurationSetting.TotalTime);
-                await StartTimer();
-            }
-            else
-            {
-                UpdateTimingInfo();
-                SecureStorage.Default.Remove("ExistingGrillData");
-                RecoveryData = null;
-            }
+        Steaks = recoveryData!.Steaks;
+        StartAt = recoveryData.StartedAt;
+        FinishAt = recoveryData.FinishesAt;
+        LongestTime = Steaks.Max(x => x.DurationSetting.TotalTime);
 
-            StateHasChanged();
-        }
-        else
-        {
-            SecureStorage.Default.Remove("ExistingGrillData");
-            RecoveryData = null;
-        }
+        await StartTimer();
+        StateHasChanged();
     }
 
     private async Task SavePersonSteak(Steak steak)
     {
-        var saved = await SteakProvider.SavePersonSteak(steak);
+        var saved = await SteakService.SavePersonSteak(steak);
         if (saved != null)
         {
             steak.SavedSteak = saved;
@@ -446,7 +388,7 @@ public partial class Index
         }
     }
 
-    private async void StopTimer()
+    private async Task StopTimer()
     {
         Timer.Enabled = false;
         Timer = null;
@@ -454,8 +396,7 @@ public partial class Index
         FinishAt = null;
         Steaks.ForEach(x => { x.StartNotificationShown = false; x.FlipNotificationShown = false; x.FirstSideStartTime = null; x.SecondSideStartTime = null; });
         LocalNotificationCenter.Current.CancelAll();
-        SecureStorage.Default.Remove("ExistingGrillData");
-        RecoveryData = null;
+        SteakService.RemoveRecoveryData();
         await Module!.InvokeVoidAsync("hideModalById", "#stopTimerModal");
     }
 
@@ -466,8 +407,7 @@ public partial class Index
         LongestTime = 0;
         StartAt = null;
         FinishAt = null;
-        SecureStorage.Default.Remove("ExistingGrillData");
-        RecoveryData = null;
+        SteakService.RemoveRecoveryData();
         RunComplete = false;
     }
 }

@@ -16,7 +16,7 @@ public partial class UpsertSteak
     public IEnumerable<SavedSteak> UserSavedSteaks { get; set; }
 
     [Inject]
-    protected SteakProvider SteakProvider { get; set; }
+    protected SteakService SteakProvider { get; set; }
     [Inject]
     protected IJSRuntime JSRunTime { get; set; }
 

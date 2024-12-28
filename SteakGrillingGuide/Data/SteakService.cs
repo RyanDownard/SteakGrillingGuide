@@ -1,14 +1,17 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using SteakGrillingGuide.Enums;
 using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Data;
 
-public class SteakProvider
+public class SteakService
 {
-    public readonly List<SteakSettings> SteakSettings = new List<SteakSettings>();
-    public readonly List<double> Thicknesses = new List<double> { .5, .75, 1.0, 1.25, 1.5, 1.75, 2.0 };
-    public SteakProvider()
+    public readonly List<SteakSettings> SteakSettings = new();
+    public readonly List<double> Thicknesses = new() { .5, .75, 1.0, 1.25, 1.5, 1.75, 2.0 };
+    private List<Steak> _steaks { get; set; }
+    public IReadOnlyList<Steak> Steaks { get; set; }
+    public SteakService()
     {
         LoadDefaults();
     }
@@ -205,5 +208,55 @@ public class SteakProvider
     public async Task SaveSteaksToStorage(IEnumerable<SavedSteak> steaks)
     {
         await SecureStorage.SetAsync("SavedSteaks", JsonSerializer.Serialize(steaks));
+    }
+
+    public void AddSteak(Steak steak)
+    {
+
+    }
+
+    public void RemoveSteak(Steak steak)
+    {
+
+    }
+
+    public void UpdateSteak(Steak steak)
+    {
+
+    }
+
+    public async Task SetRecoveryData(List<Steak> steaks, DateTime startAt, DateTime finishAt)
+    {
+        var recoveryData = new RecoveryData
+        {
+            StartedAt = startAt,
+            FinishesAt = finishAt,
+            Steaks = steaks
+        };
+        await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
+    }
+
+    public async Task<RecoveryData?> GetRecoveryData()
+    {
+        try
+        {
+            string storedRecovery = await SecureStorage.Default.GetAsync("ExistingGrillData");
+            if (!string.IsNullOrWhiteSpace(storedRecovery))
+            {
+                var RecoveryData = JsonSerializer.Deserialize<RecoveryData>(storedRecovery);
+                return RecoveryData;
+
+            }
+        }
+        catch(Exception ex)
+        {
+            return null;
+        }
+        return null;
+    }
+
+    public void RemoveRecoveryData()
+    {
+        SecureStorage.Default.Remove("ExistingGrillData");
     }
 }

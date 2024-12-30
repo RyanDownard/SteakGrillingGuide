@@ -9,21 +9,14 @@ namespace SteakGrillingGuide.Modals;
 public partial class UpsertSteak
 {
     [Parameter]
-    public EventCallback<Steak> AddSteak { get; set; }
-    [Parameter]
     public Steak Steak { get; set; } = new Steak();
-    [Parameter]
-    public IEnumerable<SavedSteak> UserSavedSteaks { get; set; }
 
     [Inject]
-    protected SteakService SteakProvider { get; set; }
+    protected SteakService SteakService { get; set; }
     [Inject]
     protected IJSRuntime JSRunTime { get; set; }
-
     IEnumerable<double> Thicknesses { get; set; }
-
     protected bool IsValid { get; set; } = true;
-
     protected double? Thickness { get; set; } = null;
     protected int? CenterCook { get; set; } = null;
     protected bool IsNewSteak { get; set; } = true;
@@ -31,9 +24,10 @@ public partial class UpsertSteak
 
     protected override Task OnInitializedAsync()
     {
-        Thicknesses = SteakProvider.Thicknesses;
+        Thicknesses = SteakService.Thicknesses;
         return base.OnInitializedAsync();
     }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -43,7 +37,7 @@ public partial class UpsertSteak
         }
     }
 
-    protected override Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
         if (Steak != null && !string.IsNullOrWhiteSpace(Steak.Name))
         {
@@ -57,9 +51,6 @@ public partial class UpsertSteak
             CenterCook = null;
             IsNewSteak = true;
         }
-
-
-        return base.OnParametersSetAsync();
     }
 
     private async Task Submit()
@@ -74,7 +65,7 @@ public partial class UpsertSteak
             IsValid = true;
             Steak.Thickness = Thickness.Value;
             Steak.CenterCook = (CenterCook)CenterCook.Value;
-            Steak.DurationSetting = SteakProvider.SteakSettings.First(i => i.CenterCook == Steak.CenterCook).Durations.First(i => i.Thickness == Steak.Thickness);
+            Steak.DurationSetting = SteakService.SteakSettings.First(i => i.CenterCook == Steak.CenterCook).Durations.First(i => i.Thickness == Steak.Thickness);
 
             if(Steak.SavedSteak != null && (Steak.Name != Steak.SavedSteak.Name || Steak.CenterCook != Steak.SavedSteak.CenterCook))
             {
@@ -96,7 +87,7 @@ public partial class UpsertSteak
     {
         if(!string.IsNullOrWhiteSpace(e.Value.ToString()))
         {
-            Steak.SavedSteak = UserSavedSteaks.First(i => i.SavedSteakId == new Guid(e.Value.ToString()));
+            Steak.SavedSteak = SteakService.SavedSteaks.First(i => i.SavedSteakId == new Guid(e.Value.ToString()));
             Steak.Name = Steak.SavedSteak.Name;
             Steak.CenterCook = Steak.SavedSteak.CenterCook;
             CenterCook = (int)Steak.SavedSteak.CenterCook;
@@ -122,8 +113,10 @@ public partial class UpsertSteak
         Thickness = null;
         CenterCook = null;
 
-        await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");
-        await AddSteak.InvokeAsync(Steak);
+        SteakService.AddSteak(Steak);
+
+        StateHasChanged();
+        await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");;
     }
 
     private async Task ResumeUpsert()
@@ -146,18 +139,20 @@ public partial class UpsertSteak
             CenterCook = Steak.CenterCook
         };
 
-        await SteakProvider.UpdateSavedSteak(Steak.SavedSteak, updatedInfo);
+        await SteakService.UpdateSavedSteak(Steak.SavedSteak, updatedInfo);
         await Module!.InvokeVoidAsync("hideModalById", "#changesMadeModal");
         await FinishAddingSteak();
     }
 
     private async Task SaveSteakAsNew()
     {
-        var savedSteak = await SteakProvider.SavePersonSteak(Steak);
+        var savedSteak = await SteakService.SavePersonSteak(Steak);
+
         if(savedSteak != null)
         {
             Steak.SavedSteak = savedSteak;
         }
+
         await Module!.InvokeVoidAsync("hideModalById", "#changesMadeModal");
         await FinishAddingSteak();
     }

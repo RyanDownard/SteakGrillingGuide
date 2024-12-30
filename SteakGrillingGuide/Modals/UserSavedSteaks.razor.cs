@@ -4,6 +4,7 @@ using MudBlazor;
 using SteakGrillingGuide.Data;
 using SteakGrillingGuide.Enums;
 using SteakGrillingGuide.Models;
+using System.Security.Cryptography;
 
 namespace SteakGrillingGuide.Modals;
 
@@ -15,8 +16,8 @@ public partial class UserSavedSteaks
     protected IJSRuntime JSRuntime { get; set; }
     [Inject]
     protected ISnackbar Snackbar { get; set; }
-    [Parameter]
-    public IEnumerable<SavedSteak> UserSteaks { get; set; }
+    [Inject]
+    protected SteakService SteakService { get; set; }
     protected SavedSteak BeforeSaved { get; set; }
     protected SavedSteak UpsertingSteak { get; set; }
     protected SavedSteak DeletingSteak { get; set; }
@@ -24,9 +25,15 @@ public partial class UserSavedSteaks
     protected bool IsValid { get; set; } = true;
     protected int? CenterCook { get; set; } = null;
 
-    protected override Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        return base.OnInitializedAsync();
+        base.OnInitialized();
+        SteakService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        SteakService.OnChange -= StateHasChanged;
     }
 
 
@@ -41,7 +48,6 @@ public partial class UserSavedSteaks
     protected async Task DeleteSavedSteak()
     {
         await SteakProvider.RemoveSavedSteak(DeletingSteak);
-        UserSteaks = await SteakProvider.GetSavedSteaks();
         Snackbar.Add($"{DeletingSteak.Name} removed!", Severity.Normal, config =>
         {
             config.RequireInteraction = false;
@@ -50,6 +56,8 @@ public partial class UserSavedSteaks
             config.HideTransitionDuration = 500;
         });
         await HideDeletingModal();
+
+        StateHasChanged();
     }
 
     protected async Task ShowDeletingModal(SavedSteak steak)
@@ -140,7 +148,6 @@ public partial class UserSavedSteaks
 
         UpsertingSteak = null;
         CenterCook = null;
-        UserSteaks = await SteakProvider.GetSavedSteaks();
         await Module!.InvokeVoidAsync("hideModalById", "#upsertSavedModal");
         await Module!.InvokeVoidAsync("showModalById", "#savedSteaksModal");
     }

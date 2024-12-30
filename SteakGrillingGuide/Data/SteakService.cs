@@ -9,8 +9,12 @@ public class SteakService
 {
     public readonly List<SteakSettings> SteakSettings = new();
     public readonly List<double> Thicknesses = new() { .5, .75, 1.0, 1.25, 1.5, 1.75, 2.0 };
-    private List<Steak> _steaks { get; set; }
-    public IReadOnlyList<Steak> Steaks { get; set; }
+    private List<Steak> _steaks = new();
+    public IReadOnlyList<Steak> Steaks => _steaks.AsReadOnly();
+    private List<SavedSteak> _savedSteaks = new();
+    public IReadOnlyList<SavedSteak> SavedSteaks => _savedSteaks.AsReadOnly();
+    public event Action OnChange;
+
     public SteakService()
     {
         LoadDefaults();
@@ -123,6 +127,8 @@ public class SteakService
 
             await SaveSteaksToStorage(savedSteaks);
 
+            await GetSavedSteaks();
+            
             savedSteak = asSavedClass;
         }
         catch (Exception ex)
@@ -131,21 +137,25 @@ public class SteakService
             return null;
         }
 
+        NotifyStateChanged();
+
         return savedSteak;
     }
 
-    public async Task<IEnumerable<SavedSteak>> GetSavedSteaks()
+    public async Task GetSavedSteaks()
     {
         try
         {
-            var savedSteaks = await GetSteaksFromStorage();
-            return savedSteaks;
+            var fromStorage = await GetSteaksFromStorage();
+            _savedSteaks = fromStorage.ToList();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             //TODO logging on failing to retrieve steaks 
-            return Enumerable.Empty<SavedSteak>();
+            _savedSteaks = new();
         }
+
+        NotifyStateChanged();
     }
 
     public async Task<bool> UpdateSavedSteak(SavedSteak steakToUpdate, SavedSteak updatedSteakInfo)
@@ -161,12 +171,16 @@ public class SteakService
             previousSteakData.Name = updatedSteakInfo.Name;
             previousSteakData.CenterCook = updatedSteakInfo.CenterCook;
 
+            _savedSteaks = savedSteaks.ToList();
+
             await SaveSteaksToStorage(savedSteaks);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             //TODO logging for failing to update a steak
         }
+
+        NotifyStateChanged();
 
         return savedSuccessfully;
     }
@@ -180,14 +194,23 @@ public class SteakService
 
             savedSteaks = savedSteaks.Where(i => i.SavedSteakId != steakToRemove.SavedSteakId);
 
+            _savedSteaks = savedSteaks.ToList();
+
+            foreach (var steak in _steaks.Where(i => i.SavedSteak.SavedSteakId == steakToRemove.SavedSteakId))
+            {
+                steak.SavedSteak = null;   
+            }
+
             await SaveSteaksToStorage(savedSteaks);
 
             savedSuccessfully = true;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             //TODO logging for failing to remove a steak
         }
+
+        NotifyStateChanged();
 
         return savedSuccessfully;
     }
@@ -212,26 +235,32 @@ public class SteakService
 
     public void AddSteak(Steak steak)
     {
+        if (string.IsNullOrWhiteSpace(steak.Name))
+        {
+            steak.Name = $"Steak {Steaks.Count + 1}";
+        }
 
+        if (!Steaks.Any(i => i == steak))
+        {
+            _steaks.Add(steak);
+        }
+
+        NotifyStateChanged();
     }
 
     public void RemoveSteak(Steak steak)
     {
-
+        _steaks.Remove(steak);
+        NotifyStateChanged();
     }
 
-    public void UpdateSteak(Steak steak)
-    {
-
-    }
-
-    public async Task SetRecoveryData(List<Steak> steaks, DateTime startAt, DateTime finishAt)
+    public async Task SetRecoveryData(DateTime startAt, DateTime finishAt)
     {
         var recoveryData = new RecoveryData
         {
             StartedAt = startAt,
             FinishesAt = finishAt,
-            Steaks = steaks
+            Steaks = _steaks
         };
         await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
     }
@@ -248,7 +277,7 @@ public class SteakService
 
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return null;
         }
@@ -259,4 +288,30 @@ public class SteakService
     {
         SecureStorage.Default.Remove("ExistingGrillData");
     }
+
+    public void UpdateAfterStopping()
+    {
+        foreach(var steak in _steaks)
+        {
+            steak.StartNotificationShown = false;
+            steak.FlipNotificationShown = false; 
+            steak.FirstSideStartTime = null; 
+            steak.SecondSideStartTime = null;
+        }
+        NotifyStateChanged();
+    }
+
+    public void ClearSteaks()
+    {
+        _steaks = new();
+        NotifyStateChanged();
+    }
+
+    public void SetSteaks(List<Steak> steaks)
+    {
+        _steaks = steaks;
+        NotifyStateChanged();
+    }
+
+    private void NotifyStateChanged() => OnChange?.Invoke();
 }

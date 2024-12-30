@@ -20,17 +20,10 @@ public partial class Index
     SteakService SteakService { get; set; }
     [Inject]
     IJSRuntime JSRunTime { get; set; }
-    private List<Steak> Steaks { get; set; } = new();
     private DateTime? StartAt { get; set; }
     public DateTime? FinishAt { get; set; }
-    private int LongestTime { get; set; }
     private bool IgnoreInfoDialog = false;
     private bool RecoveringFromClose = false;
-    private EventCallback<Steak> OnSteakAdded { get; set; }
-    private EventCallback<Steak> OnSteakEdited { get; set; }
-    private EventCallback<Steak> OnSteakDeleted { get; set; }
-    private EventCallback<Steak> OnDeleteConfirmed { get; set; }
-    private EventCallback<Steak> OnSteakSaved { get; set; }
     private EventCallback OnTimerStarted { get; set; }
     private EventCallback OnTimerStopped { get; set; }
 
@@ -48,9 +41,16 @@ public partial class Index
     private IEnumerable<SavedSteak> UserSavedSteaks { get; set; } = [];
     private Steak SteakToDelete { get; set; }
 
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
+        SteakService.OnChange += StateHasChanged;
+        await SteakService.GetSavedSteaks();
         GenerateCallBacks();
+    }
+
+    public void Dispose()
+    {
+        SteakService.OnChange -= StateHasChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,11 +87,6 @@ public partial class Index
 
     private void GenerateCallBacks()
     {
-        OnSteakAdded = new EventCallback<Steak>(this, (Steak steak) => HandleSteakAdded(steak));
-        OnSteakSaved = new EventCallback<Steak>(this, (Steak steak) => SavePersonSteak(steak));
-        OnSteakEdited = new EventCallback<Steak>(this, (Steak steak) => HandleSteakEdited(steak));
-        OnSteakDeleted = new EventCallback<Steak>(this, (Steak steak) => HandleSteakDeleted(steak));
-        OnDeleteConfirmed = new EventCallback<Steak>(this, (Steak steak) => DeleteConfirmed(steak));
         OnTimerStarted = new EventCallback(this, () => StartTimer());
         OnTimerStopped = new EventCallback(this, () => StopTimer());
     }
@@ -110,61 +105,18 @@ public partial class Index
         }
     }
 
-    private void UpdateTimingInfo()
-    {
-        if (Steaks.Any())
-        {
-            LongestTime = Steaks.Max(i => i.DurationSetting.TotalTime);
-        }
-        else
-        {
-            LongestTime = 0;
-        }
-    }
-
-    private async Task HandleSteakAdded(Steak addedSteak)
-    {
-        if (string.IsNullOrWhiteSpace(addedSteak.Name))
-        {
-            addedSteak.Name = $"Steak {Steaks.Count + 1}";
-        }
-
-        if (!Steaks.Any(i => i == addedSteak))
-        {
-            Steaks.Add(addedSteak);
-        }
-
-        await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");
-
-        UpdateTimingInfo();
-
-        UpsertingSteak = null;
-
-        StateHasChanged();
-    }
-
-
-    private async Task HandleSteakEdited(Steak steakToEdit)
+    private async Task EditSteak(Steak steakToEdit)
     {
         UpsertingSteak = steakToEdit;
-        UserSavedSteaks = await SteakService.GetSavedSteaks();
         StateHasChanged();
         await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
     }
 
-    private async Task HandleSteakDeleted(Steak steakToDelete)
+    private async Task ConfirmDeleteSteak(Steak steakToDelete)
     {
         SteakToDelete = steakToDelete;
-        await Module.InvokeVoidAsync("showModalById", "#confirmDeleteModal");
-    }
-
-    private async Task DeleteConfirmed(Steak steakToDelete)
-    {
-        await Module.InvokeVoidAsync("hideModalById", "#confirmDeleteModal");
-        Steaks.Remove(steakToDelete);
-        SteakToDelete = null;
-        UpdateTimingInfo();
         StateHasChanged();
+        await Module.InvokeVoidAsync("showModalById", "#confirmDeleteModal");
     }
 
     private async Task StartTimer()
@@ -172,21 +124,23 @@ public partial class Index
         await Module!.InvokeVoidAsync("hideModalById", "#beginTimerModal");
         if (Timer == null || !Timer.Enabled)
         {
+            var longestTime = SteakService.Steaks.Max(i => i.DurationSetting.TotalTime);
+
             if (!StartAt.HasValue || !FinishAt.HasValue)
             {
                 StartAt = DateTime.Now;
-                FinishAt = DateTime.Now.AddSeconds(LongestTime);
+                FinishAt = DateTime.Now.AddSeconds(longestTime);
             }
 
-            foreach (var steak in Steaks)
+            foreach (var steak in SteakService.Steaks)
             {
-                steak.SetStartTimes(LongestTime, StartAt.Value);
+                steak.SetStartTimes(longestTime, StartAt.Value);
             }
 
 
             int notificationId = 1;
 
-            foreach (var startTime in Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != StartAt).GroupBy(i => i.FirstSideStartTime))
+            foreach (var startTime in SteakService.Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != StartAt).GroupBy(i => i.FirstSideStartTime))
             {
                 var applySteakRequest = new NotificationRequest
                 {
@@ -204,7 +158,7 @@ public partial class Index
                 notificationId++;
             }
 
-            foreach (var flipTime in Steaks.Where(i => !i.FlipNotificationShown).GroupBy(i => i.SecondSideStartTime))
+            foreach (var flipTime in SteakService.Steaks.Where(i => !i.FlipNotificationShown).GroupBy(i => i.SecondSideStartTime))
             {
                 var applySteakRequest = new NotificationRequest
                 {
@@ -238,7 +192,7 @@ public partial class Index
             await LocalNotificationCenter.Current.Show(endSteakRequest);
 
 
-            await SteakService.SetRecoveryData(Steaks, StartAt.Value, FinishAt.Value);
+            await SteakService.SetRecoveryData(StartAt.Value, FinishAt.Value);
             Timer = new System.Timers.Timer(1000);
             Timer.Elapsed += CountDownTimer;
             Timer.Enabled = true;
@@ -267,14 +221,14 @@ public partial class Index
         bool steakNotificationUpdated = false;
         var toBePlaced = new List<string>();
         var toBeFlipped = new List<string>();
-        foreach (var steak in Steaks.Where(i => i.FirstSideStartTime < DateTime.Now && !i.StartNotificationShown))
+        foreach (var steak in SteakService.Steaks.Where(i => i.FirstSideStartTime < DateTime.Now && !i.StartNotificationShown))
         {
             steak.StartNotificationShown = true;
             steakNotificationUpdated = true;
             toBePlaced.Add($"{steak.Name}'s");
         }
 
-        foreach (var steak in Steaks.Where(i => i.SecondSideStartTime < DateTime.Now && !i.FlipNotificationShown))
+        foreach (var steak in SteakService.Steaks.Where(i => i.SecondSideStartTime < DateTime.Now && !i.FlipNotificationShown))
         {
             steak.FlipNotificationShown = true;
             steakNotificationUpdated = true;
@@ -328,15 +282,14 @@ public partial class Index
 
         if (steakNotificationUpdated)
         {
-            await SteakService.SetRecoveryData(Steaks, StartAt.Value, FinishAt.Value);
+            await SteakService.SetRecoveryData(StartAt.Value, FinishAt.Value);
         }
     }
 
     private async void OpenSteakDialog()
     {
         UpsertingSteak = new();
-        UserSavedSteaks = await SteakService.GetSavedSteaks();
-        StateHasChanged();
+
         await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
     }
 
@@ -347,45 +300,19 @@ public partial class Index
 
     private async void OpenStartDialog()
     {
-        SteaksToStart = Steaks.Where(i => i.DurationSetting.TotalTime == LongestTime);
+        var longestTime = SteakService.Steaks.Max(i => i.DurationSetting.TotalTime);
+        SteaksToStart = SteakService.Steaks.Where(i => i.DurationSetting.TotalTime == longestTime);
         await Module!.InvokeVoidAsync("showModalById", "#beginTimerModal");
     }
 
     private async Task HandleSteakRestore(RecoveryData recoveryData)
     {
-        Steaks = recoveryData!.Steaks;
+        SteakService.SetSteaks(recoveryData.Steaks);
         StartAt = recoveryData.StartedAt;
         FinishAt = recoveryData.FinishesAt;
-        LongestTime = Steaks.Max(x => x.DurationSetting.TotalTime);
 
         await StartTimer();
         StateHasChanged();
-    }
-
-    private async Task SavePersonSteak(Steak steak)
-    {
-        var saved = await SteakService.SavePersonSteak(steak);
-        if (saved != null)
-        {
-            steak.SavedSteak = saved;
-            Snackbar.Add($"{steak.Name} saved to device!", Severity.Normal, config =>
-            {
-                config.RequireInteraction = false;
-                config.VisibleStateDuration = 10000;
-                config.ShowTransitionDuration = 500;
-                config.HideTransitionDuration = 500;
-            });
-        }
-        else
-        {
-            Snackbar.Add($"Failed {steak.Name} saved to device, please try again", Severity.Error, config =>
-            {
-                config.RequireInteraction = false;
-                config.VisibleStateDuration = 10000;
-                config.ShowTransitionDuration = 500;
-                config.HideTransitionDuration = 500;
-            });
-        }
     }
 
     private async Task StopTimer()
@@ -394,7 +321,7 @@ public partial class Index
         Timer = null;
         StartAt = null;
         FinishAt = null;
-        Steaks.ForEach(x => { x.StartNotificationShown = false; x.FlipNotificationShown = false; x.FirstSideStartTime = null; x.SecondSideStartTime = null; });
+        SteakService.UpdateAfterStopping();
         LocalNotificationCenter.Current.CancelAll();
         SteakService.RemoveRecoveryData();
         await Module!.InvokeVoidAsync("hideModalById", "#stopTimerModal");
@@ -403,8 +330,7 @@ public partial class Index
     private void ResetApp()
     {
         Timer = null;
-        Steaks = new();
-        LongestTime = 0;
+        SteakService.ClearSteaks();
         StartAt = null;
         FinishAt = null;
         SteakService.RemoveRecoveryData();

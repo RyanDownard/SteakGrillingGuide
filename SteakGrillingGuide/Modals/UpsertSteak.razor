@@ -22,7 +22,7 @@
                             Thickness and Center Cook must have a value.
                         </div>
                     }
-                    @if (UserSavedSteaks != null && UserSavedSteaks.Any())
+                    @if (SteakService.SavedSteaks != null && SteakService.SavedSteaks.Any())
                     {
                         <div class="mb-3">
                             <select class="form-select" name="SavedSteak" id="SavedSteak" @onchange="SavedSteakChanged">
@@ -34,7 +34,7 @@
                                 {
                                     <option value="">Select Saved Steak</option>
                                 }
-                                @foreach (var savedSteak in UserSavedSteaks)
+                                @foreach (var savedSteak in SteakService.SavedSteaks)
                                 {
                                     if (Steak != null && Steak.SavedSteak != null && Steak.SavedSteak.SavedSteakId == savedSteak.SavedSteakId)
                                     {

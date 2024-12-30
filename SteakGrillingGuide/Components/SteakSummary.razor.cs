@@ -1,10 +1,20 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using MudBlazor;
+using SteakGrillingGuide.Data;
 using SteakGrillingGuide.Models;
 
 namespace SteakGrillingGuide.Components;
 
 public partial class SteakSummary
 {
+    [Inject]
+    protected ISnackbar Snackbar { get; set; }
+    [Inject]
+    protected SteakService SteakService { get; set; }
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+    protected IJSObjectReference Module { get; set; }
     [Parameter]
     public Steak SteakToCook { get; set; }
     [Parameter]
@@ -12,24 +22,53 @@ public partial class SteakSummary
     [Parameter]
     public DateTime? StartTime { get; set; }
     [Parameter]
-    public EventCallback<Steak> SaveSteak { get; set; }
+    public Func<Steak, Task> EditSteak { get; set; }
     [Parameter]
-    public EventCallback<Steak> EditSteak { get; set; }
-    [Parameter]
-    public EventCallback<Steak> DeleteSteak { get; set; }
+    public Func<Steak, Task> DeleteSteak { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
+        }
+    }
 
     private async Task SaveSteakCallback()
     {
-        await SaveSteak.InvokeAsync(SteakToCook);
+        var saved = await SteakService.SavePersonSteak(SteakToCook);
+        if (saved != null)
+        {
+            SteakToCook.SavedSteak = saved;
+            Snackbar.Add($"{SteakToCook.Name} saved to device!", Severity.Normal, config =>
+            {
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 10000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
+        }
+        else
+        {
+            Snackbar.Add($"Failed {SteakToCook.Name} saved to device, please try again", Severity.Error, config =>
+            {
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 10000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
+        }
+
+        StateHasChanged();
     }
 
     private async Task EditSteakCallback()
     {
-        await EditSteak.InvokeAsync(SteakToCook);
+        await EditSteak.Invoke(SteakToCook);
     }
 
     private async Task DeleteSteakCallback()
     {
-        await DeleteSteak.InvokeAsync(SteakToCook);
+        await DeleteSteak.Invoke(SteakToCook);
     }
 }

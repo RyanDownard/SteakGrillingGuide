@@ -28,21 +28,21 @@
     </nav>
 </div>
 
-<About/>
-<UserSavedSteaks UserSteaks="SavedSteaks"/>
+<About />
+<UserSavedSteaks />
 
 @code {
     [Inject]
     protected IJSRuntime JSRunTime { get; set; }
     [Inject]
-    protected SteakService SteakProvider{ get; set; }
-    protected IEnumerable<SavedSteak> SavedSteaks { get; set; }
+    protected SteakService SteakService { get; set; }
 
     protected IJSObjectReference Module { get; set; }
 
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -64,7 +64,6 @@
 
     private async Task DisplaySavedSteaksDialog()
     {
-        SavedSteaks = await SteakProvider.GetSavedSteaks();
         await Module!.InvokeVoidAsync("showModalById", "#savedSteaksModal");
     }
 }

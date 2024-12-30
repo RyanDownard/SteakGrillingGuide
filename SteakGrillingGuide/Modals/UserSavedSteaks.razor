@@ -11,7 +11,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @if (UserSteaks == null)
+                @if (SteakService.SavedSteaks == null)
                 {
                     <div>Retrieving steaks...</div>
                 }
@@ -20,10 +20,10 @@
                     <MudButton Variant="Variant.Outlined" Class="mb-3 ml-2" Color="Color.Default" OnClick="CreateSavedSteak">
                         <MudIcon Icon="@Icons.Material.Outlined.Add" Title="Add" />
                     </MudButton>
-                    @if (UserSteaks.Any())
+                    @if (SteakService.SavedSteaks.Any())
                     {
                         <ul class="list-group">
-                            @foreach (var steak in UserSteaks)
+                            @foreach (var steak in SteakService.SavedSteaks)
                             {
                                 <li class="list-group-item">
                                     @steak.Name - @steak.CenterCook.GetCookingStyleName()

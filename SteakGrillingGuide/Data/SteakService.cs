@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using Plugin.LocalNotification;
 using SteakGrillingGuide.Enums;
 using SteakGrillingGuide.Models;
 
@@ -311,6 +312,62 @@ public class SteakService
     {
         _steaks = steaks;
         NotifyStateChanged();
+    }
+
+    public async Task GenerateNotifications(DateTime startAt, DateTime finishAt)
+    {
+        int notificationId = 1;
+
+        foreach (var startTime in Steaks.Where(i => !i.StartNotificationShown && i.FirstSideStartTime != startAt).GroupBy(i => i.FirstSideStartTime))
+        {
+            var applySteakRequest = new NotificationRequest
+            {
+                NotificationId = notificationId,
+                Title = $"Steaks ready for the grill!",
+                Subtitle = $"Place {string.Join(", ", startTime.Select(x => $"{x.Name}'s"))} {(startTime.Count() > 1 ? "steaks" : "steak")} on the grill",
+                BadgeNumber = 1,
+                CategoryType = NotificationCategoryType.Alarm,
+                Schedule = new NotificationRequestSchedule
+                {
+                    NotifyTime = startTime.Key,
+                }
+            };
+            await LocalNotificationCenter.Current.Show(applySteakRequest);
+            notificationId++;
+        }
+
+        foreach (var flipTime in Steaks.Where(i => !i.FlipNotificationShown).GroupBy(i => i.SecondSideStartTime))
+        {
+            var applySteakRequest = new NotificationRequest
+            {
+                NotificationId = notificationId,
+                Title = $"Steaks ready to be flipped!",
+                Subtitle = $"Flip {string.Join(", ", flipTime.Select(x => x.Name))} {(flipTime.Count() > 1 ? "steaks" : "steak")}",
+                BadgeNumber = 1,
+                CategoryType = NotificationCategoryType.Alarm,
+                Schedule = new NotificationRequestSchedule
+                {
+                    NotifyTime = flipTime.Key
+                }
+            };
+            await LocalNotificationCenter.Current.Show(applySteakRequest);
+            notificationId++;
+        }
+
+        var endSteakRequest = new NotificationRequest
+        {
+            NotificationId = notificationId,
+            Title = $"Steaks are done!",
+            BadgeNumber = 1,
+            Silent = false,
+            CategoryType = NotificationCategoryType.Alarm,
+            Schedule = new NotificationRequestSchedule
+            {
+                NotifyTime = finishAt
+            }
+        };
+
+        await LocalNotificationCenter.Current.Show(endSteakRequest);
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();

@@ -9,8 +9,8 @@ public partial class BeginTimer
 {
     [Inject]
     private AppLifecycleService lifecycleService { get; set; }
-    [Parameter]
-    public IEnumerable<Steak> SteaksToPlaceAtStart { get; set; }
+    [Inject]
+    protected SteakService SteakService { get; set; }
     [Parameter]
     public EventCallback StartTimer { get; set; }
 
@@ -18,7 +18,14 @@ public partial class BeginTimer
 
     protected override async Task OnInitializedAsync()
     {
+        SteakService.OnChange += StateHasChanged;
+
         await CheckNotificationPermissions();
+    }
+
+    public void Dispose()
+    {
+        SteakService.OnChange -= StateHasChanged;
     }
 
     protected override Task OnAfterRenderAsync(bool firstRender)

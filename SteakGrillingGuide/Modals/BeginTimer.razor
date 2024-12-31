@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <ul class="list-group list-group-flush">
-                    @foreach (var steak in SteaksToPlaceAtStart)
+                    @foreach (var steak in SteakService.Steaks.Where(i => i.DurationSetting.TotalTime == SteakService.Steaks.Max(i => i.DurationSetting.TotalTime)))
                     {
                         <li class="list-group-item">
                             <div>

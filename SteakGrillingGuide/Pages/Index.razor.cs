@@ -36,15 +36,13 @@ public partial class Index
     private bool RunComplete = false;
     private IJSObjectReference Module { get; set; }
     private Steak UpsertingSteak { get; set; }
-    private bool RecoveryBeforeFinished { get; set; } = false;
-    private IEnumerable<Steak> SteaksToStart { get; set; } = [];
     private Steak SteakToDelete { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         SteakService.OnChange += StateHasChanged;
+
         await SteakService.GetSavedSteaks();
-        GenerateCallBacks();
     }
 
     public void Dispose()
@@ -83,12 +81,6 @@ public partial class Index
         {
             Timer.Start();
         }
-    }
-
-    private void GenerateCallBacks()
-    {
-        OnTimerStarted = new EventCallback(this, () => StartTimer());
-        OnTimerStopped = new EventCallback(this, () => StopTimer());
     }
 
     private async Task DisplayInfoDialog(bool manuallyCalled = false)
@@ -218,11 +210,13 @@ public partial class Index
             if (SnackbarErrorsAt == null && (toBePlaced.Any() || toBeFlipped.Any()))
             {
                 SnackbarErrorsAt = DateTime.Now;
-                string errorMessage = toBePlaced.Any() ? $"The following steaks need placed: <br/>{string.Join(", ", toBePlaced)}" : "";
+                string errorMessage = toBePlaced.Any() ? $"The following steaks need placed: <br/>{string.Join(", ", toBePlaced)}" : ""
+
                 if (toBePlaced.Any() && toBePlaced.Any())
                 {
                     errorMessage += $"\n\n";
                 }
+
                 errorMessage += toBeFlipped.Any() ? $"The following steaks need flipped: <br/>{string.Join(", ", toBeFlipped)}" : "";
                 SnackbarError = $"An error occurred while displaying information. <br/><br/>{errorMessage}";
             }
@@ -255,7 +249,6 @@ public partial class Index
     private async void OpenStartDialog()
     {
         var longestTime = SteakService.Steaks.Max(i => i.DurationSetting.TotalTime);
-        SteaksToStart = SteakService.Steaks.Where(i => i.DurationSetting.TotalTime == longestTime);
 
         await Module!.InvokeVoidAsync("showModalById", "#beginTimerModal");
     }

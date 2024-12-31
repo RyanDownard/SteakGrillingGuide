@@ -1,13 +1,16 @@
-var currentModal = null;
-
 function showModalById(modalId) {
-    currentModal = bootstrap.Modal.getOrCreateInstance(modalId);
+    let currentModal = bootstrap.Modal.getOrCreateInstance(modalId);
+    if (currentModal != null) {
+        currentModal.show();
+    }
 
-    currentModal.show();
 }
 
 function hideModalById(modalId) {
-    currentModal.hide();
+    let currentModal = bootstrap.Modal.getOrCreateInstance(modalId);
+    if (currentModal != null) {
+        currentModal.hide();
+    }
 }
 
 export { showModalById, hideModalById };

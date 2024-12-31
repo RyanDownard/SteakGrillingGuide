@@ -1,11 +1,11 @@
 ﻿using EnumsNET;
-using SteakGrillingGuide.Data;
+using SteakGrillingGuide.Enums;
 
 namespace SteakGrillingGuide.Extensions;
 
 public static class EnumExtensions
 {
-    public static string GetCookingStyleName(this CookingStyle value)
+    public static string GetCookingStyleName(this CenterCook value)
     {
         return value.AsString(EnumFormat.Description); 
     }

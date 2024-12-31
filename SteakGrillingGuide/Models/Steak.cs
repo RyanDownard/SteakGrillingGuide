@@ -1,7 +1,6 @@
-﻿
-using System.Diagnostics.Metrics;
+﻿using SteakGrillingGuide.Enums;
 
-namespace SteakGrillingGuide.Data;
+namespace SteakGrillingGuide.Models;
 
 public class Steak
 {
@@ -9,11 +8,12 @@ public class Steak
     public DateTime? FirstSideStartTime { get; set; }
     public DateTime? SecondSideStartTime { get; set; }
     public double Thickness { get; set; }
-    public CookingStyle CookingStyle { get; set; }
+    public CenterCook CenterCook { get; set; }
     public DurationSettings DurationSetting { get; set; }
     public bool ShowDetails { get; set; } = false;
     public bool StartNotificationShown { get; set; } = false;
     public bool FlipNotificationShown { get; set; } = false;
+    public SavedSteak SavedSteak { get; set; }
 
     public void SetStartTimes(int LongestTime, DateTime startingAt)
     {
@@ -26,7 +26,7 @@ public class Steak
         {
             var offset = LongestTime - DurationSetting.TotalTime;
             FirstSideStartTime = startingAt.AddSeconds(offset);
-            SecondSideStartTime = startingAt.AddSeconds(offset + (DurationSetting.FirstSide));
+            SecondSideStartTime = startingAt.AddSeconds(offset + DurationSetting.FirstSide);
         }
     }
 
@@ -47,7 +47,7 @@ public class Steak
         {
             var totalTime = SecondSideStartTime - FirstSideStartTime;
             var timeDifference = DateTime.Now - FirstSideStartTime;
-            percentage = 100 - Math.Round((timeDifference.Value.TotalSeconds / totalTime.Value.TotalSeconds) * 100, MidpointRounding.AwayFromZero);
+            percentage = 100 - Math.Round(timeDifference.Value.TotalSeconds / totalTime.Value.TotalSeconds * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
@@ -68,7 +68,7 @@ public class Steak
         else
         {
             var timeDifference = DateTime.Now - SecondSideStartTime;
-            percentage = 100 - Math.Round((timeDifference.Value.TotalSeconds / DurationSetting.SecondSide) * 100, MidpointRounding.AwayFromZero);
+            percentage = 100 - Math.Round(timeDifference.Value.TotalSeconds / DurationSetting.SecondSide * 100, MidpointRounding.AwayFromZero);
         }
         return percentage;
     }
@@ -84,12 +84,12 @@ public class Steak
         {
             var totalWait = (FirstSideStartTime.Value - startTime).TotalSeconds;
             var totalLeft = (FirstSideStartTime.Value - DateTime.Now).TotalSeconds;
-            return Math.Round((totalLeft / totalWait) * 100, MidpointRounding.AwayFromZero);
+            return Math.Round(totalLeft / totalWait * 100, MidpointRounding.AwayFromZero);
         }
     }
 
     public void ToggleDetails()
     {
-        ShowDetails  = !ShowDetails;
+        ShowDetails = !ShowDetails;
     }
 }

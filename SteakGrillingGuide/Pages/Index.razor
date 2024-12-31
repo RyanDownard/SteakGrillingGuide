@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using MudBlazor;
 @using SteakGrillingGuide.Components
+@using SteakGrillingGuide.Modals
 
 <div class="row mb-3 border-bottom border-dark pb-3">
     @if(!RunComplete)
@@ -21,24 +22,27 @@
             </MudButton>
         </div>
         <div class="col-3 text-end">
-            <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(Steaks== null || !Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="OpenStartDialog">
+            <MudButton Variant="Variant.Outlined" Color="Color.Success" Disabled="(SteakService.Steaks== null || !SteakService.Steaks.Any() || (Timer != null && Timer.Enabled))" @onclick="OpenStartDialog">
                 <MudIcon Icon="@Icons.Material.Outlined.Timer" Title="Timer" />
             </MudButton>
         </div>
         <div class="offset-3 col-6 text-center align-content-center justify-content-center mt-3">
-            @if (Steaks.Any())
+            @if (SteakService.Steaks.Any())
             {
                 if (StartAt.HasValue && FinishAt.HasValue)
                 {
                     var totalSeconds = (FinishAt.Value - DateTime.Now).TotalSeconds;
+
                     <div>
                         Grill Time: @($"{(int)totalSeconds / 60:0}:{(int)totalSeconds % 60:00}")
                     </div>
                 }
                 else
                 {
+                    var longestTime = SteakService.Steaks.Max(i => i.DurationSetting.TotalTime);
+
                     <div>
-                        Grill Time: @($"{(int)LongestTime / 60:0}:{(int)LongestTime % 60:00}")
+                        Grill Time: @($"{(int)longestTime / 60:0}:{(int)longestTime % 60:00}")
                     </div>
                 }
             }
@@ -59,12 +63,14 @@
         </div>
     }
 </div>
-@if (Steaks.Any())
+@if (SteakService.Steaks.Any())
 {
+    var longestTime = SteakService.Steaks.Max(i => i.DurationSetting.TotalTime);
+
     <MudExpansionPanels MultiExpansion="true">
-        @foreach (var steak in Steaks)
+        @foreach (var steak in SteakService.Steaks)
         {
-            <SteakSummary SteakToCook="steak" LongestTime="LongestTime" StartTime="StartAt" EditSteak="OnSteakEdited" DeleteSteak="OnSteakDeleted" />
+            <SteakSummary SteakToCook="steak" LongestTime="longestTime" StartTime="StartAt" EditSteak="EditSteak" DeleteSteak="ConfirmDeleteSteak" />
         }
     </MudExpansionPanels>
 }
@@ -74,3 +80,9 @@ else
         No steaks added yet.
     </div>
 }
+<UpsertSteak Steak="UpsertingSteak"/>
+<Suggestions/>
+<AppCrashed HandleDecision="HandleSteakRestore" />
+<BeginTimer StartTimer="StartTimer"/>
+<StopTimer StopTimerCallback="StopTimer" />
+<ConfirmDelete Steak="SteakToDelete"/>

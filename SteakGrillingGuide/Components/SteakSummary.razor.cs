@@ -1,43 +1,75 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using SteakGrillingGuide.Data;
-using SteakGrillingGuide.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SteakGrillingGuide.Models;
 
-namespace SteakGrillingGuide.Components
+namespace SteakGrillingGuide.Components;
+
+public partial class SteakSummary
 {
-    public partial class SteakSummary
+    [Inject]
+    protected ISnackbar Snackbar { get; set; }
+    [Inject]
+    protected SteakService SteakService { get; set; }
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+    protected IJSObjectReference Module { get; set; }
+    [Parameter]
+    public Steak SteakToCook { get; set; }
+    [Parameter]
+    public int LongestTime { get; set; }
+    [Parameter]
+    public DateTime? StartTime { get; set; }
+    [Parameter]
+    public Func<Steak, Task> EditSteak { get; set; }
+    [Parameter]
+    public Func<Steak, Task> DeleteSteak { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        [Parameter]
-        public Steak SteakToCook { get; set; }
-        [Parameter]
-        public int LongestTime { get; set; }
-        [Parameter]
-        public DateTime? StartTime { get; set; }
-        [Parameter]
-        public EventCallback<Steak> EditSteak { get; set; }
-        [Parameter]
-        public EventCallback<Steak> DeleteSteak { get; set; }
-
-        [Inject]
-        IDialogService? DialogService { get; set; }
-
-        private async Task EditSteakCallback()
+        if (firstRender)
         {
-            await EditSteak.InvokeAsync(SteakToCook);
+            Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
         }
+    }
 
-        private async Task DeleteSteakCallback()
+    protected async Task SaveSteakCallback()
+    {
+        var saved = await SteakService.SavePersonSteak(SteakToCook);
+
+        if (saved != null)
         {
-            var response = await DialogService.ShowMessageBox("Delete Steak?", $"Are you sure you want to delete {SteakToCook.Name}?", "Yes", "No");
-            if (response.Value)
+            SteakToCook.SavedSteak = saved;
+            Snackbar.Add($"{SteakToCook.Name} saved to device!", Severity.Normal, config =>
             {
-                await DeleteSteak.InvokeAsync(SteakToCook);
-            }
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 10000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
         }
+        else
+        {
+            Snackbar.Add($"Failed {SteakToCook.Name} saved to device, please try again", Severity.Error, config =>
+            {
+                config.RequireInteraction = false;
+                config.VisibleStateDuration = 10000;
+                config.ShowTransitionDuration = 500;
+                config.HideTransitionDuration = 500;
+            });
+        }
+
+        StateHasChanged();
+    }
+
+    protected async Task EditSteakCallback()
+    {
+        await EditSteak.Invoke(SteakToCook);
+    }
+
+    protected async Task DeleteSteakCallback()
+    {
+        await DeleteSteak.Invoke(SteakToCook);
     }
 }

@@ -1,0 +1,46 @@
+﻿@using SteakGrillingGuide.Extensions
+<div class="modal fade" id="beginTimerModal" tabindex="-1" aria-labelledby="beginTimerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="beginTimerModalLabel">Before You Grill</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (!NotificationsEnabled)
+                {
+                    <div class="fw-bold text-danger mb-2">
+                        You do not have notifications enabled, this must be enabled to begin the timer.
+                    </div>
+                }
+                <div class="fw-bold">
+                    You are about to start the timer for your steaks. Be sure your steaks and grill are ready.
+                    When ready, place the following steaks on the grill and hit start.
+                    <br />
+                    <br />
+                    <div class="text-danger">
+                        Do not leave your grill unattended while steaks are being cooked. You will be notified when changes need made, but you must monitor the grill and steaks at all times.
+                        <br />
+                        The notifications and timer are meant to help guide you as you grill your steaks, but you are responsible for being safe, knowing if the steak is cooked, and monitoring your grill.
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var steak in SteakService.Steaks.Where(i => i.DurationSetting.TotalTime == SteakService.Steaks.Max(i => i.DurationSetting.TotalTime)))
+                    {
+                        <li class="list-group-item">
+                            <div>
+                                @steak.Name
+                                <br />
+                                @steak.CenterCook.GetCookingStyleName() - @($"{steak.Thickness}\"")
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @onclick="Submit">Start!</button>
+            </div>
+        </div>
+    </div>
+</div>

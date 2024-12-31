@@ -1,17 +1,16 @@
-﻿@using SteakGrillingGuide.Data;
-@using SteakGrillingGuide.Extensions;
-@using EnumsNET;
+﻿@using SteakGrillingGuide.Data
+@using SteakGrillingGuide.Enums
+@using SteakGrillingGuide.Extensions
 
-
-<div class="modal fade" id="upsertModal" tabindex="-1" aria-labelledby="upsertModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="upsertSteakModal" tabindex="-1" aria-labelledby="upsertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="upsertModalLabel">Add/Edit Steak</h1>
+                <h1 class="modal-title fs-5" id="upsertModalLabel">@(IsNewSteak ? "Add" : "Edit") Steak</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @if (Thicknesses == null)
+                @if (Thicknesses == null || Steak == null)
                 {
                     <div>Processing....</div>
                 }
@@ -23,13 +22,38 @@
                             Thickness and Center Cook must have a value.
                         </div>
                     }
+                    @if (SteakService.SavedSteaks != null && SteakService.SavedSteaks.Any())
+                    {
+                        <div class="mb-3">
+                            <select class="form-select" name="SavedSteak" id="SavedSteak" @onchange="SavedSteakChanged">
+                                @if (Steak == null || Steak.SavedSteak == null)
+                                {
+                                    <option value="" selected>Select Saved Steak</option>
+                                }
+                                else
+                                {
+                                    <option value="">Select Saved Steak</option>
+                                }
+                                @foreach (var savedSteak in SteakService.SavedSteaks)
+                                {
+                                    if (Steak != null && Steak.SavedSteak != null && Steak.SavedSteak.SavedSteakId == savedSteak.SavedSteakId)
+                                    {
+                                        <option value="@savedSteak.SavedSteakId" selected>@($"{savedSteak.Name} - {savedSteak.CenterCook.GetCookingStyleName()}")</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@savedSteak.SavedSteakId">@($"{savedSteak.Name} - {savedSteak.CenterCook.GetCookingStyleName()}")</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    }
                     <div class="mb-3">
-                        <label for="exampleFormControlInput1" class="form-label">Name (Optional)</label>
                         <input @bind-value="Steak.Name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Name (Optional)">
                     </div>
                     <div class="mb-3">
                         <select class="form-select" name="Thickness" id="Thickness" @bind="@Thickness">
-                            <option>Select Thickness</option>
+                            <option value="">Select Thickness</option>
                             @foreach (var thickness in Thicknesses)
                             {
                                 <option value="@((double)thickness)">@(thickness.ToString("0.##"))</option>
@@ -39,10 +63,10 @@
 
                     <div class="mb-3">
                         <select class="form-select" name="CenterCook" id="CenterCook" @bind="@CenterCook">
-                            <option>Select Center Cook</option>
-                            @foreach (var style in Enum.GetValues(typeof(CookingStyle)))
+                            <option value="">Select Center Cook</option>
+                            @foreach (var style in Enum.GetValues(typeof(CenterCook)))
                             {
-                                <option value="@((int)style)">@(((CookingStyle)style).GetCookingStyleName())</option>
+                                <option value="@((int)style)">@(((CenterCook)style).GetCookingStyleName())</option>
                             }
                         </select>
                     </div>
@@ -55,56 +79,23 @@
         </div>
     </div>
 </div>
-@code{
-    [Parameter]
-    public EventCallback<Steak> AddSteak { get; set; }
-    [Parameter]
-    public Steak Steak { get; set; } = new Steak();
 
-    [Inject]
-    protected SteakProvider SteakProvider { get; set; }
 
-    IEnumerable<double> Thicknesses { get; set; }
-
-    protected bool IsValid { get; set; } = true;
-
-    protected double? Thickness { get; set; } = null;
-    protected int? CenterCook { get; set; } = null;
-
-    protected override Task OnInitializedAsync()
-    {
-        if(Steak == null)
-        {
-            Steak = new();
-        }
-        Thicknesses = SteakProvider.Thicknesses;
-        if (!string.IsNullOrWhiteSpace(Steak.Name))
-        {
-            Thickness = Steak.Thickness;
-            CenterCook = (int)Steak.CookingStyle;
-        }
-        return base.OnInitializedAsync();
-    }
-
-    private async Task Submit()
-    {
-        try
-        {
-            if (Thickness == null || CenterCook == null)
-            {
-                IsValid = false;
-                return;
-            }
-            IsValid = true;
-            Steak.Thickness = Thickness.Value;
-            Steak.CookingStyle = (CookingStyle)CenterCook.Value;
-            Steak.DurationSetting = SteakProvider.SteakSettings.First(i => i.CookingStyle == Steak.CookingStyle).Durations.First(i => i.Thickness == Steak.Thickness);
-            await AddSteak.InvokeAsync(Steak);
-        }
-        catch (Exception ex)
-        {
-            IsValid = false;
-            return;
-        }
-    }
-}
+<div class="modal fade" id="changesMadeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="changesMadeModal">Saved Steak Changed</h1>
+            </div>
+            <div class="modal-body">
+                It looks like the details for the steak are different from what is saved. Do you want to update the saved steak?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="ResumeUpsert">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveSteakAsNew">Saved As New</button>
+                <button type="button" class="btn btn-primary" @onclick="AddWithoutSaving">No</button>
+                <button type="button" class="btn btn-primary" @onclick="UpdateSavedSteak">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>

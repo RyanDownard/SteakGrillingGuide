@@ -9,7 +9,7 @@
                     @SteakToCook.Name
                 </div>
                 <div>
-                    @SteakToCook.CookingStyle.GetCookingStyleName() - @($"{SteakToCook.Thickness}\"")
+                    @SteakToCook.CenterCook.GetCookingStyleName() - @($"{SteakToCook.Thickness}\"")
                 </div>
             </div>
             <div class="col-3 justify-content-center align-content-center">
@@ -35,16 +35,30 @@
         </div>
     </TitleContent>
     <ChildContent>
-        @if(!StartTime.HasValue)
+        @if (!StartTime.HasValue)
         {
             <div class="row mb-2">
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
+                    @if (SteakToCook.SavedSteak != null)
+                    {
+                        <div>
+                            Saved
+                        </div>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="SaveSteakCallback">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Save" Title="Save" />
+                        </MudButton>
+                    }
+
+                </div>
+                <div class="col-4 text-center">
                     <MudButton Variant="Variant.Outlined" Color="Color.Warning" OnClick="EditSteakCallback">
                         <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Title="Edit" />
                     </MudButton>
-
                 </div>
-                <div class="col-6 text-center">
+                <div class="col-4 text-center">
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteSteakCallback">
                         <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete" />
                     </MudButton>
@@ -65,11 +79,11 @@
                     </td>
                     <td>
                         <span class="@(SteakToCook.FirstSideStartTime < DateTime.Now && SteakToCook.SecondSideStartTime > DateTime.Now ? "fw-bold text-success" : "")">
-                        @($"{SteakToCook.DurationSetting.FirstSide / 60:0}:{SteakToCook.DurationSetting.FirstSide % 60:00}")
+                            @($"{SteakToCook.DurationSetting.FirstSide / 60:0}:{SteakToCook.DurationSetting.FirstSide % 60:00}")
                         </span>
                         /
                         <span class="@(SteakToCook.SecondSideStartTime < DateTime.Now ? "fw-bold text-success" : "")">
-                        @($"{SteakToCook.DurationSetting.SecondSide / 60:0}:{SteakToCook.DurationSetting.SecondSide % 60:00}")
+                            @($"{SteakToCook.DurationSetting.SecondSide / 60:0}:{SteakToCook.DurationSetting.SecondSide % 60:00}")
                         </span>
                     </td>
                 </tr>

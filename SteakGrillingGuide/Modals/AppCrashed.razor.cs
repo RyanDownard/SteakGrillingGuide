@@ -13,8 +13,8 @@ public partial class AppCrashed
     public IJSRuntime JSRuntime { get; set; }
     [Parameter, EditorRequired]
     public Func<RecoveryData, Task> HandleDecision { get; set; }
-    private RecoveryData RecoveryData { get; set; } = null;
-    private IJSObjectReference Module { get; set; }
+    protected RecoveryData RecoveryData { get; set; } = null;
+    protected IJSObjectReference Module { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -31,13 +31,13 @@ public partial class AppCrashed
         }
     }
 
-    private async Task Submit()
+    protected async Task Submit()
     {
         await Module.InvokeVoidAsync("hideModalById", "#appCrashedModal");
         await HandleDecision.Invoke(RecoveryData);
     }
 
-    private async Task Cancel()
+    protected async Task Cancel()
     {
         SteakService.RemoveRecoveryData();
         await Module.InvokeVoidAsync("hideModalById", "#appCrashedModal");

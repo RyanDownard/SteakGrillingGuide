@@ -1,7 +1,6 @@
 ﻿using MudBlazor;
 using SteakGrillingGuide.Data;
 using Plugin.LocalNotification;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SteakGrillingGuide.Models;
@@ -20,23 +19,15 @@ public partial class Index
     SteakService SteakService { get; set; }
     [Inject]
     IJSRuntime JSRunTime { get; set; }
-    private DateTime? StartAt { get; set; }
-    public DateTime? FinishAt { get; set; }
-    private bool IgnoreInfoDialog = false;
-    private bool RecoveringFromClose = false;
-    private EventCallback OnTimerStarted { get; set; }
-    private EventCallback OnTimerStopped { get; set; }
-
-    private static System.Timers.Timer Timer { get; set; }
-
-    private DateTime? SnackbarErrorsAt { get; set; } = null;
-
-    private string SnackbarError { get; set; } = string.Empty;
-
-    private bool RunComplete = false;
-    private IJSObjectReference Module { get; set; }
-    private Steak UpsertingSteak { get; set; }
-    private Steak SteakToDelete { get; set; }
+    protected DateTime? StartAt { get; set; }
+    protected DateTime? FinishAt { get; set; }
+    protected static System.Timers.Timer Timer { get; set; }
+    protected DateTime? SnackbarErrorsAt { get; set; } = null;
+    protected string SnackbarError { get; set; } = string.Empty;
+    protected bool RunComplete = false;
+    protected IJSObjectReference Module { get; set; }
+    protected Steak UpsertingSteak { get; set; }
+    protected Steak SteakToDelete { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,14 +45,9 @@ public partial class Index
     {
         if (firstRender)
         {
-            lifecycleService.Resumed += () => HandleResume();
-            lifecycleService.Paused += () => HandlePause();
+            lifecycleService.Resumed += HandleResume;
+            lifecycleService.Paused += HandlePause;
             Module = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/bsModal.js");
-
-            if (!RecoveringFromClose)
-            {
-                await DisplayInfoDialog();
-            }
         }
     }
 
@@ -87,12 +73,14 @@ public partial class Index
     {
         string GetWarningSet = await SecureStorage.Default.GetAsync("IgnoreInfoDialog");
 
+        var ignoreInfoDialog = false;
+
         if (GetWarningSet != null)
         {
-            _ = bool.TryParse(GetWarningSet, out IgnoreInfoDialog);
+            _ = bool.TryParse(GetWarningSet, out ignoreInfoDialog);
         }
 
-        if (!IgnoreInfoDialog || manuallyCalled)
+        if (!ignoreInfoDialog || manuallyCalled)
         {
             await Module!.InvokeVoidAsync("showModalById", "#suggestionsModal");
         }
@@ -155,6 +143,7 @@ public partial class Index
             Timer = null;
             RunComplete = true;
             Snackbar.Add("Steaks are done!", Severity.Normal, config => { config.RequireInteraction = false; });
+
             SecureStorage.Default.Remove("ExistingGrillData");
         }
 
@@ -210,7 +199,7 @@ public partial class Index
             if (SnackbarErrorsAt == null && (toBePlaced.Any() || toBeFlipped.Any()))
             {
                 SnackbarErrorsAt = DateTime.Now;
-                string errorMessage = toBePlaced.Any() ? $"The following steaks need placed: <br/>{string.Join(", ", toBePlaced)}" : ""
+                string errorMessage = toBePlaced.Any() ? $"The following steaks need placed: <br/>{string.Join(", ", toBePlaced)}" : "";
 
                 if (toBePlaced.Any() && toBePlaced.Any())
                 {

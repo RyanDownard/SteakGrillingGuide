@@ -10,10 +10,13 @@ public class SteakService
 {
     public readonly List<SteakSettings> SteakSettings = new();
     public readonly List<double> Thicknesses = new() { .5, .75, 1.0, 1.25, 1.5, 1.75, 2.0 };
-    private List<Steak> _steaks = new();
+
+    protected List<Steak> _steaks = new();
     public IReadOnlyList<Steak> Steaks => _steaks.AsReadOnly();
-    private List<SavedSteak> _savedSteaks = new();
+
+    protected List<SavedSteak> _savedSteaks = new();
     public IReadOnlyList<SavedSteak> SavedSteaks => _savedSteaks.AsReadOnly();
+
     public event Action OnChange;
 
     public SteakService()
@@ -107,6 +110,7 @@ public class SteakService
     public async Task<SavedSteak> SavePersonSteak(Steak steakToSave)
     {
         SavedSteak savedSteak;
+
         try
         {
             var savedSteaks = await GetSteaksFromStorage();
@@ -127,7 +131,6 @@ public class SteakService
             savedSteaks = savedSteaks.Concat(new SavedSteak[] { asSavedClass });
 
             await SaveSteaksToStorage(savedSteaks);
-
             await GetSavedSteaks();
             
             savedSteak = asSavedClass;
@@ -192,9 +195,7 @@ public class SteakService
         try
         {
             var savedSteaks = await GetSteaksFromStorage();
-
             savedSteaks = savedSteaks.Where(i => i.SavedSteakId != steakToRemove.SavedSteakId);
-
             _savedSteaks = savedSteaks.ToList();
 
             foreach (var steak in _steaks.Where(i => i.SavedSteak.SavedSteakId == steakToRemove.SavedSteakId))
@@ -219,8 +220,10 @@ public class SteakService
     public async Task<IEnumerable<SavedSteak>> GetSteaksFromStorage()
     {
         var steakSavedResponse = await SecureStorage.GetAsync("SavedSteaks");
+
         if (string.IsNullOrWhiteSpace(steakSavedResponse))
             return Enumerable.Empty<SavedSteak>();
+
         return JsonSerializer.Deserialize<IEnumerable<SavedSteak>>(steakSavedResponse);
     }
 
@@ -252,6 +255,7 @@ public class SteakService
     public void RemoveSteak(Steak steak)
     {
         _steaks.Remove(steak);
+
         NotifyStateChanged();
     }
 
@@ -263,6 +267,7 @@ public class SteakService
             FinishesAt = finishAt,
             Steaks = _steaks
         };
+
         await SecureStorage.Default.SetAsync("ExistingGrillData", JsonSerializer.Serialize(recoveryData));
     }
 
@@ -271,18 +276,20 @@ public class SteakService
         try
         {
             string storedRecovery = await SecureStorage.Default.GetAsync("ExistingGrillData");
+
             if (!string.IsNullOrWhiteSpace(storedRecovery))
             {
                 var RecoveryData = JsonSerializer.Deserialize<RecoveryData>(storedRecovery);
                 return RecoveryData;
 
             }
+
+            return null;
         }
         catch (Exception ex)
         {
             return null;
         }
-        return null;
     }
 
     public void RemoveRecoveryData()
@@ -299,18 +306,21 @@ public class SteakService
             steak.FirstSideStartTime = null; 
             steak.SecondSideStartTime = null;
         }
+
         NotifyStateChanged();
     }
 
     public void ClearSteaks()
     {
         _steaks = new();
+
         NotifyStateChanged();
     }
 
     public void SetSteaks(List<Steak> steaks)
     {
         _steaks = steaks;
+
         NotifyStateChanged();
     }
 
@@ -332,6 +342,7 @@ public class SteakService
                     NotifyTime = startTime.Key,
                 }
             };
+
             await LocalNotificationCenter.Current.Show(applySteakRequest);
             notificationId++;
         }
@@ -350,6 +361,7 @@ public class SteakService
                     NotifyTime = flipTime.Key
                 }
             };
+
             await LocalNotificationCenter.Current.Show(applySteakRequest);
             notificationId++;
         }

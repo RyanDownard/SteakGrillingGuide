@@ -14,7 +14,7 @@ public partial class BeginTimer
     [Parameter]
     public EventCallback StartTimer { get; set; }
 
-    private bool NotificationsEnabled { get; set; } = false;
+    protected bool NotificationsEnabled { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,7 +37,7 @@ public partial class BeginTimer
         return base.OnAfterRenderAsync(firstRender);
     }
 
-    private async Task CheckNotificationPermissions()
+    protected async Task CheckNotificationPermissions()
     {
         NotificationsEnabled = await LocalNotificationCenter.Current.AreNotificationsEnabled();
         if (!NotificationsEnabled)
@@ -48,7 +48,7 @@ public partial class BeginTimer
         StateHasChanged();
     }
 
-    private async void Submit()
+    protected async void Submit()
     {
         await StartTimer.InvokeAsync();
     }

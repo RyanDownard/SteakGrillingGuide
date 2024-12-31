@@ -34,9 +34,10 @@ public partial class SteakSummary
         }
     }
 
-    private async Task SaveSteakCallback()
+    protected async Task SaveSteakCallback()
     {
         var saved = await SteakService.SavePersonSteak(SteakToCook);
+
         if (saved != null)
         {
             SteakToCook.SavedSteak = saved;
@@ -62,12 +63,12 @@ public partial class SteakSummary
         StateHasChanged();
     }
 
-    private async Task EditSteakCallback()
+    protected async Task EditSteakCallback()
     {
         await EditSteak.Invoke(SteakToCook);
     }
 
-    private async Task DeleteSteakCallback()
+    protected async Task DeleteSteakCallback()
     {
         await DeleteSteak.Invoke(SteakToCook);
     }

@@ -53,7 +53,7 @@ public partial class UpsertSteak
         }
     }
 
-    private async Task Submit()
+    protected async Task Submit()
     {
         try
         {
@@ -83,7 +83,7 @@ public partial class UpsertSteak
             return;
         }
     }
-    private void SavedSteakChanged(ChangeEventArgs e)
+    protected void SavedSteakChanged(ChangeEventArgs e)
     {
         if(!string.IsNullOrWhiteSpace(e.Value.ToString()))
         {
@@ -108,7 +108,7 @@ public partial class UpsertSteak
         }
     }
 
-    private async Task FinishAddingSteak()
+    protected async Task FinishAddingSteak()
     {
         Thickness = null;
         CenterCook = null;
@@ -119,19 +119,19 @@ public partial class UpsertSteak
         await Module!.InvokeVoidAsync("hideModalById", "#upsertSteakModal");;
     }
 
-    private async Task ResumeUpsert()
+    protected async Task ResumeUpsert()
     {
         await Module!.InvokeVoidAsync("hideModalById", "#changesMadeModal");
         await Module!.InvokeVoidAsync("showModalById", "#upsertSteakModal");
     }
 
-    private async Task AddWithoutSaving()
+    protected async Task AddWithoutSaving()
     {
         await Module!.InvokeVoidAsync("hideModalById", "#changesMadeModal");
         await FinishAddingSteak();
     }
 
-    private async Task UpdateSavedSteak()
+    protected async Task UpdateSavedSteak()
     {
         var updatedInfo = new SavedSteak()
         {
@@ -144,7 +144,7 @@ public partial class UpsertSteak
         await FinishAddingSteak();
     }
 
-    private async Task SaveSteakAsNew()
+    protected async Task SaveSteakAsNew()
     {
         var savedSteak = await SteakService.SavePersonSteak(Steak);
 

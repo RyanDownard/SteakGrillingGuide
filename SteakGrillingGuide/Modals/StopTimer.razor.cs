@@ -7,7 +7,7 @@ public partial class StopTimer
     [Parameter]
     public EventCallback StopTimerCallback { get; set; }
 
-    private async void Submit()
+    protected async void Submit()
     {
         await StopTimerCallback.InvokeAsync();
     }

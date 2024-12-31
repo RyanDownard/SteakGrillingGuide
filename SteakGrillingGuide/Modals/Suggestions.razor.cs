@@ -2,7 +2,8 @@
 {
     public partial class Suggestions
     { 
-        private bool DontShowOnStart = false;
+        protected bool DontShowOnStart = false;
+        
         protected override async Task OnInitializedAsync()
         {
             string GetWarningSet = await SecureStorage.Default.GetAsync("IgnoreInfoDialog");
@@ -13,7 +14,7 @@
             }
         }
 
-        private async Task ShowDialogPreferenceChanged(bool value)
+        protected async Task ShowDialogPreferenceChanged(bool value)
         {
             DontShowOnStart = value;
             await SecureStorage.Default.SetAsync("IgnoreInfoDialog", value.ToString());

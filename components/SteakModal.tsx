@@ -8,7 +8,21 @@ import {
   StyleSheet,
 } from 'react-native';
 
-const SteakModal = ({ visible, onClose, onSave, editingSteak }) => {
+interface Steak {
+  personName: string;
+  desiredDoneness: string;
+  firstSideTime: number;
+  secondSideTime: number;
+}
+
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (steak: Steak) => void;
+  editingSteak?: Steak | null;
+}
+
+const SteakModal: React.FC<Props>  = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [desiredDoneness, setDesiredDoneness] = useState('');
   const [firstSideTime, setFirstSideTime] = useState('');

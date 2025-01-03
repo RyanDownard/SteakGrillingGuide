@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -6,13 +6,14 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Keyboard,
 } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 
 interface Steak {
   personName: string;
   desiredDoneness: string;
-  firstSideTime: number;
-  secondSideTime: number;
+  thickness: number;
 }
 
 interface Props {
@@ -22,35 +23,58 @@ interface Props {
   editingSteak?: Steak | null;
 }
 
-const SteakModal: React.FC<Props>  = ({ visible, onClose, onSave, editingSteak }) => {
+const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [desiredDoneness, setDesiredDoneness] = useState('');
-  const [firstSideTime, setFirstSideTime] = useState('');
-  const [secondSideTime, setSecondSideTime] = useState('');
+  const [thickness, setThickness] = useState('');
+
+
+  const centerCookOptions = [
+    { label: 'Rare', value: 'Rare' },
+    { label: 'Medium Rare', value: 'Medium Rare' },
+    { label: 'Medium', value: 'Medium' },
+    { label: 'Medium Well', value: 'Medium Well' },
+    { label: 'Well Done', value: 'Well Done' },
+  ];
+
+  const thicknessOptions = [
+    { label: '0.5', value: '0.5' },
+    { label: '1.0', value: '1.0' },
+    { label: '1.5', value: '1.5' },
+    { label: '2.0', value: '2.0' },
+  ];
 
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setDesiredDoneness(editingSteak.desiredDoneness);
-      setFirstSideTime(editingSteak.firstSideTime.toString());
-      setSecondSideTime(editingSteak.secondSideTime.toString());
+      setThickness(editingSteak.thickness.toString());
     } else {
       setPersonName('');
       setDesiredDoneness('');
-      setFirstSideTime('');
-      setSecondSideTime('');
+      setThickness('');
     }
   }, [editingSteak]);
 
   const handleSave = () => {
-    const steak = {
+    var thicknessNumber = Number(thickness);
+    const steak: Steak = {
       personName,
       desiredDoneness,
-      firstSideTime: Number(firstSideTime),
-      secondSideTime: Number(secondSideTime),
+      thickness: thicknessNumber,
     };
     onSave(steak);
     onClose();
+  };
+
+  const personNameInputRef = useRef<TextInput>(null);
+
+  const handleDismissKeyboard = () => {
+    // Call .blur() on all TextInputs to dismiss the keyboard
+    personNameInputRef.current?.blur();
+
+    // Alternatively, you can use this to dismiss the keyboard globally:
+    Keyboard.dismiss();
   };
 
   return (
@@ -61,52 +85,64 @@ const SteakModal: React.FC<Props>  = ({ visible, onClose, onSave, editingSteak }
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            {editingSteak ? 'Edit Steak' : 'Add Steak'}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Person's Name"
-            value={personName}
-            onChangeText={setPersonName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Desired Doneness (e.g., Medium Rare)"
-            value={desiredDoneness}
-            onChangeText={setDesiredDoneness}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="First Side Time (seconds)"
-            value={firstSideTime}
-            onChangeText={setFirstSideTime}
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Second Side Time (seconds)"
-            value={secondSideTime}
-            onChangeText={setSecondSideTime}
-            keyboardType="numeric"
-          />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {editingSteak ? 'Edit Steak' : 'Add Steak'}
+            </Text>
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={onClose}
-            >
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.saveButton]}
-              onPress={handleSave}
-            >
-              <Text style={styles.buttonText}>Save</Text>
-            </TouchableOpacity>
+            <TextInput
+              ref={personNameInputRef}
+              style={styles.input}
+              placeholder="Person's Name"
+              value={personName}
+              onChangeText={setPersonName}
+              enterKeyHint={'done'}
+            />
+
+            <Text style={styles.label}>Center Cook:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              data={centerCookOptions}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Center Cook"
+              value={desiredDoneness}
+              onFocus={handleDismissKeyboard}
+              onChange={(item) => setDesiredDoneness(item.value)}
+            />
+
+            <Text style={styles.label}>Thickness:</Text>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              data={thicknessOptions}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Thickness"
+              value={thickness}
+              onFocus={handleDismissKeyboard}
+              onChange={(item) => setThickness(item.value)}
+            />
+
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={onClose}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={handleSave}
+              >
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
       </View>
     </Modal>
   );
@@ -132,6 +168,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  label: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   input: {
     height: 40,
     borderColor: '#ccc',
@@ -139,6 +180,23 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 15,
+  },
+  dropdown: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    justifyContent: 'center',
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: '#aaa',
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',

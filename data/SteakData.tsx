@@ -1,19 +1,21 @@
 class SteakCooking {
   personName: string;
   desiredDoneness: string; // e.g., "Rare", "Medium Rare", "Well Done"
+  thickness: number;
   firstSideTime: number; // in seconds
   secondSideTime: number; // in seconds
 
   constructor(
     personName: string,
     desiredDoneness: string,
-    firstSideTime: number,
-    secondSideTime: number
+    thickness: number
   ) {
     this.personName = personName;
     this.desiredDoneness = desiredDoneness;
-    this.firstSideTime = firstSideTime;
-    this.secondSideTime = secondSideTime;
+    this.thickness = thickness;
+
+    this.firstSideTime = 0;
+    this.secondSideTime = 0;
   }
 
   totalCookingTime(): number {

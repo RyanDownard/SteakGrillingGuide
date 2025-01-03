@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Keyboard,
+  Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 
@@ -26,7 +27,7 @@ interface Props {
 const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [desiredDoneness, setDesiredDoneness] = useState('');
-  const [thickness, setThickness] = useState('');
+  const [thickness, setThickness] = useState(0);
 
 
   const centerCookOptions = [
@@ -38,25 +39,31 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   ];
 
   const thicknessOptions = [
-    { label: '0.5', value: '0.5' },
-    { label: '1.0', value: '1.0' },
-    { label: '1.5', value: '1.5' },
-    { label: '2.0', value: '2.0' },
+    { label: '0.5', value: 0.5 },
+    { label: '1.0', value: 1.0 },
+    { label: '1.5', value: 1.5 },
+    { label: '2.0', value: 2.0 },
   ];
 
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setDesiredDoneness(editingSteak.desiredDoneness);
-      setThickness(editingSteak.thickness.toString());
+      setThickness(editingSteak.thickness);
     } else {
       setPersonName('');
       setDesiredDoneness('');
-      setThickness('');
+      setThickness(0);
     }
   }, [editingSteak]);
 
   const handleSave = () => {
+    if(personName.length === 0 || desiredDoneness.length === 0 || thickness === 0)
+    {
+      Alert.alert('Name, center cook, and thickness must have a value before saving.')
+      return;
+    }
+
     var thicknessNumber = Number(thickness);
     const steak: Steak = {
       personName,

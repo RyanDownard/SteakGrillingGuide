@@ -10,12 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-
-interface Steak {
-  personName: string;
-  desiredDoneness: string;
-  thickness: number;
-}
+import { Steak } from '../data/SteakData';
 
 interface Props {
   visible: boolean;
@@ -26,7 +21,7 @@ interface Props {
 
 const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
-  const [desiredDoneness, setDesiredDoneness] = useState('');
+  const [centerCook, setcenterCook] = useState('');
   const [thickness, setThickness] = useState(0);
 
 
@@ -40,26 +35,28 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
 
   const thicknessOptions = [
     { label: '0.5', value: 0.5 },
+    { label: '0.75', value: 0.75 },
     { label: '1.0', value: 1.0 },
+    { label: '1.25', value: 1.25 },
     { label: '1.5', value: 1.5 },
+    { label: '1.75', value: 1.75 },
     { label: '2.0', value: 2.0 },
   ];
 
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
-      setDesiredDoneness(editingSteak.desiredDoneness);
+      setcenterCook(editingSteak.centerCook);
       setThickness(editingSteak.thickness);
     } else {
       setPersonName('');
-      setDesiredDoneness('');
+      setcenterCook('');
       setThickness(0);
     }
   }, [editingSteak]);
 
   const handleSave = () => {
-    if(personName.length === 0 || desiredDoneness.length === 0 || thickness === 0)
-    {
+    if (personName.length === 0 || centerCook.length === 0 || thickness === 0) {
       Alert.alert('Name, center cook, and thickness must have a value before saving.')
       return;
     }
@@ -67,9 +64,10 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     var thicknessNumber = Number(thickness);
     const steak: Steak = {
       personName,
-      desiredDoneness,
+      centerCook,
       thickness: thicknessNumber,
     };
+
     onSave(steak);
     onClose();
   };
@@ -92,64 +90,64 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingSteak ? 'Edit Steak' : 'Add Steak'}
-            </Text>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>
+            {editingSteak ? 'Edit Steak' : 'Add Steak'}
+          </Text>
 
-            <TextInput
-              ref={personNameInputRef}
-              style={styles.input}
-              placeholder="Person's Name"
-              value={personName}
-              onChangeText={setPersonName}
-              enterKeyHint={'done'}
-            />
+          <TextInput
+            ref={personNameInputRef}
+            style={styles.input}
+            placeholder="Person's Name"
+            value={personName}
+            onChangeText={setPersonName}
+            enterKeyHint={'done'}
+          />
 
-            <Text style={styles.label}>Center Cook:</Text>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={centerCookOptions}
-              labelField="label"
-              valueField="value"
-              placeholder="Select Center Cook"
-              value={desiredDoneness}
-              onFocus={handleDismissKeyboard}
-              onChange={(item) => setDesiredDoneness(item.value)}
-            />
+          <Text style={styles.label}>Center Cook:</Text>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={centerCookOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Center Cook"
+            value={centerCook}
+            onFocus={handleDismissKeyboard}
+            onChange={(item) => setcenterCook(item.value)}
+          />
 
-            <Text style={styles.label}>Thickness:</Text>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              data={thicknessOptions}
-              labelField="label"
-              valueField="value"
-              placeholder="Select Thickness"
-              value={thickness}
-              onFocus={handleDismissKeyboard}
-              onChange={(item) => setThickness(item.value)}
-            />
+          <Text style={styles.label}>Thickness:</Text>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={thicknessOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Thickness"
+            value={thickness}
+            onFocus={handleDismissKeyboard}
+            onChange={(item) => setThickness(item.value)}
+          />
 
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.cancelButton]}
-                onPress={onClose}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.saveButton]}
-                onPress={handleSave}
-              >
-                <Text style={styles.buttonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={onClose}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.saveButton]}
+              onPress={handleSave}
+            >
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
           </View>
+        </View>
       </View>
     </Modal>
   );

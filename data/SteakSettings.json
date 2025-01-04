@@ -1,0 +1,63 @@
+[
+    {
+      "CenterCook": "Rare",
+      "Durations": [
+        { "Thickness": 0.5, "FirstSide": 120, "SecondSide": 120 },
+        { "Thickness": 0.75, "FirstSide": 240, "SecondSide": 120 },
+        { "Thickness": 1.0, "FirstSide": 300, "SecondSide": 180 },
+        { "Thickness": 1.25, "FirstSide": 300, "SecondSide": 240 },
+        { "Thickness": 1.5, "FirstSide": 360, "SecondSide": 240 },
+        { "Thickness": 1.75, "FirstSide": 420, "SecondSide": 300 },
+        { "Thickness": 2.0, "FirstSide": 480, "SecondSide": 360 }
+      ]
+    },
+    {
+      "CenterCook": "Medium Rare",
+      "Durations": [
+        { "Thickness": 0.5, "FirstSide": 180, "SecondSide": 120 },
+        { "Thickness": 0.75, "FirstSide": 240, "SecondSide": 180 },
+        { "Thickness": 1.0, "FirstSide": 300, "SecondSide": 240 },
+        { "Thickness": 1.25, "FirstSide": 360, "SecondSide": 300 },
+        { "Thickness": 1.5, "FirstSide": 420, "SecondSide": 300 },
+        { "Thickness": 1.75, "FirstSide": 480, "SecondSide": 360 },
+        { "Thickness": 2.0, "FirstSide": 540, "SecondSide": 480 }
+      ]
+    },
+    {
+      "CenterCook": "Medium",
+      "Durations": [
+        { "Thickness": 0.5, "FirstSide": 240, "SecondSide": 120 },
+        { "Thickness": 0.75, "FirstSide": 300, "SecondSide": 180 },
+        { "Thickness": 1.0, "FirstSide": 360, "SecondSide": 240 },
+        { "Thickness": 1.25, "FirstSide": 420, "SecondSide": 300 },
+        { "Thickness": 1.5, "FirstSide": 420, "SecondSide": 360 },
+        { "Thickness": 1.75, "FirstSide": 420, "SecondSide": 420 },
+        { "Thickness": 2.0, "FirstSide": 600, "SecondSide": 480 }
+      ]
+    },
+    {
+      "CenterCook": "Medium Well",
+      "Durations": [
+        { "Thickness": 0.5, "FirstSide": 240, "SecondSide": 180 },
+        { "Thickness": 0.75, "FirstSide": 360, "SecondSide": 240 },
+        { "Thickness": 1.0, "FirstSide": 420, "SecondSide": 300 },
+        { "Thickness": 1.25, "FirstSide": 480, "SecondSide": 360 },
+        { "Thickness": 1.5, "FirstSide": 480, "SecondSide": 420 },
+        { "Thickness": 1.75, "FirstSide": 600, "SecondSide": 480 },
+        { "Thickness": 2.0, "FirstSide": 720, "SecondSide": 540 }
+      ]
+    },
+    {
+      "CenterCook": "Well Done",
+      "Durations": [
+        { "Thickness": 0.5, "FirstSide": 300, "SecondSide": 180 },
+        { "Thickness": 0.75, "FirstSide": 420, "SecondSide": 300 },
+        { "Thickness": 1.0, "FirstSide": 480, "SecondSide": 360 },
+        { "Thickness": 1.25, "FirstSide": 540, "SecondSide": 420 },
+        { "Thickness": 1.5, "FirstSide": 600, "SecondSide": 480 },
+        { "Thickness": 1.75, "FirstSide": 660, "SecondSide": 540 },
+        { "Thickness": 2.0, "FirstSide": 780, "SecondSide": 660 }
+      ]
+    }
+  ]
+  

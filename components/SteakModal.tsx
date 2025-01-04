@@ -21,7 +21,7 @@ interface Props {
 
 const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
-  const [centerCook, setcenterCook] = useState('');
+  const [centerCook, setCenterCook] = useState('');
   const [thickness, setThickness] = useState(0);
 
 
@@ -46,11 +46,11 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
-      setcenterCook(editingSteak.centerCook);
+      setCenterCook(editingSteak.centerCook);
       setThickness(editingSteak.thickness);
     } else {
       setPersonName('');
-      setcenterCook('');
+      setCenterCook('');
       setThickness(0);
     }
   }, [editingSteak]);
@@ -66,10 +66,21 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       personName,
       centerCook,
       thickness: thicknessNumber,
+      firstSideTime: 0,
+      secondSideTime: 0,
+      totalCookingTime: function (): number {
+        throw new Error('Function not implemented.');
+      },
+      description: function (): string {
+        throw new Error('Function not implemented.');
+      },
     };
 
     onSave(steak);
     onClose();
+    setPersonName('');
+    setThickness(0);
+    setCenterCook('');
   };
 
   const personNameInputRef = useRef<TextInput>(null);
@@ -115,7 +126,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
             placeholder="Select Center Cook"
             value={centerCook}
             onFocus={handleDismissKeyboard}
-            onChange={(item) => setcenterCook(item.value)}
+            onChange={(item) => setCenterCook(item.value)}
           />
 
           <Text style={styles.label}>Thickness:</Text>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPlus, faPause, faCircleInfo, faPlay } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,18 +15,16 @@ const TopButtons: React.FC<Props> = ({ onAdd, onPause, onInfo, onStart }) => {
   return (
     <View style={styles.buttonContainer}>
       <TouchableOpacity style={[styles.button, styles.addButton]} onPress={onAdd}>
-      <FontAwesomeIcon icon={faPlus} size={24} color={'#949799'} />
-
+        <FontAwesomeIcon icon={faPlus} size={24} color={'#949799'} />
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, styles.pauseButton]} onPress={onPause}>
-      <FontAwesomeIcon icon={faPause} size={24} color={'#c70404'} />
-
+        <FontAwesomeIcon icon={faPause} size={24} color={'#c70404'} />
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, styles.infoButton]} onPress={onInfo}>
-      <FontAwesomeIcon icon={faCircleInfo} size={24} color={'#029af2'}/>
+        <FontAwesomeIcon icon={faCircleInfo} size={24} color={'#029af2'} />
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, styles.startButton]} onPress={onStart}>
-      <FontAwesomeIcon icon={faPlay} size={24} color={'#03911f'} />
+        <FontAwesomeIcon icon={faPlay} size={24} color={'#03911f'} />
       </TouchableOpacity>
     </View>
   );

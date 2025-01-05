@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import SteakModal from './components/SteakModal';
 import TopButtons from './components/TopButtons';
+import SteakList from './components/SteakList.tsx';
 import { addSteak, editSteak, getSteaks, getCookingTimes, Steak } from './data/SteakData.tsx';
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -68,19 +69,7 @@ const App = () => {
     <SafeAreaView style={styles.container}>
       <TopButtons onAdd={handleOnAddSteak} onPause={pauseTimer} onInfo={showInfo} onStart={startTimer} />
       <Text style={styles.longestTime}>{getLongestTime()}</Text>
-      <FlatList
-        data={steaks}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.steakItem}>
-            <Text>
-              {item.personName}: {item.centerCook} (First:{' '}
-              {item.firstSideTime}s, Second: {item.secondSideTime}s)
-            </Text>
-            <Button title="Edit" onPress={() => handleEdit(item)} />
-          </View>
-        )}
-      />
+      <SteakList steaks={steaks} onEdit={handleEdit} />
 
       <SteakModal
         visible={modalVisible}

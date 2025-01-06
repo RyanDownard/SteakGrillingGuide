@@ -17,7 +17,7 @@ interface ConfirmDeleteModalProps {
 
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ deleteModalVisible, steakToDelete, setDeleteModalVisible, handleDelete }) => {
   return (
-    <Modal visible={deleteModalVisible} transparent animationType="slide">
+    <Modal visible={deleteModalVisible} transparent animationType="fade">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>Are you sure you want to delete {steakToDelete?.personName}'s steak?</Text>

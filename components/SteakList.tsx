@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { formatTime } from '../data/Helpers';
 
 interface Props {
     steak: Steak;
@@ -15,13 +16,6 @@ interface ListProps {
     onEdit: (steak: Steak) => void;
     onDelete: (steak: Steak) => void;
 }
-
-const getMinutes = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-};
 
 const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
     const [expanded, setExpanded] = useState(false);
@@ -56,8 +50,8 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
 
                             {/* Table Row */}
                             <View style={styles.tableRow}>
-                                <Text style={styles.tableCell}>{getMinutes(steak.firstSideTime + steak.secondSideTime)}</Text>
-                                <Text style={styles.tableCell}>{getMinutes(steak.firstSideTime)} / {getMinutes(steak.secondSideTime)}</Text>
+                                <Text style={styles.tableCell}>{formatTime(steak.totalCookingTime())}</Text>
+                                <Text style={styles.tableCell}>{formatTime(steak.firstSideTime)} / {formatTime(steak.secondSideTime)}</Text>
                             </View>
                         </View>
 

@@ -62,11 +62,7 @@ class Steak {
   }
 
   totalCookingTime(): number {
-  // Use 0 as a fallback if the times are null or undefined
-  const safeFirstSideTime = this.firstSideTime ?? 0;
-  const safeSecondSideTime = this.secondSideTime ?? 0;
-
-  return safeFirstSideTime + safeSecondSideTime;
+      return this.firstSideTime + this.secondSideTime;
 }
 
 

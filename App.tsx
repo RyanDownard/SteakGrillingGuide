@@ -9,6 +9,7 @@ import { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak } 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
+import { formatTime } from './data/Helpers.tsx';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,7 +42,7 @@ const App = () => {
     setEditingSteak(null);
 
     setLongestTime(Math.max(
-      ...steaks.map((steak) => steak.firstSideTime + steak.secondSideTime)
+      ...steaks.map((steak) => steak.totalCookingTime())
     ));
   };
 
@@ -92,12 +93,6 @@ const App = () => {
 
     return () => clearInterval(timer);
   }, [timerRunning, endTime]);
-
-  const formatTime = (timeInSeconds: number): string => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   const handleEdit = (steak: any) => {
     setEditingSteak(steak);

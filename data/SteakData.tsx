@@ -78,7 +78,7 @@ Total time: ${this.totalCookingTime()} seconds.`;
 }
 
 
-const steaks: Steak[] = [];
+let steaks: Steak[] = [];
 
 const addSteak = (steak: Steak) => {
   steaks.push(steak);
@@ -90,8 +90,12 @@ const editSteak = (index: number, updatedSteak: Steak) => {
   }
 };
 
+const updateSteaks = (newSteaks: Steak[]) => {
+  steaks = newSteaks;
+}
+
 const getSteaks = () => {
   return steaks;
 };
 
-export { addSteak, editSteak, getSteaks, getCookingTimes, Steak };
+export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak };

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, StyleSheet, SafeAreaView, Modal, View, Button } from 'react-native';
 import SteakModal from './components/SteakModal';
 import BeforeYouGrill from './components/BeforeYouGrill';
 import StartTimerModal from './components/StartTimerModal.tsx';
 import TopButtons from './components/TopButtons';
 import SteakList from './components/SteakList.tsx';
-import { addSteak, editSteak, getSteaks, getCookingTimes, Steak } from './data/SteakData.tsx';
+import { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak } from './data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 
@@ -14,11 +14,12 @@ const App = () => {
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [steaks, setSteaks] = useState(getSteaks());
-  const [editingSteak, setEditingSteak] = useState(null);
+  const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [steakToDelete, setSteakToDelete] = useState<Steak | null>(null);
   const [longestTime, setLongestTime] = useState(0);
-
-  const [endTime, setEndTime] = useState<Date | null>(null); // Target end time
-  const [remainingTime, setRemainingTime] = useState(0); // Time left in seconds
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [remainingTime, setRemainingTime] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
 
   library.add(fas);
@@ -37,6 +38,7 @@ const App = () => {
     }
     setSteaks([...getSteaks()]);
     setEditingSteak(null);
+
     setLongestTime(Math.max(
       ...steaks.map((steak) => steak.firstSideTime + steak.secondSideTime)
     ));
@@ -46,14 +48,26 @@ const App = () => {
     setModalVisible(true);
   };
 
-  const showInfo = () => {
-    setBeforeYouGrillVisible(true);
+  const handleDelete = () => {
+    if (steakToDelete) {
+      const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
+      setSteaks(updatedSteaks);
+      setDeleteModalVisible(false);
+      setSteakToDelete(null);
+
+      updateSteaks(updatedSteaks);
+    }
+  };
+
+  const showDeleteConfirm = (steak: Steak) => {
+    setSteakToDelete(steak);
+    setDeleteModalVisible(true);
   };
 
   const startTimer = () => {
     setStartTimerModalVisible(false);
-    let now = new Date();
-    const calculatedEndTime = new Date(now.getTime() + longestTime * 1000); // Add longest time in milliseconds
+    const now = new Date();
+    const calculatedEndTime = new Date(now.getTime() + longestTime * 1000);
     setEndTime(calculatedEndTime);
     setTimerRunning(true);
   };
@@ -64,7 +78,7 @@ const App = () => {
     if (timerRunning && endTime) {
       timer = setInterval(() => {
         const now = new Date();
-        const diffInSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000); // Time difference in seconds
+        const diffInSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
         if (diffInSeconds <= 0) {
           clearInterval(timer);
           setRemainingTime(0);
@@ -75,7 +89,7 @@ const App = () => {
       }, 1000);
     }
 
-    return () => clearInterval(timer); // Cleanup on unmount
+    return () => clearInterval(timer);
   }, [timerRunning, endTime]);
 
   const formatTime = (timeInSeconds: number): string => {
@@ -97,12 +111,12 @@ const App = () => {
           setTimerRunning(false);
           setRemainingTime(0);
         }}
-        onInfo={showInfo}
+        onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
       />
       {steaks && steaks.length > 0 && (
         <Text style={styles.longestTime}>
-          {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(longestTime)}
+          {timerRunning ? formatTime(remainingTime) : 'Ready to Start!'}
         </Text>
       )}
       {(!steaks || steaks.length === 0) && (
@@ -110,7 +124,7 @@ const App = () => {
           No Steaks Added
         </Text>
       )}
-      <SteakList steaks={steaks} onEdit={handleEdit} />
+      <SteakList steaks={steaks} onEdit={handleEdit} onDelete={showDeleteConfirm} />
 
       <SteakModal
         visible={modalVisible}
@@ -135,6 +149,19 @@ const App = () => {
           onStart={startTimer}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal visible={deleteModalVisible} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Are you sure you want to delete this steak?</Text>
+            <View style={styles.modalButtons}>
+              <Button title="Cancel" onPress={() => setDeleteModalVisible(false)} />
+              <Button title="Delete" onPress={handleDelete} color="red" />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -144,14 +171,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-  },
-  steakItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   longestTime: {
     textAlign: 'center',
@@ -166,6 +185,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 20,
     fontSize: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 });
 

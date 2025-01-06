@@ -7,11 +7,13 @@ import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 interface Props {
     steak: Steak;
     onEdit: (steak: Steak) => void;
+    onDelete: (steak: Steak) => void;
 }
 
 interface ListProps {
     steaks: Steak[];
     onEdit: (steak: Steak) => void;
+    onDelete: (steak: Steak) => void;
 }
 
 const getMinutes = (time: number) => {
@@ -21,7 +23,7 @@ const getMinutes = (time: number) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const SteakItem: React.FC<Props> = ({ steak, onEdit }) => {
+const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -41,7 +43,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit }) => {
                             <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => onEdit(steak)}>
                                 <FontAwesomeIcon icon={faPencil} size={24} color={'#e3cf17'} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={() => onEdit(steak)}>
+                            <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={() => onDelete(steak)}>
                                 <FontAwesomeIcon icon={faTrash} size={24} color={'#c70404'} />
                             </TouchableOpacity>
                         </View>
@@ -66,12 +68,12 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit }) => {
     );
 };
 
-const SteakList: React.FC<ListProps> = ({ steaks, onEdit }) => {
+const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete }) => {
     return (
         <FlatList
             data={steaks}
             keyExtractor={(item) => item.personName}
-            renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} />}
+            renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} onDelete={onDelete} />}
         />
     );
 };

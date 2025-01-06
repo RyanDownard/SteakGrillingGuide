@@ -62,19 +62,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     }
 
     var thicknessNumber = Number(thickness);
-    const steak: Steak = {
-      personName,
-      centerCook,
-      thickness: thicknessNumber,
-      firstSideTime: 0,
-      secondSideTime: 0,
-      totalCookingTime: function (): number {
-        throw new Error('Function not implemented.');
-      },
-      description: function (): string {
-        throw new Error('Function not implemented.');
-      },
-    };
+    const steak = new Steak(personName, centerCook, thicknessNumber);
 
     onSave(steak);
     onClose();

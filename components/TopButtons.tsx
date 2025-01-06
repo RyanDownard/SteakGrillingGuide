@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPlus, faPause, faCircleInfo, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faStop, faCircleInfo, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 
 interface Props {
@@ -18,7 +18,7 @@ const TopButtons: React.FC<Props> = ({ onAdd, onPause, onInfo, onStart }) => {
         <FontAwesomeIcon icon={faPlus} size={24} color={'#949799'} />
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, styles.pauseButton]} onPress={onPause}>
-        <FontAwesomeIcon icon={faPause} size={24} color={'#c70404'} />
+        <FontAwesomeIcon icon={faStop} size={24} color={'#c70404'} />
       </TouchableOpacity>
       <TouchableOpacity style={[styles.button, styles.infoButton]} onPress={onInfo}>
         <FontAwesomeIcon icon={faCircleInfo} size={24} color={'#029af2'} />

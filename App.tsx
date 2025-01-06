@@ -8,6 +8,7 @@ import SteakList from './components/SteakList.tsx';
 import { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak } from './data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
+import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -116,7 +117,7 @@ const App = () => {
       />
       {steaks && steaks.length > 0 && (
         <Text style={styles.longestTime}>
-          {timerRunning ? formatTime(remainingTime) : 'Ready to Start!'}
+          {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(longestTime)}
         </Text>
       )}
       {(!steaks || steaks.length === 0) && (
@@ -150,18 +151,7 @@ const App = () => {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      <Modal visible={deleteModalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Are you sure you want to delete this steak?</Text>
-            <View style={styles.modalButtons}>
-              <Button title="Cancel" onPress={() => setDeleteModalVisible(false)} />
-              <Button title="Delete" onPress={handleDelete} color="red" />
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={setModalVisible} handleDelete={handleDelete}  />
     </SafeAreaView>
   );
 };
@@ -192,23 +182,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
+  
 });
 
 export default App;

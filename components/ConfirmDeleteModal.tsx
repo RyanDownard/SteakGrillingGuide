@@ -11,7 +11,7 @@ import { Steak } from '../data/SteakData';
 interface ConfirmDeleteModalProps {
   deleteModalVisible: boolean;
   steakToDelete: Steak | null;
-  setDeleteModalVisible: (visible: boolean) => void;
+  setDeleteModalVisible: () => void;
   handleDelete: (steak: Steak) => void;
 }
 
@@ -22,7 +22,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ deleteModalVisi
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>Are you sure you want to delete {steakToDelete?.personName}'s steak?</Text>
           <View style={styles.modalButtons}>
-            <Button title="Cancel" onPress={() => setDeleteModalVisible(false)} />
+            <Button title="Cancel" onPress={setDeleteModalVisible} />
             <Button title="Delete" onPress={() => handleDelete(steakToDelete!)} color="red" />
           </View>
         </View>

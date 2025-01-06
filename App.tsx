@@ -151,7 +151,7 @@ const App = () => {
         />
       )}
 
-      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={setModalVisible} handleDelete={handleDelete}  />
+      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={() => setDeleteModalVisible(false)} handleDelete={handleDelete}  />
     </SafeAreaView>
   );
 };

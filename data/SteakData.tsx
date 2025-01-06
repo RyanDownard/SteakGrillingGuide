@@ -62,14 +62,19 @@ class Steak {
   }
 
   totalCookingTime(): number {
-    return this.firstSideTime + this.secondSideTime;
-  }
+  // Use 0 as a fallback if the times are null or undefined
+  const safeFirstSideTime = this.firstSideTime ?? 0;
+  const safeSecondSideTime = this.secondSideTime ?? 0;
 
-  description(): string {
-    return `${this.personName} wants their steak ${this.centerCook}. 
+  return safeFirstSideTime + safeSecondSideTime;
+}
+
+
+description(): string {
+  return `${this.personName} wants their steak ${this.centerCook}. 
 Cook the first side for ${this.firstSideTime} seconds and the second side for ${this.secondSideTime} seconds. 
 Total time: ${this.totalCookingTime()} seconds.`;
-  }
+}
 }
 
 

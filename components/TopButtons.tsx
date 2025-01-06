@@ -35,6 +35,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     paddingVertical: 10,
+    borderBottomColor: '#000',
+    borderBottomWidth: 1,
   },
   button: {
     borderColor: 'black',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, SafeAreaView, Modal, View, Button } from 'react-native';
+import { Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import SteakModal from './components/SteakModal';
 import BeforeYouGrill from './components/BeforeYouGrill';
 import StartTimerModal from './components/StartTimerModal.tsx';
@@ -10,6 +10,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
+import notifee, { TimestampTrigger, TriggerType } from '@notifee/react-native';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,12 +67,57 @@ const App = () => {
     setDeleteModalVisible(true);
   };
 
-  const startTimer = () => {
+  const startTimer = async () => {
     setStartTimerModalVisible(false);
     const now = new Date();
-    const calculatedEndTime = new Date(now.getTime() + longestTime * 1000);
+    const calculatedEndTime = new Date(now.getTime() + (longestTime * 1000));
     setEndTime(calculatedEndTime);
     setTimerRunning(true);
+
+    let allowed = await notifee.requestPermission();
+
+    if(!allowed.ios.sound && !allowed.ios.notificationCenter){
+      Alert.alert('Please enable notifications in settings to use this feature');
+      return;
+    }
+
+    // Set the trigger time (1 minute from now)
+    const date = new Date(Date.now() + 5 * 1000); // 5 seconds from now
+
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: 4,
+      // Set sound to Aldebaran
+      // (url: "content://media/internal/audio/media/30")
+      sound: 'content://media/internal/audio/media/30',
+    });
+
+    // Create a trigger for the notification
+    const trigger: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: date.getTime(), // Convert date to milliseconds
+    };
+
+    // Create and schedule the notification
+    await notifee.createTriggerNotification(
+      {
+        title: 'Scheduled Notification',
+        body: 'This is a local notification that fired 1 minute later!',
+        android: {
+          channelId: channelId, // Ensure the channel exists
+        },
+        ios: {
+          // iOS resource (.wav, aiff, .caf)
+          interruptionLevel: 'timeSensitive',
+          sound: 'default',
+
+        },
+      },
+      trigger
+    );
+
+
   };
 
   useEffect(() => {
@@ -146,7 +192,7 @@ const App = () => {
         />
       )}
 
-      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={() => setDeleteModalVisible(false)} handleDelete={handleDelete}  />
+      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={() => setDeleteModalVisible(false)} handleDelete={handleDelete} />
     </SafeAreaView>
   );
 };
@@ -177,7 +223,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  
+
 });
 
 export default App;

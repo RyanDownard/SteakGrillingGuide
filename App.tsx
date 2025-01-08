@@ -11,6 +11,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType } from '@notifee/react-native';
+import NotificationSounds, { playSampleSound } from 'react-native-notification-sounds';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,6 +25,7 @@ const App = () => {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
+  const [notificationSound, setNotificationSound] = useState('default');
 
   library.add(fas);
 
@@ -76,7 +78,7 @@ const App = () => {
 
     let allowed = await notifee.requestPermission();
 
-    if(!allowed.ios.sound && !allowed.ios.notificationCenter){
+    if (!allowed.ios.sound && !allowed.ios.notificationCenter) {
       Alert.alert('Please enable notifications in settings to use this feature');
       return;
     }
@@ -84,13 +86,26 @@ const App = () => {
     // Set the trigger time (1 minute from now)
     const date = new Date(Date.now() + 5 * 1000); // 5 seconds from now
 
+    NotificationSounds.getNotifications('notification').then(soundsList => {
+      console.warn('SOUNDS', JSON.stringify(soundsList));
+      /*
+      Play the notification sound.
+      pass the complete sound object.
+      This function can be used for playing the sample sound
+      */
+     setNotificationSound(soundsList[23].url);
+      playSampleSound(soundsList[23]);
+      // if you want to stop any playing sound just call:
+      // stopSampleSound();
+    });
+
     const channelId = await notifee.createChannel({
       id: 'default',
       name: 'Default Channel',
       importance: 4,
       // Set sound to Aldebaran
       // (url: "content://media/internal/audio/media/30")
-      sound: 'content://media/internal/audio/media/30',
+      sound: notificationSound,
     });
 
     // Create a trigger for the notification

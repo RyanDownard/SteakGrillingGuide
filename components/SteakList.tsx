@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActionSheetIOS } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';

@@ -11,9 +11,11 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
+import StopTimerModal from './components/StopTimerModal.tsx';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [steaks, setSteaks] = useState(getSteaks());
@@ -112,6 +114,10 @@ const App = () => {
     }
   };
 
+  const showStopTimerModal = () => {
+    setStopTimerModalVisible(true);
+  }
+
   const showDeleteConfirm = (steak: Steak) => {
     setSteakToDelete(steak);
     setDeleteModalVisible(true);
@@ -152,6 +158,13 @@ const App = () => {
     }
   };
 
+  const stopTimer = () => {
+    setStopTimerModalVisible(false);
+    setTimerRunning(false);
+    setRemainingTime(0);
+    notifee.cancelAllNotifications();
+  };
+
   const startTimer = async () => {
     let permission = await notifee.requestPermission({
       sound: true,
@@ -173,7 +186,6 @@ const App = () => {
       );
       return;
     }
-
 
     setStartTimerModalVisible(false);
     const now = new Date();
@@ -255,9 +267,7 @@ const App = () => {
       <TopButtons
         onAdd={() => handleOnAddSteak()}
         onPause={() => {
-          setTimerRunning(false);
-          setRemainingTime(0);
-          notifee.cancelAllNotifications();
+          showStopTimerModal();
         }}
         onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
@@ -287,6 +297,8 @@ const App = () => {
       />
 
       <BeforeYouGrill visible={beforeYouGrillVisible} onClose={() => setBeforeYouGrillVisible(false)} />
+
+      <StopTimerModal visible={stopTimerModalVisible} onClose={() => setStopTimerModalVisible(false)} onStop={stopTimer} />
 
       <StartTimerModal
         visible={startTimeModalVisible}

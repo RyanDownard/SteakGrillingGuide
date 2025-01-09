@@ -57,7 +57,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
 
   const handleSave = () => {
     if (personName.length === 0 || centerCook.length === 0 || thickness === 0) {
-      Alert.alert('Name, center cook, and thickness must have a value before saving.')
+      Alert.alert('Name, center cook, and thickness must have a value before saving.');
       return;
     }
 

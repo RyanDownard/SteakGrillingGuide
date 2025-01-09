@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Text, StyleSheet, SafeAreaView, Alert, Linking } from 'react-native';
 import SteakModal from './components/SteakModal';
 import BeforeYouGrill from './components/BeforeYouGrill';
 import StartTimerModal from './components/StartTimerModal.tsx';
@@ -10,7 +10,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
-import notifee, { TimestampTrigger, TriggerType } from '@notifee/react-native';
+import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -153,6 +153,28 @@ const App = () => {
   };
 
   const startTimer = async () => {
+    let permission = await notifee.requestPermission({
+      sound: true,
+      announcement: true,
+      alert: true,
+    });
+
+    if(permission.authorizationStatus === AuthorizationStatus.DENIED){
+      Alert.alert(
+        'Notification Permission Required',
+        'This app needs notification permissions to notify you about steak timers. Please enable them in the app settings.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Open Settings',
+            onPress: () => Linking.openSettings(),
+          },
+        ]
+      );
+      return;
+    }
+
+
     setStartTimerModalVisible(false);
     const now = new Date();
     const calculatedEndTime = new Date(now.getTime() + longestTime * 1000);

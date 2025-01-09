@@ -12,6 +12,7 @@ import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from './components/StopTimerModal.tsx';
+import globalStyles from './styles/globalStyles.tsx';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -264,6 +265,9 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={globalStyles.appTitle}>
+        Steak Grilling Guide
+      </Text>
       <TopButtons
         onAdd={() => handleOnAddSteak()}
         onPause={() => {

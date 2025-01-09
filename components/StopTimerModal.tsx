@@ -4,8 +4,8 @@ import {
     Text,
     Modal,
     TouchableOpacity,
-    StyleSheet,
 } from 'react-native';
+import globalStyles from '../styles/globalStyles';
 
 interface StopTimerModalProps {
     visible: boolean;
@@ -21,35 +21,38 @@ const StopTimerModal: React.FC<StopTimerModalProps> = ({ visible, onClose, onSto
             transparent={true}
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
+            <View style={globalStyles.modalOverlay}>
+                <View style={globalStyles.modalContent}>
                     {/* Modal Header */}
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Stop Timer</Text>
+                    <View style={globalStyles.modalHeader}>
+                        <Text style={globalStyles.modalTitle}>Stop Timer</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text style={globalStyles.closeButton}>✕</Text>
+                        </TouchableOpacity>
                     </View>
 
                     {/* Modal Body */}
-                    <Text style={styles.modalSubtitle}>
+                    <Text style={globalStyles.modalSubtitle}>
                         Are you sure you want to stop the timer?
                     </Text>
 
-                    <Text style={[styles.modalSubtitle, styles.modalWarning]}>
+                    <Text style={[globalStyles.modalSubtitle, globalStyles.modalWarning]}>
                         Stopping the timer cannot be undone, if you hit start again the timer will start from the longest steak time.
                         If you have steaks on the grill, you will need to monitor and maintain them until done on your own.
                     </Text>
 
-                    <View style={styles.buttonContainer}>
+                    <View style={globalStyles.buttonContainer}>
                         <TouchableOpacity
-                            style={[styles.button, styles.goodButton]}
+                            style={[globalStyles.button, globalStyles.goodButton]}
                             onPress={onClose}
                         >
-                            <Text style={styles.buttonText}>No</Text>
+                            <Text style={globalStyles.buttonText}>No</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.button, styles.badButton]}
+                            style={[globalStyles.button, globalStyles.badButton]}
                             onPress={onStop}
                         >
-                            <Text style={styles.buttonText}>Yes</Text>
+                            <Text style={globalStyles.buttonText}>Yes</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -57,76 +60,5 @@ const StopTimerModal: React.FC<StopTimerModalProps> = ({ visible, onClose, onSto
         </Modal>
     );
 };
-
-const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        width: '90%',
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 20,
-        elevation: 5,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    modalSubtitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#555',
-    },
-    modalBody: {
-        marginBottom: 20,
-    },
-    modalFooter: {
-        alignSelf: 'flex-end',
-        marginTop: 10,
-        backgroundColor: '#007BFF',
-        paddingVertical: 8,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-      },
-      button: {
-        flex: 1,
-        paddingVertical: 10,
-        borderRadius: 5,
-        marginHorizontal: 5,
-        alignItems: 'center',
-      },
-      badButton: {
-        backgroundColor: '#d9534f',
-      },
-      goodButton: {
-        backgroundColor: '#5cb85c',
-      },
-      buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-      },
-      modalWarning: {
-        fontSize: 14,
-        color: 'red',
-        marginBottom: 10,
-    },
-});
 
 export default StopTimerModal;

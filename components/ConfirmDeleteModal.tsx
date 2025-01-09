@@ -4,9 +4,9 @@ import {
   View,
   Text,
   Button,
-  StyleSheet,
 } from 'react-native';
 import { Steak } from '../data/SteakData';
+import globalStyles from '../styles/globalStyles';
 
 interface ConfirmDeleteModalProps {
   deleteModalVisible: boolean;
@@ -18,10 +18,10 @@ interface ConfirmDeleteModalProps {
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ deleteModalVisible, steakToDelete, setDeleteModalVisible, handleDelete }) => {
   return (
     <Modal visible={deleteModalVisible} transparent animationType="fade">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalText}>Are you sure you want to delete {steakToDelete?.personName}'s steak?</Text>
-          <View style={styles.modalButtons}>
+      <View style={globalStyles.modalContainer}>
+        <View style={globalStyles.modalContent}>
+          <Text style={globalStyles.modalText}>Are you sure you want to delete {steakToDelete?.personName}'s steak?</Text>
+          <View style={globalStyles.modalButtons}>
             <Button title="Cancel" onPress={setDeleteModalVisible} />
             <Button title="Delete" onPress={() => handleDelete(steakToDelete!)} color="red" />
           </View>
@@ -29,28 +29,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ deleteModalVisi
       </View>
     </Modal>
   );
-}
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  modalText: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-});
+};
 
 export default ConfirmDeleteModal;

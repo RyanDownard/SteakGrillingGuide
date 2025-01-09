@@ -5,12 +5,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Keyboard,
   Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Steak } from '../data/SteakData';
+import globalStyles from '../styles/globalStyles';
 
 interface Props {
   visible: boolean;
@@ -88,26 +88,32 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       visible={visible}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            {editingSteak ? 'Edit Steak' : 'Add Steak'}
-          </Text>
+      <View style={globalStyles.modalOverlay}>
+        <View style={globalStyles.modalContent}>
+          <View style={globalStyles.modalHeader}>
+            <Text style={globalStyles.modalTitle}>
+              {editingSteak ? 'Edit Steak' : 'Add Steak'}
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Text style={globalStyles.closeButton}>✕</Text>
+            </TouchableOpacity>
+          </View>
 
+          <Text style={globalStyles.label}>Person Name:</Text>
           <TextInput
             ref={personNameInputRef}
-            style={styles.input}
+            style={globalStyles.input}
             placeholder="Person's Name"
             value={personName}
             onChangeText={setPersonName}
             enterKeyHint={'done'}
           />
 
-          <Text style={styles.label}>Center Cook:</Text>
+          <Text style={globalStyles.label}>Center Cook:</Text>
           <Dropdown
-            style={styles.dropdown}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
+            style={globalStyles.dropdown}
+            placeholderStyle={globalStyles.placeholderStyle}
+            selectedTextStyle={globalStyles.selectedTextStyle}
             data={centerCookOptions}
             labelField="label"
             valueField="value"
@@ -117,11 +123,11 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
             onChange={(item) => setCenterCook(item.value)}
           />
 
-          <Text style={styles.label}>Thickness:</Text>
+          <Text style={globalStyles.label}>Thickness:</Text>
           <Dropdown
-            style={styles.dropdown}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
+            style={globalStyles.dropdown}
+            placeholderStyle={globalStyles.placeholderStyle}
+            selectedTextStyle={globalStyles.selectedTextStyle}
             data={thicknessOptions}
             labelField="label"
             valueField="value"
@@ -132,18 +138,18 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
           />
 
 
-          <View style={styles.buttonContainer}>
+          <View style={globalStyles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
+              style={[globalStyles.button, globalStyles.cancelButton]}
               onPress={onClose}
             >
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text style={globalStyles.buttonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, styles.saveButton]}
+              style={[globalStyles.button, globalStyles.saveButton]}
               onPress={handleSave}
             >
-              <Text style={styles.buttonText}>Save</Text>
+              <Text style={globalStyles.buttonText}>Save</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -151,79 +157,5 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-  },
-  dropdown: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    justifyContent: 'center',
-  },
-  placeholderStyle: {
-    fontSize: 14,
-    color: '#aaa',
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-    color: '#333',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#d9534f',
-  },
-  saveButton: {
-    backgroundColor: '#5cb85c',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 export default SteakModal;

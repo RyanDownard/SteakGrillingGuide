@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import SteakModal from './components/SteakModal';
 import BeforeYouGrill from './components/BeforeYouGrill';
 import StartTimerModal from './components/StartTimerModal.tsx';
@@ -11,7 +11,6 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from './components/ConfirmDeleteModal.tsx';
 import { formatTime } from './data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType } from '@notifee/react-native';
-import NotificationSounds, { playSampleSound } from 'react-native-notification-sounds';
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,9 +24,98 @@ const App = () => {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [notificationSound, setNotificationSound] = useState('default');
 
   library.add(fas);
+
+  // Schedule a single notification using Notifee
+  const scheduleNotification = async (title: string, body: string, secondsFromNow: number) => {
+    try {
+      const triggerTime = Date.now() + secondsFromNow * 1000;
+
+      const trigger: TimestampTrigger = {
+        type: TriggerType.TIMESTAMP,
+        timestamp: triggerTime,
+      };
+
+      await notifee.createChannel({
+        id: 'steak-timer',
+        name: 'Steak Timer Notifications',
+      });
+
+      await notifee.createTriggerNotification(
+        {
+          title,
+          body,
+          android: {
+            channelId: 'steak-timer',
+            smallIcon: 'ic_launcher',
+          },
+          ios: {
+            interruptionLevel: 'timeSensitive',
+            sound: 'default',
+          },
+        },
+        trigger
+      );
+
+      console.log(`Notification scheduled: ${title} - ${body} at ${new Date(triggerTime)}`);
+    } catch (error) {
+      console.error('Error scheduling notification:', error);
+    }
+  };
+
+  // Group steaks by time and schedule grouped notifications
+  const groupSteaksByTime = (steaksToGroup: Steak[], action: 'place' | 'flip') => {
+    const grouped: Record<number, string[]> = {};
+
+    steaksToGroup.forEach((steak) => {
+      let time = 0;
+      let diffTime = longestTime - steak.totalCookingTime();
+      if (action === 'place') {
+        time = steak.totalCookingTime();
+      }
+      else if (action === 'flip') {
+        if(longestTime === steak.totalCookingTime()){
+          time = steak.firstSideTime;
+        }
+        else{
+          time = longestTime - steak.firstSideTime + diffTime;
+        }
+      }
+      console.log(time);
+      if (!grouped[time]) { grouped[time] = []; }
+      grouped[time].push(steak.personName);
+    });
+
+    return grouped;
+  };
+
+  const scheduleGroupedNotifications = async (groupedSteaks: Steak[]) => {
+    // Place notifications
+    const placeGrouped = groupSteaksByTime(groupedSteaks, 'place');
+    for (const [time, names] of Object.entries(placeGrouped)) {
+      await scheduleNotification(
+        'Place Steaks',
+        `It's time to place ${names.join(' and ')}'s ${steaks.length === 1 ? 'steak' : 'steaks'} on the grill!`,
+        longestTime - Number(time)
+      );
+    }
+
+    // Flip notifications
+    const flipGrouped = groupSteaksByTime(steaks, 'flip');
+    for (const [time, names] of Object.entries(flipGrouped)) {
+      await scheduleNotification(
+        'Flip Steaks',
+        `Time to flip ${names.join(' and ')}'s ${steaks.length === 1 ? 'steak' : 'steaks'}!`,
+        Number(time)
+      );
+    }
+  };
+
+  const showDeleteConfirm = (steak: Steak) => {
+    setSteakToDelete(steak);
+    setDeleteModalVisible(true);
+  };
 
   const handleSave = (steak: Steak) => {
     if (editingSteak) {
@@ -41,18 +129,16 @@ const App = () => {
 
       addSteak(steak);
     }
-    setSteaks([...getSteaks()]);
+    const updatedSteaks = [...getSteaks()];
+    setSteaks(updatedSteaks);
     setEditingSteak(null);
 
-    setLongestTime(Math.max(
-      ...steaks.map((steak) => steak.totalCookingTime())
-    ));
+    setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.totalCookingTime())));
   };
 
   const handleOnAddSteak = () => {
     setModalVisible(true);
   };
-
   const handleDelete = () => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
@@ -61,51 +147,33 @@ const App = () => {
       setSteakToDelete(null);
 
       updateSteaks(updatedSteaks);
-    }
-  };
 
-  const showDeleteConfirm = (steak: Steak) => {
-    setSteakToDelete(steak);
-    setDeleteModalVisible(true);
+      setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.totalCookingTime())));
+    }
   };
 
   const startTimer = async () => {
     setStartTimerModalVisible(false);
     const now = new Date();
-    const calculatedEndTime = new Date(now.getTime() + (longestTime * 1000));
+    const calculatedEndTime = new Date(now.getTime() + longestTime * 1000);
     setEndTime(calculatedEndTime);
     setTimerRunning(true);
 
-    let allowed = await notifee.requestPermission();
+    // Schedule notifications
+    await scheduleGroupedNotifications(steaks);
+    await scheduleCompleteNotification(calculatedEndTime);
+  };
 
-    if (!allowed.ios.sound && !allowed.ios.notificationCenter) {
-      Alert.alert('Please enable notifications in settings to use this feature');
-      return;
-    }
-
-    // Set the trigger time (1 minute from now)
-    const date = new Date(Date.now() + 5 * 1000); // 5 seconds from now
-
-    NotificationSounds.getNotifications('notification').then(soundsList => {
-      console.warn('SOUNDS', JSON.stringify(soundsList));
-      /*
-      Play the notification sound.
-      pass the complete sound object.
-      This function can be used for playing the sample sound
-      */
-     setNotificationSound(soundsList[23].url);
-      playSampleSound(soundsList[23]);
-      // if you want to stop any playing sound just call:
-      // stopSampleSound();
-    });
+  const scheduleCompleteNotification = async (calculatedEndTime: Date) => {
+    const date = calculatedEndTime;
 
     const channelId = await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
+      id: 'steak-timer',
+      name: 'Steak Timer Notifications',
       importance: 4,
-      // Set sound to Aldebaran
-      // (url: "content://media/internal/audio/media/30")
-      sound: notificationSound,
+      sound: 'default', // Ensure the sound is set to default or a valid sound file
+      vibration: true,
+      lights: true,
     });
 
     // Create a trigger for the notification
@@ -117,10 +185,12 @@ const App = () => {
     // Create and schedule the notification
     await notifee.createTriggerNotification(
       {
-        title: 'Scheduled Notification',
-        body: 'This is a local notification that fired 1 minute later!',
+        title: 'Steaks Ready',
+        body: steaks.length === 1 ? 'Steak is done!' : 'Steaks are done!',
         android: {
           channelId: channelId, // Ensure the channel exists
+          importance: 4,
+          sound: 'default', // Ensure the sound is set to default or a valid sound file
         },
         ios: {
           // iOS resource (.wav, aiff, .caf)
@@ -131,8 +201,6 @@ const App = () => {
       },
       trigger
     );
-
-
   };
 
   useEffect(() => {
@@ -163,10 +231,11 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <TopButtons
-        onAdd={handleOnAddSteak}
+        onAdd={() => handleOnAddSteak()}
         onPause={() => {
           setTimerRunning(false);
           setRemainingTime(0);
+          notifee.cancelAllNotifications();
         }}
         onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
@@ -175,9 +244,9 @@ const App = () => {
         <Text style={styles.longestTime}>
           {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(longestTime)}
         </Text>
-      )}
+      )}x
       {(!steaks || steaks.length === 0) && (
-        <Text onPress={handleOnAddSteak} style={styles.noneAddedText}>
+        <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added
         </Text>
       )}
@@ -193,21 +262,21 @@ const App = () => {
         editingSteak={editingSteak}
       />
 
-      <BeforeYouGrill
-        visible={beforeYouGrillVisible}
-        onClose={() => setBeforeYouGrillVisible(false)}
+      <BeforeYouGrill visible={beforeYouGrillVisible} onClose={() => setBeforeYouGrillVisible(false)} />
+
+      <StartTimerModal
+        visible={startTimeModalVisible}
+        steaks={steaks}
+        onClose={() => setStartTimerModalVisible(false)}
+        onStart={startTimer}
       />
 
-      {steaks.length > 0 && (
-        <StartTimerModal
-          visible={startTimeModalVisible}
-          steaks={steaks}
-          onClose={() => setStartTimerModalVisible(false)}
-          onStart={startTimer}
-        />
-      )}
-
-      <ConfirmDeleteModal deleteModalVisible={deleteModalVisible} steakToDelete={steakToDelete} setDeleteModalVisible={() => setDeleteModalVisible(false)} handleDelete={handleDelete} />
+      <ConfirmDeleteModal
+        deleteModalVisible={deleteModalVisible}
+        steakToDelete={steakToDelete}
+        setDeleteModalVisible={() => setDeleteModalVisible(false)}
+        handleDelete={handleDelete}
+      />
     </SafeAreaView>
   );
 };
@@ -232,13 +301,6 @@ const styles = StyleSheet.create({
     margin: 20,
     fontSize: 20,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-
 });
 
 export default App;

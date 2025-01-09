@@ -45,13 +45,13 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
                             {/* Table Header */}
                             <View style={styles.tableRow}>
                                 <Text style={styles.tableHeader}>Starts At</Text>
-                                <Text style={styles.tableHeader}>First/Second</Text>
+                                <Text style={styles.tableHeader}>Flips At</Text>
                             </View>
 
                             {/* Table Row */}
                             <View style={styles.tableRow}>
                                 <Text style={styles.tableCell}>{formatTime(steak.totalCookingTime())}</Text>
-                                <Text style={styles.tableCell}>{formatTime(steak.firstSideTime)} / {formatTime(steak.secondSideTime)}</Text>
+                                <Text style={styles.tableCell}>{formatTime(steak.secondSideTime)}</Text>
                             </View>
                         </View>
 

@@ -75,10 +75,10 @@ const App = () => {
         time = steak.totalCookingTime();
       }
       else if (action === 'flip') {
-        if(longestTime === steak.totalCookingTime()){
+        if (longestTime === steak.totalCookingTime()) {
           time = steak.firstSideTime;
         }
-        else{
+        else {
           time = longestTime - steak.firstSideTime + diffTime;
         }
       }
@@ -159,7 +159,7 @@ const App = () => {
       alert: true,
     });
 
-    if(permission.authorizationStatus === AuthorizationStatus.DENIED){
+    if (permission.authorizationStatus === AuthorizationStatus.DENIED) {
       Alert.alert(
         'Notification Permission Required',
         'This app needs notification permissions to notify you about steak timers. Please enable them in the app settings.',
@@ -261,6 +261,8 @@ const App = () => {
         }}
         onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
+        pauseEnabled={timerRunning}
+        startEnabled={!timerRunning && steaks.length > 0}
       />
       {steaks && steaks.length > 0 && (
         <Text style={styles.longestTime}>
@@ -272,7 +274,7 @@ const App = () => {
           No Steaks Added
         </Text>
       )}
-      <SteakList steaks={steaks} onEdit={handleEdit} onDelete={showDeleteConfirm} />
+      <SteakList steaks={steaks} onEdit={handleEdit} onDelete={showDeleteConfirm} actionsDisabled={timerRunning} />
 
       <SteakModal
         visible={modalVisible}

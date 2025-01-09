@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActionSheetIOS } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -9,15 +9,17 @@ interface Props {
     steak: Steak;
     onEdit: (steak: Steak) => void;
     onDelete: (steak: Steak) => void;
+    actionsDisabled: boolean;
 }
 
 interface ListProps {
     steaks: Steak[];
     onEdit: (steak: Steak) => void;
     onDelete: (steak: Steak) => void;
+    actionsDisabled: boolean;
 }
 
-const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
+const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -34,11 +36,11 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
                             {/* <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={() => onEdit(steak)}>
                                 <FontAwesomeIcon icon={faSave} size={24} color={'#029af2'} />
                             </TouchableOpacity> */}
-                            <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => onEdit(steak)}>
-                                <FontAwesomeIcon icon={faPencil} size={24} color={'#e3cf17'} />
+                            <TouchableOpacity style={[styles.button, styles.editButton, actionsDisabled && styles.disabledButton]} onPress={() => onEdit(steak)} disabled={actionsDisabled}>
+                                <FontAwesomeIcon icon={faPencil} size={24} color={actionsDisabled ? '#949799' : '#e3cf17'} />
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={() => onDelete(steak)}>
-                                <FontAwesomeIcon icon={faTrash} size={24} color={'#c70404'} />
+                            <TouchableOpacity style={[styles.button, styles.deleteButton, actionsDisabled && styles.disabledButton]} onPress={() => onDelete(steak)} disabled={actionsDisabled}>
+                                <FontAwesomeIcon icon={faTrash} size={24} color={actionsDisabled ? '#949799' : '#c70404'} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.table}>
@@ -62,12 +64,12 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete }) => {
     );
 };
 
-const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete }) => {
+const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisabled }) => {
     return (
         <FlatList
             data={steaks}
             keyExtractor={(item) => item.personName}
-            renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} onDelete={onDelete} />}
+            renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} onDelete={onDelete} actionsDisabled={actionsDisabled} />}
         />
     );
 };
@@ -167,6 +169,10 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         color: '#555',
+    },
+    disabledButton: {
+        opacity: 0.5,
+        borderColor: '#949799',
     },
 });
 

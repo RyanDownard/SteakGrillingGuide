@@ -142,7 +142,7 @@ const App = () => {
     setSteaks(updatedSteaks);
     setEditingSteak(null);
 
-    setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.totalCookingTime())));
+    setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
   };
 
   const handleOnAddSteak = () => {
@@ -158,7 +158,7 @@ const App = () => {
 
       updateSteaks(updatedSteaks);
 
-      setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.totalCookingTime())));
+      setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     }
   };
 
@@ -166,6 +166,7 @@ const App = () => {
     setStopTimerModalVisible(false);
     setTimerRunning(false);
     setRemainingTime(0);
+    setLongestTime(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     notifee.cancelAllNotifications();
     await AsyncStorage.removeItem('steakTimerData');
   };

@@ -22,7 +22,7 @@ interface Props {
 const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
-  const [thickness, setThickness] = useState(0);
+  const [thickness, setThickness] = useState('');
 
 
   const centerCookOptions = [
@@ -34,29 +34,29 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   ];
 
   const thicknessOptions = [
-    { label: '0.5', value: 0.5 },
-    { label: '0.75', value: 0.75 },
-    { label: '1.0', value: 1.0 },
-    { label: '1.25', value: 1.25 },
-    { label: '1.5', value: 1.5 },
-    { label: '1.75', value: 1.75 },
-    { label: '2.0', value: 2.0 },
+    { label: '0.5', value: '0.5' },
+    { label: '0.75', value: '0.75' },
+    { label: '1.0', value: '1.0' },
+    { label: '1.25', value: '1.25' },
+    { label: '1.5', value: '1.5' },
+    { label: '1.75', value: '1.75' },
+    { label: '2.0', value: '2.0' },
   ];
 
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
-      setThickness(editingSteak.thickness);
+      setThickness(editingSteak.thickness.toString());
     } else {
       setPersonName('');
       setCenterCook('');
-      setThickness(0);
+      setThickness('');
     }
   }, [editingSteak]);
 
   const handleSave = () => {
-    if (personName.length === 0 || centerCook.length === 0 || thickness === 0) {
+    if (personName.length === 0 || centerCook.length === 0 || thickness === '') {
       Alert.alert('Name, center cook, and thickness must have a value before saving.');
       return;
     }
@@ -67,7 +67,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     onSave(steak);
     onClose();
     setPersonName('');
-    setThickness(0);
+    setThickness('');
     setCenterCook('');
   };
 

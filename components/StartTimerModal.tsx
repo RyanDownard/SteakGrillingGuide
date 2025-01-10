@@ -12,9 +12,9 @@ import globalStyles from '../styles/globalStyles';
 
 interface StartTimerModalProps {
     visible: boolean;
-    steaks: Steak[]; // Array of steaks
+    steaks: Steak[];
     onClose: () => void;
-    onStart: () => void; // Function to start the timer with the longest time
+    onStart: () => void;
 }
 
 const StartTimerModal: React.FC<StartTimerModalProps> = ({
@@ -36,15 +36,12 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
         >
             <View style={globalStyles.modalOverlay}>
                 <View style={globalStyles.modalContent}>
-                    {/* Modal Header */}
                     <View style={globalStyles.modalHeader}>
                         <Text style={globalStyles.modalTitle}>Before You Grill</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Text style={globalStyles.closeButton}>✕</Text>
                         </TouchableOpacity>
                     </View>
-
-                    {/* Modal Body */}
                     <Text style={globalStyles.modalText}>
                         You are about to start the timer for your steaks. Be sure your
                         steaks and grill are ready. When ready, place the following steaks
@@ -80,8 +77,6 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                     ({longestTimeSteaks.length === 0 ? (
                         <Text>No steaks added yet.</Text>
                     ) : null})
-
-                    {/* Footer Buttons */}
                     <View style={globalStyles.footerButtons}>
                         <TouchableOpacity
                             onPress={onClose}

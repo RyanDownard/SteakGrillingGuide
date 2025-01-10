@@ -206,6 +206,7 @@ const globalStyles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 15,
+        textDecorationColor: 'red',
     },
     dropdown: {
         height: 40,

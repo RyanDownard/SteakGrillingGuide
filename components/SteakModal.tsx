@@ -103,7 +103,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
           <TextInput
             ref={personNameInputRef}
             style={globalStyles.input}
-            placeholder="Person's Name"
+            placeholder="Person Name"
             value={personName}
             onChangeText={setPersonName}
             enterKeyHint={'done'}

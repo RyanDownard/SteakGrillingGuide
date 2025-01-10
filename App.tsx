@@ -117,7 +117,7 @@ const App = () => {
 
   const showStopTimerModal = () => {
     setStopTimerModalVisible(true);
-  }
+  };
 
   const showDeleteConfirm = (steak: Steak) => {
     setSteakToDelete(steak);

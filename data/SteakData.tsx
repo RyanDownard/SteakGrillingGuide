@@ -88,7 +88,7 @@ const editSteak = (index: number, updatedSteak: Steak) => {
 
 const updateSteaks = (newSteaks: Steak[]) => {
   steaks = newSteaks;
-}
+};
 
 const getSteaks = () => {
   return steaks;

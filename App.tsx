@@ -13,6 +13,8 @@ import { formatTime } from './data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from './components/StopTimerModal.tsx';
 import globalStyles from './styles/globalStyles.tsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const App = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -146,6 +148,7 @@ const App = () => {
   const handleOnAddSteak = () => {
     setModalVisible(true);
   };
+  
   const handleDelete = () => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
@@ -194,6 +197,18 @@ const App = () => {
     setEndTime(calculatedEndTime);
     setTimerRunning(true);
 
+    try {
+      const dataToSave = {
+        steaks,
+        endTime: calculatedEndTime.toISOString(),
+        remainingTime: longestTime,
+      };
+      await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
+      console.log('Timer and steaks saved.');
+    } catch (error) {
+      console.error('Failed to save timer and steaks:', error);
+    }
+
     // Schedule notifications
     await scheduleGroupedNotifications(steaks);
     await scheduleCompleteNotification(calculatedEndTime);
@@ -237,6 +252,38 @@ const App = () => {
       trigger
     );
   };
+
+  useEffect(() => {
+    const loadSteakData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem('steakTimerData');
+
+        if (savedData) {
+          const { steaks: savedSteaks, endTime: savedEndTime } = JSON.parse(savedData);
+
+          const now = new Date();
+          const endsAt = new Date(savedEndTime);
+          const diffInSeconds = Math.floor((endsAt.getTime() - now.getTime()) / 1000);
+
+          // If the timer should still be running
+          if (diffInSeconds > 0) {
+            setSteaks(savedSteaks);
+            setEndTime(endsAt);
+            setRemainingTime(diffInSeconds);
+            setTimerRunning(true);
+          } else {
+            // If the timer expired, reset
+            await AsyncStorage.removeItem('steakTimerData');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load timer and steaks data:', error);
+      }
+    };
+
+    loadSteakData();
+  }, []);
+
 
   useEffect(() => {
     let timer: any;

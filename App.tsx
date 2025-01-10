@@ -162,11 +162,12 @@ const App = () => {
     }
   };
 
-  const stopTimer = () => {
+  const stopTimer = async () => {
     setStopTimerModalVisible(false);
     setTimerRunning(false);
     setRemainingTime(0);
     notifee.cancelAllNotifications();
+    await AsyncStorage.removeItem('steakTimerData');
   };
 
   const startTimer = async () => {
@@ -253,6 +254,7 @@ const App = () => {
     );
   };
 
+  //handles returning and the app has crashed
   useEffect(() => {
     const loadSteakData = async () => {
       try {
@@ -268,12 +270,16 @@ const App = () => {
           // If the timer should still be running
           if (diffInSeconds > 0) {
             setSteaks(savedSteaks);
+            updateSteaks(savedSteaks);
             setEndTime(endsAt);
             setRemainingTime(diffInSeconds);
             setTimerRunning(true);
+            setLongestTime(Math.max(...savedSteaks.map((calcSteak: Steak) => calcSteak.totalCookingTime())));
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
+            Alert.alert('Unexpected Close', 
+              "The app closed unexpectedly, if it's on us, we hope your steaks still turned out great and apologize for the inconvinence.");
           }
         }
       } catch (error) {
@@ -285,18 +291,21 @@ const App = () => {
   }, []);
 
 
+  //timer functionality
   useEffect(() => {
     let timer: any;
 
     if (timerRunning && endTime) {
-      timer = setInterval(() => {
+      timer = setInterval(async () => {
         const now = new Date();
         const diffInSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
         if (diffInSeconds <= 0) {
           clearInterval(timer);
           setRemainingTime(0);
           setTimerRunning(false);
-        } else {
+          await AsyncStorage.removeItem('steakTimerData');
+        }
+        else {
           setRemainingTime(diffInSeconds);
         }
       }, 1000);

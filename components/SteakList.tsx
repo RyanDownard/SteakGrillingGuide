@@ -53,7 +53,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
 
                             {/* Table Row */}
                             <View style={globalStyles.tableRow}>
-                                <Text style={globalStyles.tableCell}>{formatTime(steak.totalCookingTime())}</Text>
+                                <Text style={globalStyles.tableCell}>{formatTime(steak.firstSideTime + steak.secondSideTime)}</Text>
                                 <Text style={globalStyles.tableCell}>{formatTime(steak.secondSideTime)}</Text>
                             </View>
                         </View>

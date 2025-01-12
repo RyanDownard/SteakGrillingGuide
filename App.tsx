@@ -20,10 +20,11 @@ const App = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator>
-      <Tab.Screen 
-        name="Steak Grilling Guide"
+      <Tab.Screen
+        name="Home"
         component={Home}
         options={{
+          headerTitle: 'Steak Grilling Guide',
           tabBarIcon: homeIcon,
         }} />
       <Tab.Screen

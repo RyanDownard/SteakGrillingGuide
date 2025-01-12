@@ -42,8 +42,9 @@ const Home = () => {
       };
 
       await notifee.createChannel({
-        id: 'steak-timer',
+        id: 'sound',
         name: 'Steak Timer Notifications',
+        sound: 'default',
       });
 
       await notifee.createTriggerNotification(
@@ -51,12 +52,18 @@ const Home = () => {
           title,
           body,
           android: {
-            channelId: 'steak-timer',
+            channelId: 'sound',
             smallIcon: 'ic_launcher',
+            sound: 'default',
+            showChronometer: true,
+            chronometerDirection: 'down',
+            timestamp: Date.now() + secondsFromNow * 1000,
+            badgeCount: 1,
           },
           ios: {
             interruptionLevel: 'timeSensitive',
             sound: 'default',
+            badgeCount: 1,
           },
         },
         trigger
@@ -79,12 +86,7 @@ const Home = () => {
         time = steak.totalCookingTime();
       }
       else if (action === 'flip') {
-        if (longestTime === steak.totalCookingTime()) {
-          time = steak.firstSideTime;
-        }
-        else {
-          time = longestTime - steak.firstSideTime + diffTime;
-        }
+        time = steak.firstSideTime + diffTime;
       }
       console.log(time);
       if (!grouped[time]) { grouped[time] = []; }
@@ -100,7 +102,7 @@ const Home = () => {
     for (const [time, names] of Object.entries(placeGrouped)) {
       await scheduleNotification(
         'Place Steaks',
-        `It's time to place ${names.join(' and ')}'s ${steaks.length === 1 ? 'steak' : 'steaks'} on the grill!`,
+        `It's time to place ${names.join(' and ')}'s ${names.length === 1 ? 'steak' : 'steaks'} on the grill!`,
         longestTime - Number(time)
       );
     }
@@ -110,7 +112,7 @@ const Home = () => {
     for (const [time, names] of Object.entries(flipGrouped)) {
       await scheduleNotification(
         'Flip Steaks',
-        `Time to flip ${names.join(' and ')}'s ${steaks.length === 1 ? 'steak' : 'steaks'}!`,
+        `Time to flip ${names.join(' and ')}'s ${names.length === 1 ? 'steak' : 'steaks'}!`,
         Number(time)
       );
     }

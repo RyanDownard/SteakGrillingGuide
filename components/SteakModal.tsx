@@ -25,7 +25,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const [centerCook, setCenterCook] = useState('');
   const [thickness, setThickness] = useState('');
   const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
-  const { savedSteaks } = useSavedSteaks();
+  const { savedSteaks, updateSavedSteak } = useSavedSteaks();
 
 
   const centerCookOptions = [
@@ -59,6 +59,13 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     setSelectedSavedSteak(null);
   }, [editingSteak]);
 
+  const handleSavedDetailsChanged = () => {
+    selectedSavedSteak!.personName = personName;
+    selectedSavedSteak!.centerCook = centerCook;
+
+    updateSavedSteak(selectedSavedSteak);
+  };
+
   const handleSave = () => {
     if (personName.length === 0 || centerCook.length === 0 || thickness === '') {
       Alert.alert('Name, center cook, and thickness must have a value before saving.');
@@ -69,6 +76,24 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     const steak = new Steak(personName, centerCook, thicknessNumber);
 
     if (selectedSavedSteak) {
+      if(personName !== selectedSavedSteak.personName
+        || centerCook !== selectedSavedSteak.centerCook){
+          Alert.alert(
+            'Details Changed',
+            'You selected a saved steak and changed the details, do you want to update the saved steak?',
+            [
+              {
+                text: 'Yes',
+                onPress: () => handleSavedDetailsChanged(),
+              },
+              {
+                text: 'No',
+              },
+            ],
+            {cancelable: false},
+          );
+        }
+
       steak.savedSteak = selectedSavedSteak;
     }
 

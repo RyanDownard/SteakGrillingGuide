@@ -26,8 +26,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
     const { addSavedSteak } = useSavedSteaks();
 
     const handleSaveSteakToDevice = (steakToSave: Steak) => {
-        var savedSteak = addSavedSteak(steakToSave);
-        steakToSave.savedSteak = savedSteak;
+        addSavedSteak(steakToSave);
     };
 
     return (

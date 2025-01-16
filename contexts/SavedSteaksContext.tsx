@@ -73,8 +73,8 @@ export const SavedSteaksProvider = ({ children }: { children: React.ReactNode })
             favoritesArray.push(savedSteakInfo);
             await AsyncStorage.setItem(SAVED_STEAKS_STORAGE_KEY, JSON.stringify(favoritesArray));
             setSavedSteaks(favoritesArray);
+            steakToSave.savedSteak = savedSteakInfo;
             Alert.alert('Steak saved!');
-            return savedSteakInfo;
         } catch (error) {
             Alert.alert('An error occured while attempting to remove steak');
             console.error('Failed to save favorite steak:', error);

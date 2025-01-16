@@ -107,10 +107,27 @@ const updateSteaks = (newSteaks: Steak[]) => {
   steaks = newSteaks;
 };
 
+const updateSteaksWithSavedId = (updatedInfo: SavedSteak) => {
+  steaks.forEach((steak) => {
+    if (steak.savedSteak && steak.savedSteak.id === updatedInfo.id) {
+      steak.personName = updatedInfo.personName;
+      steak.centerCook = updatedInfo.centerCook;
+    }
+  });
+};
+
+const removeAnySavedSteakInfo = (id: number) => {
+  steaks.forEach((steak) => {
+    if (steak.savedSteak && steak.savedSteak.id === id) {
+      steak.savedSteak = null;
+    }
+  });
+}
+
 const getSteaks = () => {
   return steaks;
 };
 
 
 
-export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak, SavedSteak };
+export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, updateSteaksWithSavedId, removeAnySavedSteakInfo, Steak, SavedSteak };

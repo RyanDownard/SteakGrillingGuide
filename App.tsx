@@ -5,6 +5,7 @@ import Home from './views/Home';
 import SavedSteaks from './views/SavedSteaks';
 import { faSave, faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { SavedSteaksProvider } from './contexts/SavedSteaksContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,23 +19,25 @@ const savedSteakIcon = ({ color, size }: { color: string; size: number }) => (
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Tab.Navigator>
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        options={{
-          headerTitle: 'Steak Grilling Guide',
-          tabBarIcon: homeIcon,
-        }} />
-      <Tab.Screen
-        name="Saved Steaks"
-        component={SavedSteaks}
-        options={{
-          tabBarIcon: savedSteakIcon,
-        }}/>
-      </Tab.Navigator>
-    </NavigationContainer>
+    <SavedSteaksProvider>
+      <NavigationContainer>
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Home"
+            component={Home}
+            options={{
+              headerTitle: 'Steak Grilling Guide',
+              tabBarIcon: homeIcon,
+            }} />
+          <Tab.Screen
+            name="Saved Steaks"
+            component={SavedSteaks}
+            options={{
+              tabBarIcon: savedSteakIcon,
+            }} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SavedSteaksProvider>
   );
 };
 

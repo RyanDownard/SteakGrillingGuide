@@ -200,7 +200,7 @@ const globalStyles = StyleSheet.create({
         marginBottom: 5,
     },
     input: {
-        height: 40,
+        height: 45,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
@@ -209,7 +209,7 @@ const globalStyles = StyleSheet.create({
         textDecorationColor: 'red',
     },
     dropdown: {
-        height: 40,
+        height: 45,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
@@ -273,6 +273,21 @@ const globalStyles = StyleSheet.create({
         fontFamily: 'Avenir-Book',
         backgroundColor: '#575555',
         color: '#ffffff',
+    },
+    clearButtonContainer:{
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    clearButton: {
+        flex: 0.35,
+        marginBottom: 20,
+        fontSize: 15,
+        textAlign: 'center',
+        borderWidth: 1,
+        borderRadius: 5,
+        borderColor: '#d9534f',
+        backgroundColor: '#d9534f',
+        color: 'white',
     },
 });
 

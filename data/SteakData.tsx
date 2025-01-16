@@ -39,6 +39,22 @@ const getCookingTimes = (
   return { firstSide: duration.FirstSide, secondSide: duration.SecondSide };
 };
 
+class SavedSteak {
+  id: number;
+  personName: string;
+  centerCook: string;
+
+  constructor(
+    id: number,
+    personName: string,
+    centerCook: string,
+  ){
+    this.id = id;
+    this.personName = personName;
+    this.centerCook = centerCook;
+  }
+}
+
 
 class Steak {
   personName: string;
@@ -46,6 +62,7 @@ class Steak {
   thickness: number;
   firstSideTime: number; // in seconds
   secondSideTime: number; // in seconds
+  savedSteak?: SavedSteak | null;
 
   constructor(
     personName: string,
@@ -94,4 +111,6 @@ const getSteaks = () => {
   return steaks;
 };
 
-export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak };
+
+
+export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak, SavedSteak };

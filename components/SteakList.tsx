@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faTrash, faSave } from '@fortawesome/free-solid-svg-icons';
 import { formatTime } from '../data/Helpers';
 import globalStyles from '../styles/globalStyles';
+import { useSavedSteaks } from '../contexts/SavedSteaksContext';
 
 interface Props {
     steak: Steak;
@@ -22,6 +23,12 @@ interface ListProps {
 
 const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }) => {
     const [expanded, setExpanded] = useState(false);
+    const { addSavedSteak } = useSavedSteaks();
+
+    const handleSaveSteakToDevice = (steakToSave: Steak) => {
+        var savedSteak = addSavedSteak(steakToSave);
+        steakToSave.savedSteak = savedSteak;
+    };
 
     return (
         <TouchableOpacity onPress={() => setExpanded(!expanded)}>
@@ -34,9 +41,11 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                 {expanded ? (
                     <View style={globalStyles.details}>
                         <View style={globalStyles.buttonsContainer}>
-                            {/* <TouchableOpacity style={[globalStyles.button, globalStyles.saveButton]} onPress={() => onEdit(steak)}>
-                                <FontAwesomeIcon icon={faSave} size={24} color={'#029af2'} />
-                            </TouchableOpacity> */}
+                            {(steak.savedSteak === null || steak.savedSteak === undefined ? (
+                                <TouchableOpacity style={[globalStyles.actionButton, globalStyles.infoButtonOutline]} onPress={() => handleSaveSteakToDevice(steak)}>
+                                    <FontAwesomeIcon icon={faSave} size={24} color={'#029af2'} />
+                                </TouchableOpacity>
+                            ) : null)}
                             <TouchableOpacity style={[globalStyles.actionButton, globalStyles.editButton, actionsDisabled && globalStyles.disabledButton]} onPress={() => onEdit(steak)} disabled={actionsDisabled}>
                                 <FontAwesomeIcon icon={faPencil} size={24} color={actionsDisabled ? '#949799' : '#e3cf17'} />
                             </TouchableOpacity>
@@ -45,13 +54,10 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                             </TouchableOpacity>
                         </View>
                         <View style={globalStyles.table}>
-                            {/* Table Header */}
                             <View style={globalStyles.tableRow}>
                                 <Text style={globalStyles.tableHeader}>Starts At</Text>
                                 <Text style={globalStyles.tableHeader}>Flips At</Text>
                             </View>
-
-                            {/* Table Row */}
                             <View style={globalStyles.tableRow}>
                                 <Text style={globalStyles.tableCell}>{formatTime(steak.firstSideTime + steak.secondSideTime)}</Text>
                                 <Text style={globalStyles.tableCell}>{formatTime(steak.secondSideTime)}</Text>

@@ -9,8 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { Steak } from '../data/SteakData';
+import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
+import { useSavedSteaks } from '../contexts/SavedSteaksContext';
 
 interface Props {
   visible: boolean;
@@ -23,6 +24,8 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
   const [thickness, setThickness] = useState('');
+  const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
+  const { savedSteaks } = useSavedSteaks();
 
 
   const centerCookOptions = [
@@ -53,6 +56,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       setCenterCook('');
       setThickness('');
     }
+    setSelectedSavedSteak(null);
   }, [editingSteak]);
 
   const handleSave = () => {
@@ -64,11 +68,25 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     var thicknessNumber = Number(thickness);
     const steak = new Steak(personName, centerCook, thicknessNumber);
 
+    if (selectedSavedSteak) {
+      steak.savedSteak = selectedSavedSteak;
+    }
+
     onSave(steak);
     onClose();
+    clearInputs();
+  };
+
+  const clearInputs = () => {
     setPersonName('');
     setThickness('');
     setCenterCook('');
+    setSelectedSavedSteak(null);
+  };
+
+  const handleClose = () => {
+    clearInputs();
+    onClose();
   };
 
   const personNameInputRef = useRef<TextInput>(null);
@@ -81,12 +99,21 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     Keyboard.dismiss();
   };
 
+  const handleDropdownChange = (item: SavedSteak) => {
+    if (item) {
+      setSelectedSavedSteak(item);
+      setCenterCook(item.centerCook);
+      setPersonName(item.personName);
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
+      presentationStyle={'overFullScreen'}
     >
       <View style={globalStyles.modalOverlay}>
         <View style={globalStyles.modalContent}>
@@ -94,16 +121,37 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
             <Text style={globalStyles.modalTitle}>
               {editingSteak ? 'Edit Steak' : 'Add Steak'}
             </Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={handleClose}>
               <Text style={globalStyles.closeButton}>✕</Text>
             </TouchableOpacity>
           </View>
+          ({savedSteaks.length > 0 && !editingSteak ? (
+            <Dropdown
+              style={globalStyles.dropdown}
+              selectedTextStyle={globalStyles.selectedTextStyle}
+              data={savedSteaks}
+              labelField="personName"
+              valueField="id"
+              placeholder="Select a saved steak"
+              value={selectedSavedSteak}
+              onChange={handleDropdownChange}
+            />
+          ) : null})
+
+          ({selectedSavedSteak ? (
+            <TouchableOpacity style={globalStyles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
+              <Text style={globalStyles.clearButton}>
+                Clear Saved
+              </Text>
+            </TouchableOpacity>
+          ) : null})
 
           <Text style={globalStyles.label}>Person Name:</Text>
           <TextInput
             ref={personNameInputRef}
             style={globalStyles.input}
             placeholder="Person Name"
+            placeholderTextColor={'#aaa'}
             value={personName}
             onChangeText={setPersonName}
             enterKeyHint={'done'}
@@ -141,7 +189,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
           <View style={globalStyles.buttonContainer}>
             <TouchableOpacity
               style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={onClose}
+              onPress={handleClose}
             >
               <Text style={globalStyles.buttonText}>Cancel</Text>
             </TouchableOpacity>

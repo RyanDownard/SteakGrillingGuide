@@ -5,7 +5,14 @@ import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
 import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
-import { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, Steak } from '../data/SteakData.tsx';
+import {
+  addSteak,
+  editSteak,
+  getSteaks,
+  getCookingTimes,
+  updateSteaks,
+  Steak,
+} from '../data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal.tsx';
@@ -343,7 +350,11 @@ const Home = () => {
           No Steaks Added
         </Text>
       )}
-      <SteakList steaks={steaks} onEdit={handleEdit} onDelete={showDeleteConfirm} actionsDisabled={timerRunning} />
+      <SteakList
+        steaks={steaks}
+        onEdit={handleEdit}
+        onDelete={showDeleteConfirm}
+        actionsDisabled={timerRunning} />
 
       <SteakModal
         visible={modalVisible}

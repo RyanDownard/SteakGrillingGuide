@@ -19,6 +19,7 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
     >
       <View style={globalStyles.modalOverlay}>
         <View style={globalStyles.modalContent}>

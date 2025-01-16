@@ -9,8 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { Steak } from '../data/SteakData';
+import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
+import { useSavedSteaks } from '../contexts/SavedSteaksContext';
 
 interface Props {
   visible: boolean;
@@ -22,7 +23,9 @@ interface Props {
 const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
-  const [thickness, setThickness] = useState(0);
+  const [thickness, setThickness] = useState('');
+  const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
+  const { savedSteaks } = useSavedSteaks();
 
 
   const centerCookOptions = [
@@ -34,29 +37,30 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   ];
 
   const thicknessOptions = [
-    { label: '0.5', value: 0.5 },
-    { label: '0.75', value: 0.75 },
-    { label: '1.0', value: 1.0 },
-    { label: '1.25', value: 1.25 },
-    { label: '1.5', value: 1.5 },
-    { label: '1.75', value: 1.75 },
-    { label: '2.0', value: 2.0 },
+    { label: '0.5', value: '0.5' },
+    { label: '0.75', value: '0.75' },
+    { label: '1.0', value: '1.0' },
+    { label: '1.25', value: '1.25' },
+    { label: '1.5', value: '1.5' },
+    { label: '1.75', value: '1.75' },
+    { label: '2.0', value: '2.0' },
   ];
 
   useEffect(() => {
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
-      setThickness(editingSteak.thickness);
+      setThickness(editingSteak.thickness.toString());
     } else {
       setPersonName('');
       setCenterCook('');
-      setThickness(0);
+      setThickness('');
     }
+    setSelectedSavedSteak(null);
   }, [editingSteak]);
 
   const handleSave = () => {
-    if (personName.length === 0 || centerCook.length === 0 || thickness === 0) {
+    if (personName.length === 0 || centerCook.length === 0 || thickness === '') {
       Alert.alert('Name, center cook, and thickness must have a value before saving.');
       return;
     }
@@ -64,11 +68,25 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     var thicknessNumber = Number(thickness);
     const steak = new Steak(personName, centerCook, thicknessNumber);
 
+    if (selectedSavedSteak) {
+      steak.savedSteak = selectedSavedSteak;
+    }
+
     onSave(steak);
     onClose();
+    clearInputs();
+  };
+
+  const clearInputs = () => {
     setPersonName('');
-    setThickness(0);
+    setThickness('');
     setCenterCook('');
+    setSelectedSavedSteak(null);
+  };
+
+  const handleClose = () => {
+    clearInputs();
+    onClose();
   };
 
   const personNameInputRef = useRef<TextInput>(null);
@@ -81,12 +99,21 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     Keyboard.dismiss();
   };
 
+  const handleDropdownChange = (item: SavedSteak) => {
+    if (item) {
+      setSelectedSavedSteak(item);
+      setCenterCook(item.centerCook);
+      setPersonName(item.personName);
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
+      presentationStyle={'overFullScreen'}
     >
       <View style={globalStyles.modalOverlay}>
         <View style={globalStyles.modalContent}>
@@ -94,16 +121,37 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
             <Text style={globalStyles.modalTitle}>
               {editingSteak ? 'Edit Steak' : 'Add Steak'}
             </Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity onPress={handleClose}>
               <Text style={globalStyles.closeButton}>✕</Text>
             </TouchableOpacity>
           </View>
+          ({savedSteaks.length > 0 && !editingSteak ? (
+            <Dropdown
+              style={globalStyles.dropdown}
+              selectedTextStyle={globalStyles.selectedTextStyle}
+              data={savedSteaks}
+              labelField="personName"
+              valueField="id"
+              placeholder="Select a saved steak"
+              value={selectedSavedSteak}
+              onChange={handleDropdownChange}
+            />
+          ) : null})
+
+          ({selectedSavedSteak ? (
+            <TouchableOpacity style={globalStyles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
+              <Text style={globalStyles.clearButton}>
+                Clear Saved
+              </Text>
+            </TouchableOpacity>
+          ) : null})
 
           <Text style={globalStyles.label}>Person Name:</Text>
           <TextInput
             ref={personNameInputRef}
             style={globalStyles.input}
             placeholder="Person Name"
+            placeholderTextColor={'#aaa'}
             value={personName}
             onChangeText={setPersonName}
             enterKeyHint={'done'}
@@ -141,7 +189,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
           <View style={globalStyles.buttonContainer}>
             <TouchableOpacity
               style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={onClose}
+              onPress={handleClose}
             >
               <Text style={globalStyles.buttonText}>Cancel</Text>
             </TouchableOpacity>

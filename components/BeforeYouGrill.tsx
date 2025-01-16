@@ -19,18 +19,16 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
     >
       <View style={globalStyles.modalOverlay}>
         <View style={globalStyles.modalContent}>
-          {/* Modal Header */}
           <View style={globalStyles.modalHeader}>
             <Text style={globalStyles.modalTitle}>Before You Grill</Text>
             <TouchableOpacity onPress={onClose}>
               <Text style={globalStyles.closeButton}>✕</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Modal Body */}
           <Text style={globalStyles.modalSubtitle}>
             Before you get started on your steaks, we have some suggestions for preparing and cooking your steak:
           </Text>

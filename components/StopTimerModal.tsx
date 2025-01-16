@@ -23,15 +23,12 @@ const StopTimerModal: React.FC<StopTimerModalProps> = ({ visible, onClose, onSto
         >
             <View style={globalStyles.modalOverlay}>
                 <View style={globalStyles.modalContent}>
-                    {/* Modal Header */}
                     <View style={globalStyles.modalHeader}>
                         <Text style={globalStyles.modalTitle}>Stop Timer</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Text style={globalStyles.closeButton}>✕</Text>
                         </TouchableOpacity>
                     </View>
-
-                    {/* Modal Body */}
                     <Text style={globalStyles.modalSubtitle}>
                         Are you sure you want to stop the timer?
                     </Text>

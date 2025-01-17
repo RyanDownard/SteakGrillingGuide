@@ -122,7 +122,7 @@ const removeAnySavedSteakInfo = (id: number) => {
       steak.savedSteak = null;
     }
   });
-}
+};
 
 const getSteaks = () => {
   return steaks;

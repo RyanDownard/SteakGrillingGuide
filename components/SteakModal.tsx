@@ -50,13 +50,16 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
-      setThickness(editingSteak.thickness.toString());
+      setThickness(editingSteak.thickness.toFixed(1).toString());
+      if (editingSteak.savedSteak) {
+        setSelectedSavedSteak(editingSteak.savedSteak);
+      }
     } else {
       setPersonName('');
       setCenterCook('');
       setThickness('');
+      setSelectedSavedSteak(null);
     }
-    setSelectedSavedSteak(null);
   }, [editingSteak]);
 
   const handleSavedDetailsChanged = () => {
@@ -76,23 +79,24 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     const steak = new Steak(personName, centerCook, thicknessNumber);
 
     if (selectedSavedSteak) {
-      if(personName !== selectedSavedSteak.personName
-        || centerCook !== selectedSavedSteak.centerCook){
-          Alert.alert(
-            'Details Changed',
-            'You selected a saved steak and changed the details, do you want to update the saved steak?',
-            [
-              {
-                text: 'Yes',
-                onPress: () => handleSavedDetailsChanged(),
-              },
-              {
-                text: 'No',
-              },
-            ],
-            {cancelable: false},
-          );
-        }
+      if (personName !== selectedSavedSteak.personName
+        || centerCook !== selectedSavedSteak.centerCook) {
+        Alert.alert(
+          'Details Changed',
+          'You selected a saved steak and changed the details, do you want to update the saved steak?',
+          [
+            {
+              text: 'Yes',
+              onPress: () => handleSavedDetailsChanged(),
+            },
+            {
+              text: 'No',
+              onPress: () => { steak.savedSteak = null; },
+            },
+          ],
+          { cancelable: false },
+        );
+      }
 
       steak.savedSteak = selectedSavedSteak;
     }
@@ -117,10 +121,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const personNameInputRef = useRef<TextInput>(null);
 
   const handleDismissKeyboard = () => {
-    // Call .blur() on all TextInputs to dismiss the keyboard
     personNameInputRef.current?.blur();
-
-    // Alternatively, you can use this to dismiss the keyboard globally:
     Keyboard.dismiss();
   };
 
@@ -150,7 +151,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
               <Text style={globalStyles.closeButton}>✕</Text>
             </TouchableOpacity>
           </View>
-          ({savedSteaks.length > 0 && !editingSteak ? (
+          ({savedSteaks.length > 0 && (
             <Dropdown
               style={globalStyles.dropdown}
               selectedTextStyle={globalStyles.selectedTextStyle}
@@ -161,15 +162,15 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
               value={selectedSavedSteak}
               onChange={handleDropdownChange}
             />
-          ) : null})
+          )})
 
-          ({selectedSavedSteak ? (
+          ({selectedSavedSteak && (
             <TouchableOpacity style={globalStyles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
               <Text style={globalStyles.clearButton}>
                 Clear Saved
               </Text>
             </TouchableOpacity>
-          ) : null})
+          )})
 
           <Text style={globalStyles.label}>Person Name:</Text>
           <TextInput

@@ -28,6 +28,7 @@ const globalStyles = StyleSheet.create({
     closeButton: {
         fontSize: 20,
         color: '#333',
+        padding: 10,
     },
     modalSubtitle: {
         fontSize: 16,

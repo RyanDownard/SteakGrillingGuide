@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SavedSteak, removeAnySavedSteakInfo } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import globalStyles from '../styles/globalStyles';
 import { useSavedSteaks } from '../contexts/SavedSteaksContext';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
-
-
 
 const SavedSteaks = () => {
     const { savedSteaks, removeSavedSteak } = useSavedSteaks();
@@ -20,8 +18,23 @@ const SavedSteaks = () => {
     };
 
     const handleDeleteSteak = (steak: SavedSteak) => {
-        removeSavedSteak(steak);
-        removeAnySavedSteakInfo(steak.id);
+        Alert.alert(
+            'Delete Saved Steak?',
+            `Are you sure you want to delete saved steak for ${steak.personName}?`,
+            [
+                {
+                    text: 'Yes',
+                    onPress: () => {
+                        removeSavedSteak(steak.id);
+                        removeAnySavedSteakInfo(steak.id);
+                    },
+                },
+                {
+                    text: 'No',
+                },
+            ],
+            { cancelable: false },
+        );
     };
 
     return (
@@ -36,7 +49,7 @@ const SavedSteaks = () => {
                         <TouchableOpacity onPress={() => handleEditSteak(item)} style={[globalStyles.actionButton, globalStyles.editButton]}>
                             <FontAwesomeIcon icon={faPencil} size={24} color={'#e3cf17'} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteSteak(item.id)} style={[globalStyles.actionButton, globalStyles.deleteButton]}>
+                        <TouchableOpacity onPress={() => handleDeleteSteak(item)} style={[globalStyles.actionButton, globalStyles.deleteButton]}>
                             <FontAwesomeIcon icon={faTrash} size={24} color={'#c70404'} />
                         </TouchableOpacity>
                     </View>
@@ -44,9 +57,9 @@ const SavedSteaks = () => {
             />
 
             <EditSavedSteakModal
-                onClose={() => {setEditSavedSteakmodalVisible(false); setEditingSteak(null)}}
+                onClose={() => { setEditSavedSteakmodalVisible(false); setEditingSteak(null); }}
                 visible={editSavedSteakModalVisible}
-                editingSteak={editingSteak}/>
+                editingSteak={editingSteak} />
 
         </View>
     );

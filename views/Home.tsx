@@ -15,7 +15,6 @@ import {
 } from '../data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import ConfirmDeleteModal from '../components/ConfirmDeleteModal.tsx';
 import { formatTime } from '../data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
@@ -29,8 +28,6 @@ const Home = () => {
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [steaks, setSteaks] = useState(getSteaks());
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [steakToDelete, setSteakToDelete] = useState<Steak | null>(null);
   const [longestTime, setLongestTime] = useState(0);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -129,10 +126,6 @@ const Home = () => {
     setStopTimerModalVisible(true);
   };
 
-  const showDeleteConfirm = (steak: Steak) => {
-    setSteakToDelete(steak);
-    setDeleteModalVisible(true);
-  };
 
   const handleSave = (steak: Steak) => {
     if (editingSteak) {
@@ -157,12 +150,29 @@ const Home = () => {
     setModalVisible(true);
   };
 
-  const handleDelete = () => {
+  const showDeleteConfirm = (steakToDelete: Steak) => {
+    Alert.alert(
+      'Delete Steak?',
+      `Are you sure you want to delete ${steakToDelete.personName}'s steak?`,
+      [
+        {
+          text: 'Yes',
+          onPress: () => handleDelete(steakToDelete),
+        },
+        {
+          text: 'No',
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+
+  const handleDelete = (steakToDelete: Steak) => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
       setSteaks(updatedSteaks);
-      setDeleteModalVisible(false);
-      setSteakToDelete(null);
+      // setDeleteModalVisible(false);
+      // setSteakToDelete(null);
 
       updateSteaks(updatedSteaks);
 
@@ -344,7 +354,7 @@ const Home = () => {
         <Text style={styles.longestTime}>
           {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(longestTime)}
         </Text>
-      )}x
+      )}
       {(!steaks || steaks.length === 0) && (
         <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added
@@ -366,22 +376,20 @@ const Home = () => {
         editingSteak={editingSteak}
       />
 
-      <BeforeYouGrill visible={beforeYouGrillVisible} onClose={() => setBeforeYouGrillVisible(false)} />
+      <BeforeYouGrill
+        visible={beforeYouGrillVisible} onClose={() => setBeforeYouGrillVisible(false)}
+        />
 
-      <StopTimerModal visible={stopTimerModalVisible} onClose={() => setStopTimerModalVisible(false)} onStop={stopTimer} />
+      <StopTimerModal
+        visible={stopTimerModalVisible} onClose={() => setStopTimerModalVisible(false)}
+        onStop={stopTimer}
+        />
 
       <StartTimerModal
         visible={startTimeModalVisible}
         steaks={steaks}
         onClose={() => setStartTimerModalVisible(false)}
         onStart={startTimer}
-      />
-
-      <ConfirmDeleteModal
-        deleteModalVisible={deleteModalVisible}
-        steakToDelete={steakToDelete}
-        setDeleteModalVisible={() => setDeleteModalVisible(false)}
-        handleDelete={handleDelete}
       />
     </SafeAreaView>
   );

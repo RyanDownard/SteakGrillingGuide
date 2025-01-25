@@ -48,7 +48,7 @@ class SavedSteak {
     id: number,
     personName: string,
     centerCook: string,
-  ){
+  ) {
     this.id = id;
     this.personName = personName;
     this.centerCook = centerCook;
@@ -104,7 +104,7 @@ const editSteak = (index: number, updatedSteak: Steak) => {
 };
 
 const updateSteaks = (newSteaks: Steak[]) => {
-  steaks = newSteaks;
+  steaks = [...newSteaks];
 };
 
 const updateSteaksWithSavedId = (updatedInfo: SavedSteak) => {
@@ -130,4 +130,4 @@ const getSteaks = () => {
 
 
 
-export { addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, updateSteaksWithSavedId, removeAnySavedSteakInfo, Steak, SavedSteak };
+export { steaks, addSteak, editSteak, getSteaks, getCookingTimes, updateSteaks, updateSteaksWithSavedId, removeAnySavedSteakInfo, Steak, SavedSteak };

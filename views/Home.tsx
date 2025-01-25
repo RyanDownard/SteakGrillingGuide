@@ -15,10 +15,10 @@ import {
 } from '../data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import { formatTime } from '../data/Helpers.tsx';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTimer } from '../contexts/TimerContext.tsx';
 
 
 const Home = () => {
@@ -28,10 +28,7 @@ const Home = () => {
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [steaks, setSteaks] = useState(getSteaks());
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
-  const [longestTime, setLongestTime] = useState(0);
-  const [endTime, setEndTime] = useState<Date | null>(null);
-  const [remainingTime, setRemainingTime] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
+  const { duration, timerRunning, endTime, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
 
   library.add(fas);
 
@@ -85,7 +82,7 @@ const Home = () => {
 
     steaksToGroup.forEach((steak) => {
       let time = 0;
-      let diffTime = longestTime - steak.totalCookingTime();
+      let diffTime = duration - steak.totalCookingTime();
       if (action === 'place') {
         time = steak.totalCookingTime();
       }
@@ -107,7 +104,7 @@ const Home = () => {
       await scheduleNotification(
         'Place Steaks',
         `It's time to place ${names.join(' and ')}'s ${names.length === 1 ? 'steak' : 'steaks'} on the grill!`,
-        longestTime - Number(time)
+        duration - Number(time)
       );
     }
 
@@ -143,7 +140,7 @@ const Home = () => {
     setSteaks(updatedSteaks);
     setEditingSteak(null);
 
-    setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+    setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
   };
 
   const handleOnAddSteak = () => {
@@ -170,23 +167,18 @@ const Home = () => {
   const handleDelete = (steakToDelete: Steak) => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
+
       setSteaks(updatedSteaks);
-      // setDeleteModalVisible(false);
-      // setSteakToDelete(null);
-
       updateSteaks(updatedSteaks);
-
-      setLongestTime(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+      setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     }
   };
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
-    setTimerRunning(false);
-    setRemainingTime(0);
-    setLongestTime(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+    stopContextTimer();
+    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     notifee.cancelAllNotifications();
-    await AsyncStorage.removeItem('steakTimerData');
   };
 
   const startTimer = async () => {
@@ -213,7 +205,7 @@ const Home = () => {
 
     setStartTimerModalVisible(false);
     const now = new Date();
-    const calculatedEndTime = new Date(now.getTime() + longestTime * 1000);
+    const calculatedEndTime = new Date(now.getTime() + duration * 1000);
     setEndTime(calculatedEndTime);
     setTimerRunning(true);
 
@@ -221,7 +213,7 @@ const Home = () => {
       const dataToSave = {
         steaks,
         endTime: calculatedEndTime.toISOString(),
-        remainingTime: longestTime,
+        remainingTime: duration,
       };
       await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
       console.log('Timer and steaks saved.');
@@ -293,7 +285,7 @@ const Home = () => {
             setEndTime(endsAt);
             setRemainingTime(diffInSeconds);
             setTimerRunning(true);
-            setLongestTime(Math.max(...savedSteaks.map((calcSteak: Steak) => calcSteak.totalCookingTime())));
+            setDuration(Math.max(...savedSteaks.map((calcSteak: Steak) => calcSteak.totalCookingTime())));
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
@@ -307,7 +299,7 @@ const Home = () => {
     };
 
     loadSteakData();
-  }, []);
+  }, [setDuration, setEndTime, setRemainingTime, setTimerRunning]);
 
 
   //timer functionality
@@ -331,7 +323,7 @@ const Home = () => {
     }
 
     return () => clearInterval(timer);
-  }, [timerRunning, endTime]);
+  }, [timerRunning, endTime, setRemainingTime, setTimerRunning]);
 
   const handleEdit = (steak: any) => {
     setEditingSteak(steak);
@@ -350,11 +342,11 @@ const Home = () => {
         pauseEnabled={timerRunning}
         startEnabled={!timerRunning && steaks.length > 0}
       />
-      {steaks && steaks.length > 0 && (
+      {/* {steaks && steaks.length > 0 && (
         <Text style={styles.longestTime}>
-          {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(longestTime)}
+          {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(duration)}
         </Text>
-      )}
+      )} */}
       {(!steaks || steaks.length === 0) && (
         <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added

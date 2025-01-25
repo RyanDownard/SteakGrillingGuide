@@ -8,6 +8,8 @@ import { faSave, faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { SavedSteaksProvider } from './contexts/SavedSteaksContext';
 import notifee from '@notifee/react-native';
+import { TimerProvider } from './contexts/TimerContext';
+import Timer from './components/Timer';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,25 +35,28 @@ const App = () => {
   }, []);
 
   return (
-    <SavedSteaksProvider>
-      <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerTitle: 'Steak Grilling Guide',
-              tabBarIcon: homeIcon,
-            }} />
-          <Tab.Screen
-            name="Saved Steaks"
-            component={SavedSteaks}
-            options={{
-              tabBarIcon: savedSteakIcon,
-            }} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </SavedSteaksProvider>
+    <TimerProvider>
+      <SavedSteaksProvider>
+        <NavigationContainer>
+          <Timer/>
+          <Tab.Navigator>
+            <Tab.Screen
+              name="Home"
+              component={Home}
+              options={{
+                headerTitle: 'Steak Grilling Guide',
+                tabBarIcon: homeIcon,
+              }} />
+            <Tab.Screen
+              name="Saved Steaks"
+              component={SavedSteaks}
+              options={{
+                tabBarIcon: savedSteakIcon,
+              }} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </SavedSteaksProvider>
+    </TimerProvider>
   );
 };
 

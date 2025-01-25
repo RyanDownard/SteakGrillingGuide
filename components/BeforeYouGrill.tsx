@@ -53,8 +53,6 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
             </Text>
             <Text style={globalStyles.modalItem}>- Enjoy!</Text>
           </View>
-
-          {/* Close Button */}
           <TouchableOpacity onPress={onClose} style={globalStyles.modalFooter}>
             <Text style={globalStyles.modalFooterText}>Close</Text>
           </TouchableOpacity>

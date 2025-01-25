@@ -60,7 +60,7 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                         cooked.
                     </Text>
 
-                    ({longestTimeSteaks.length > 0 ? (
+                    ({longestTimeSteaks.length > 0 && (
                         <FlatList
                             data={longestTimeSteaks}
                             keyExtractor={(item: Steak) => item.personName}
@@ -72,11 +72,11 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                                     </Text>
                                 </View>}
                         />
-                    ) : null})
+                    )})
 
-                    ({longestTimeSteaks.length === 0 ? (
+                    ({longestTimeSteaks.length === 0 && (
                         <Text>No steaks added yet.</Text>
-                    ) : null})
+                    )})
                     <View style={globalStyles.footerButtons}>
                         <TouchableOpacity
                             onPress={onClose}

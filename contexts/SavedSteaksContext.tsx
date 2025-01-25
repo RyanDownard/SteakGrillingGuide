@@ -73,13 +73,31 @@ export const SavedSteaksProvider = ({ children }: { children: React.ReactNode })
             favoritesArray.push(savedSteakInfo);
             await AsyncStorage.setItem(SAVED_STEAKS_STORAGE_KEY, JSON.stringify(favoritesArray));
             setSavedSteaks(favoritesArray);
+            steakToSave.savedSteak = savedSteakInfo;
             Alert.alert('Steak saved!');
-            return savedSteakInfo;
         } catch (error) {
             Alert.alert('An error occured while attempting to remove steak');
             console.error('Failed to save favorite steak:', error);
         }
     };
+
+    const updateSavedSteak = async (savedSteak: SavedSteak) => {
+        const favorites = await AsyncStorage.getItem(SAVED_STEAKS_STORAGE_KEY);
+        const favoritesArray = favorites ? JSON.parse(favorites) : [];
+        let indexOf = favoritesArray.findIndex((steak: SavedSteak) => steak.id === savedSteak.id);
+
+        if(indexOf >= 0){
+            favoritesArray[indexOf] = savedSteak;
+        }
+        else{
+            Alert.alert('Failed to find saved steak to update.');
+        }
+
+        await AsyncStorage.setItem(SAVED_STEAKS_STORAGE_KEY, JSON.stringify(favoritesArray));
+
+        setSavedSteaks(favoritesArray);
+    };
+
     const removeSavedSteak = async (id: number) => {
         const favorites = await AsyncStorage.getItem(SAVED_STEAKS_STORAGE_KEY);
         const favoritesArray = favorites ? JSON.parse(favorites) : [];
@@ -93,7 +111,7 @@ export const SavedSteaksProvider = ({ children }: { children: React.ReactNode })
     };
 
     return (
-        <SavedSteaksContext.Provider value={{ savedSteaks, addSavedSteak, removeSavedSteak }}>
+        <SavedSteaksContext.Provider value={{ savedSteaks, addSavedSteak, removeSavedSteak, updateSavedSteak }}>
             {children}
         </SavedSteaksContext.Provider>
     );

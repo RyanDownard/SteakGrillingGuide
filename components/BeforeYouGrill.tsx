@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   Modal,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import globalStyles from '../styles/globalStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 interface GrillInfoModalProps {
   visible: boolean;
@@ -13,6 +16,33 @@ interface GrillInfoModalProps {
 }
 
 const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => {
+  const [hideOnStart, setHideOnStart] = useState(false);
+
+  const checkShowBeforeYouGrillModal = async () => {
+    try {
+      const value = await AsyncStorage.getItem('hideInfoModalOnStart');
+      console.log(value);
+      if (value === undefined) {
+        setHideOnStart(true);
+      }
+      else {
+        setHideOnStart(value === 'true');
+      }
+    } catch (error) {
+      console.error('Error reading stored value:', error);
+    }
+  };
+
+  const handleHideOnStartChecked = async (isChecked: boolean) => {
+    setHideOnStart(isChecked);
+
+    await AsyncStorage.setItem('hideInfoModalOnStart', isChecked.toString());
+  };
+
+  useEffect(() => {
+    checkShowBeforeYouGrillModal();
+  }, []);
+
   return (
     <Modal
       visible={visible}
@@ -52,6 +82,19 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
               - Verify steaks are properly cooked before eating.
             </Text>
             <Text style={globalStyles.modalItem}>- Enjoy!</Text>
+            <View style={styles.checkBoxContainer}>
+              <BouncyCheckbox
+                size={25}
+                isChecked={hideOnStart}
+                fillColor="grey"
+                disableText={true}
+                unFillColor="#FFFFFF"
+                iconStyle={styles.iconStyling}
+                innerIconStyle={styles.innerIconStyling}
+                onPress={(isChecked: boolean) => { handleHideOnStartChecked(isChecked); }}
+              />
+              <Text style={styles.dontShowStyling}>Do not show on start</Text>
+            </View>
           </View>
           <TouchableOpacity onPress={onClose} style={globalStyles.modalFooter}>
             <Text style={globalStyles.modalFooterText}>Close</Text>
@@ -61,5 +104,23 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  checkBoxContainer: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  iconStyling: {
+    borderColor: 'grey',
+  },
+  innerIconStyling: {
+    borderWidth: 2,
+  },
+  dontShowStyling: {
+    fontWeight: 'bold',
+    paddingTop: 5,
+    marginLeft: 10,
+  },
+});
 
 export default BeforeYouGrill;

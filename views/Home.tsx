@@ -265,6 +265,22 @@ const Home = () => {
     );
   };
 
+  const handleEdit = (steak: any) => {
+    setEditingSteak(steak);
+    setModalVisible(true);
+  };
+
+  const checkShowBeforeYouGrillModal = async () => {
+    try {
+      const value = await AsyncStorage.getItem('hideInfoModalOnStart');
+      if (value === undefined || value !== 'true') {
+        setBeforeYouGrillVisible(true);
+      }
+    } catch (error) {
+      console.error('Error reading stored value:', error);
+    }
+  };
+
   //handles returning and the app has crashed
   useEffect(() => {
     const loadSteakData = async () => {
@@ -325,10 +341,9 @@ const Home = () => {
     return () => clearInterval(timer);
   }, [timerRunning, endTime, setRemainingTime, setTimerRunning]);
 
-  const handleEdit = (steak: any) => {
-    setEditingSteak(steak);
-    setModalVisible(true);
-  };
+  useEffect(() => {
+    checkShowBeforeYouGrillModal();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

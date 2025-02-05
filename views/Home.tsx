@@ -28,7 +28,7 @@ const Home = () => {
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [steaks, setSteaks] = useState(getSteaks());
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
-  const { duration, timerRunning, endTime, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
+  const { duration, timerRunning, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
 
   library.add(fas);
 
@@ -235,7 +235,7 @@ const Home = () => {
 
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: date.getTime(), 
+      timestamp: date.getTime(),
     };
 
     await notifee.createTriggerNotification(

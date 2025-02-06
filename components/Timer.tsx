@@ -1,11 +1,12 @@
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useTimer } from '../contexts/TimerContext';
-import { steaks } from '../data/SteakData';
+import { useSteakContext } from '../contexts/SteaksContext.tsx';
 import { formatTime } from '../data/Helpers';
 
 const Timer = () => {
     const { duration, remainingTime, timerRunning } = useTimer();
+    const { steaks } = useSteakContext();
 
     return (
         <SafeAreaView style={[steaks && steaks.length > 0 ? styles.container : styles.noDisplay]}>

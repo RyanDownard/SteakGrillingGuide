@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { SavedSteak, removeAnySavedSteakInfo } from '../data/SteakData';
+import { SavedSteak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import globalStyles from '../styles/globalStyles';
 import { useSavedSteaks } from '../contexts/SavedSteaksContext';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
+import { useSteakContext } from '../contexts/SteaksContext.tsx';
 
 const SavedSteaks = () => {
+    const { removeAnySavedSteakInfo } = useSteakContext();
     const { savedSteaks, removeSavedSteak } = useSavedSteaks();
     const [editingSteak, setEditingSteak] = useState<SavedSteak | null>(null);
     const [editSavedSteakModalVisible, setEditSavedSteakmodalVisible] = useState(false);

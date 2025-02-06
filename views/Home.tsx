@@ -5,30 +5,24 @@ import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
 import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
-import {
-  addSteak,
-  editSteak,
-  getSteaks,
-  getCookingTimes,
-  updateSteaks,
-  Steak,
-} from '../data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimer } from '../contexts/TimerContext.tsx';
+import { useSteakContext } from '../contexts/SteaksContext.tsx';
+import { Steak } from '../data/SteakData.tsx';
 
 
 const Home = () => {
+  const { duration, timerRunning, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
+  const { steaks, addSteak, editSteak, updateSteaks } = useSteakContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
-  const [steaks, setSteaks] = useState(getSteaks());
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
-  const { duration, timerRunning, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
 
   library.add(fas);
 
@@ -125,18 +119,9 @@ const Home = () => {
       const index = steaks.indexOf(editingSteak);
       editSteak(index, steak);
     } else {
-      const cookingTimes = getCookingTimes(steak.centerCook, steak.thickness);
-
-      steak.firstSideTime = cookingTimes?.firstSide ?? 0;
-      steak.secondSideTime = cookingTimes?.secondSide ?? 0;
-
       addSteak(steak);
     }
-    const updatedSteaks = [...getSteaks()];
-    setSteaks(updatedSteaks);
     setEditingSteak(null);
-
-    setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
   };
 
   const handleOnAddSteak = () => {
@@ -164,16 +149,13 @@ const Home = () => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
 
-      setSteaks(updatedSteaks);
       updateSteaks(updatedSteaks);
-      setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     }
   };
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
     stopContextTimer();
-    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     notifee.cancelAllNotifications();
   };
 
@@ -274,6 +256,10 @@ const Home = () => {
   };
 
   useEffect(() => {
+    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+  }, [steaks, setDuration]);
+
+  useEffect(() => {
     const loadSteakData = async () => {
       try {
         const savedData = await AsyncStorage.getItem('steakTimerData');
@@ -286,12 +272,10 @@ const Home = () => {
           const diffInSeconds = Math.floor((endsAt.getTime() - now.getTime()) / 1000);
 
           if (diffInSeconds > 0) {
-            setSteaks(savedSteaks);
             updateSteaks(savedSteaks);
             setEndTime(endsAt);
             setRemainingTime(diffInSeconds);
             setTimerRunning(true);
-            setDuration(Math.max(...savedSteaks.map((calcSteak: Steak) => calcSteak.totalCookingTime())));
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
@@ -305,7 +289,7 @@ const Home = () => {
     };
 
     loadSteakData();
-  }, [setDuration, setEndTime, setRemainingTime, setTimerRunning]);
+  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks]);
 
   useEffect(() => {
     checkShowBeforeYouGrillModal();

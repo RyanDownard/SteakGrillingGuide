@@ -12,7 +12,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import { useSavedSteaks } from '../contexts/SavedSteaksContext';
-import { updateSteaksWithSavedId } from '../data/SteakData';
+import { useSteakContext } from '../contexts/SteaksContext';
 
 interface Props {
   visible: boolean;
@@ -24,6 +24,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
   const { updateSavedSteak } = useSavedSteaks();
+  const { updateSteaksWithSavedId } = useSteakContext();
 
 
   const centerCookOptions = [
@@ -75,10 +76,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
   const personNameInputRef = useRef<TextInput>(null);
 
   const handleDismissKeyboard = () => {
-    // Call .blur() on all TextInputs to dismiss the keyboard
     personNameInputRef.current?.blur();
-
-    // Alternatively, you can use this to dismiss the keyboard globally:
     Keyboard.dismiss();
   };
 

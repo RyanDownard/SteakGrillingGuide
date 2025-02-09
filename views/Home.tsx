@@ -5,34 +5,27 @@ import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
 import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
-import {
-  addSteak,
-  editSteak,
-  getSteaks,
-  getCookingTimes,
-  updateSteaks,
-  Steak,
-} from '../data/SteakData.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTimer } from '../contexts/TimerContext.tsx';
+import { useSteakContext } from '../contexts/SteaksContext.tsx';
+import { Steak } from '../data/SteakData.tsx';
 
 
 const Home = () => {
+  const { duration, timerRunning, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
+  const { steaks, addSteak, editSteak, updateSteaks } = useSteakContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
-  const [steaks, setSteaks] = useState(getSteaks());
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
-  const { duration, timerRunning, endTime, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
 
   library.add(fas);
 
-  // Schedule a single notification using Notifee
   const scheduleNotification = async (title: string, body: string, secondsFromNow: number) => {
     try {
       const triggerTime = Date.now() + secondsFromNow * 1000;
@@ -76,7 +69,6 @@ const Home = () => {
     }
   };
 
-  // Group steaks by time and schedule grouped notifications
   const groupSteaksByTime = (steaksToGroup: Steak[], action: 'place' | 'flip') => {
     const grouped: Record<number, string[]> = {};
 
@@ -98,7 +90,6 @@ const Home = () => {
   };
 
   const scheduleGroupedNotifications = async (groupedSteaks: Steak[]) => {
-    // Place notifications
     const placeGrouped = groupSteaksByTime(groupedSteaks, 'place');
     for (const [time, names] of Object.entries(placeGrouped)) {
       await scheduleNotification(
@@ -108,7 +99,6 @@ const Home = () => {
       );
     }
 
-    // Flip notifications
     const flipGrouped = groupSteaksByTime(steaks, 'flip');
     for (const [time, names] of Object.entries(flipGrouped)) {
       await scheduleNotification(
@@ -129,18 +119,9 @@ const Home = () => {
       const index = steaks.indexOf(editingSteak);
       editSteak(index, steak);
     } else {
-      const cookingTimes = getCookingTimes(steak.centerCook, steak.thickness);
-
-      steak.firstSideTime = cookingTimes?.firstSide ?? 0;
-      steak.secondSideTime = cookingTimes?.secondSide ?? 0;
-
       addSteak(steak);
     }
-    const updatedSteaks = [...getSteaks()];
-    setSteaks(updatedSteaks);
     setEditingSteak(null);
-
-    setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
   };
 
   const handleOnAddSteak = () => {
@@ -168,16 +149,13 @@ const Home = () => {
     if (steakToDelete) {
       const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
 
-      setSteaks(updatedSteaks);
       updateSteaks(updatedSteaks);
-      setDuration(Math.max(...updatedSteaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     }
   };
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
     stopContextTimer();
-    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
     notifee.cancelAllNotifications();
   };
 
@@ -221,7 +199,6 @@ const Home = () => {
       console.error('Failed to save timer and steaks:', error);
     }
 
-    // Schedule notifications
     await scheduleGroupedNotifications(steaks);
     await scheduleCompleteNotification(calculatedEndTime);
   };
@@ -233,29 +210,26 @@ const Home = () => {
       id: 'steak-timer',
       name: 'Steak Timer Notifications',
       importance: 4,
-      sound: 'default', // Ensure the sound is set to default or a valid sound file
+      sound: 'default',
       vibration: true,
       lights: true,
     });
 
-    // Create a trigger for the notification
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: date.getTime(), // Convert date to milliseconds
+      timestamp: date.getTime(),
     };
 
-    // Create and schedule the notification
     await notifee.createTriggerNotification(
       {
         title: 'Steaks Ready',
         body: steaks.length === 1 ? 'Steak is done!' : 'Steaks are done!',
         android: {
-          channelId: channelId, // Ensure the channel exists
+          channelId: channelId,
           importance: 4,
-          sound: 'default', // Ensure the sound is set to default or a valid sound file
+          sound: 'default',
         },
         ios: {
-          // iOS resource (.wav, aiff, .caf)
           interruptionLevel: 'timeSensitive',
           sound: 'default',
 
@@ -281,7 +255,10 @@ const Home = () => {
     }
   };
 
-  //handles returning and the app has crashed
+  useEffect(() => {
+    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+  }, [steaks, setDuration]);
+
   useEffect(() => {
     const loadSteakData = async () => {
       try {
@@ -294,14 +271,11 @@ const Home = () => {
           const endsAt = new Date(savedEndTime);
           const diffInSeconds = Math.floor((endsAt.getTime() - now.getTime()) / 1000);
 
-          // If the timer should still be running
           if (diffInSeconds > 0) {
-            setSteaks(savedSteaks);
             updateSteaks(savedSteaks);
             setEndTime(endsAt);
             setRemainingTime(diffInSeconds);
             setTimerRunning(true);
-            setDuration(Math.max(...savedSteaks.map((calcSteak: Steak) => calcSteak.totalCookingTime())));
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
@@ -315,31 +289,7 @@ const Home = () => {
     };
 
     loadSteakData();
-  }, [setDuration, setEndTime, setRemainingTime, setTimerRunning]);
-
-
-  //timer functionality
-  useEffect(() => {
-    let timer: any;
-
-    if (timerRunning && endTime) {
-      timer = setInterval(async () => {
-        const now = new Date();
-        const diffInSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
-        if (diffInSeconds <= 0) {
-          clearInterval(timer);
-          setRemainingTime(0);
-          setTimerRunning(false);
-          await AsyncStorage.removeItem('steakTimerData');
-        }
-        else {
-          setRemainingTime(diffInSeconds);
-        }
-      }, 1000);
-    }
-
-    return () => clearInterval(timer);
-  }, [timerRunning, endTime, setRemainingTime, setTimerRunning]);
+  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks]);
 
   useEffect(() => {
     checkShowBeforeYouGrillModal();
@@ -357,11 +307,6 @@ const Home = () => {
         pauseEnabled={timerRunning}
         startEnabled={!timerRunning && steaks.length > 0}
       />
-      {/* {steaks && steaks.length > 0 && (
-        <Text style={styles.longestTime}>
-          {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(duration)}
-        </Text>
-      )} */}
       {(!steaks || steaks.length === 0) && (
         <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added

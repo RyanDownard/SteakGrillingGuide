@@ -9,6 +9,7 @@ interface SteakContextType {
     updateSteaks: (newSteaks: Steak[]) => void;
     updateSteaksWithSavedId: (updatedInfo: SavedSteak) => void;
     removeAnySavedSteakInfo: (id: number) => void;
+    updateSteaksStatus: (timeRemaining: number) => void;
     getSteaks: () => Steak[];
     getCookingTimes: (centerCook: string, thickness: number) => { firstSide: number; secondSide: number } | null;
 }
@@ -50,6 +51,33 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     : steak
             )
         );
+    };
+
+    const updateSteaksStatus = (remainingTime: number) => {
+        const steaksToPlace = steaks.filter((steak) => steak.firstSideTime + steak.secondSideTime < remainingTime && !steak.isPlaced);
+        if (steaksToPlace.length > 0) {
+            steaksToPlace.forEach((steakToPlace) => {
+                setSteaks((prevSteaks) =>
+                    prevSteaks.map((steak) =>
+                        steak === steakToPlace ? { ...steak, isPlaced: true, totalCookingTime: steak.totalCookingTime, description: steak.description } : steak
+                    )
+                );
+            });
+        }
+
+        const steaksToFlip = steaks.filter((steak) => steak.secondSideTime < remainingTime && !steak.isFlipped);
+
+        if(steaksToFlip.length > 0){
+            steaksToFlip.forEach((steakToFlip) => {
+                setSteaks((prevSteaks) =>
+                    prevSteaks.map((steak) =>
+                        steak === steakToFlip ? { ...steak, isFlipped: true, totalCookingTime: steak.totalCookingTime, description: steak.description } : steak
+                    )
+                );
+            });
+        }
+
+
     };
 
     const getSteaks = () => {

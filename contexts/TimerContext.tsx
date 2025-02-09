@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSteakContext } from './SteaksContext';
 
 const TimerContext = createContext<any>(null);
 
@@ -22,7 +23,6 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         setTimerRunning(true);
     };
 
-    //timer functionality
     useEffect(() => {
         let timer: any;
 

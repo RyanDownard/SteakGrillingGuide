@@ -59,13 +59,6 @@ class Steak {
     return this.firstSideTime + this.secondSideTime;
   }
 
-
-  description(): string {
-    return `${this.personName} wants their steak ${this.centerCook}. 
-Cook the first side for ${this.firstSideTime} seconds and the second side for ${this.secondSideTime} seconds. 
-Total time: ${this.totalCookingTime()} seconds.`;
-  }
-
   getCookingTimes = (
     centerCook: string,
     thickness: number

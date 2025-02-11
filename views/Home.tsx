@@ -16,7 +16,7 @@ import { Steak } from '../data/SteakData.tsx';
 
 
 const Home = () => {
-  const { duration, timerRunning, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
+  const { duration, timerRunning, endTime, startContextTimer, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
   const { steaks, addSteak, editSteak, updateSteaks } = useSteakContext();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
@@ -37,7 +37,7 @@ const Home = () => {
 
       await notifee.createChannel({
         id: 'sound',
-        name: 'Steak Timer Notifications',
+        name: `Steak Timer Notifications ${new Date(triggerTime)}`,
         sound: 'default',
       });
 
@@ -62,8 +62,6 @@ const Home = () => {
         },
         trigger
       );
-
-      console.log(`Notification scheduled: ${title} - ${body} at ${new Date(triggerTime)}`);
     } catch (error) {
       console.error('Error scheduling notification:', error);
     }
@@ -74,23 +72,25 @@ const Home = () => {
 
     steaksToGroup.forEach((steak) => {
       let time = 0;
-      let diffTime = duration - steak.totalCookingTime();
+      let diffTime = duration - (steak.firstSideTime + steak.secondSideTime);
       if (action === 'place') {
-        time = steak.totalCookingTime();
-      }
-      else if (action === 'flip') {
+        if ((steak.firstSideTime + steak.secondSideTime) === duration) { return; }
+        time = (steak.firstSideTime + steak.secondSideTime);
+      } else if (action === 'flip') {
         time = steak.firstSideTime + diffTime;
       }
-      console.log(time);
-      if (!grouped[time]) { grouped[time] = []; }
+
+      if (!grouped[time]) {
+        grouped[time] = [];
+      }
       grouped[time].push(steak.personName);
     });
 
     return grouped;
   };
 
-  const scheduleGroupedNotifications = async (groupedSteaks: Steak[]) => {
-    const placeGrouped = groupSteaksByTime(groupedSteaks, 'place');
+  const scheduleGroupedNotifications = async () => {
+    const placeGrouped = groupSteaksByTime(steaks, 'place');
     for (const [time, names] of Object.entries(placeGrouped)) {
       await scheduleNotification(
         'Place Steaks',
@@ -153,9 +153,18 @@ const Home = () => {
     }
   };
 
+  const resetSteakStatus = () => {
+    steaks.forEach((steak) => {
+      steak.isPlaced = false;
+      steak.isFlipped = false;
+    });
+    updateSteaks([...steaks]);
+  };
+
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
     stopContextTimer();
+    resetSteakStatus();
     notifee.cancelAllNotifications();
   };
 
@@ -182,25 +191,26 @@ const Home = () => {
     }
 
     setStartTimerModalVisible(false);
-    const now = new Date();
-    const calculatedEndTime = new Date(now.getTime() + duration * 1000);
-    setEndTime(calculatedEndTime);
-    setTimerRunning(true);
+    startContextTimer();
 
     try {
       const dataToSave = {
         steaks,
-        endTime: calculatedEndTime.toISOString(),
+        endTime: duration.toISOString(),
         remainingTime: duration,
       };
       await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
-      console.log('Timer and steaks saved.');
     } catch (error) {
       console.error('Failed to save timer and steaks:', error);
     }
 
-    await scheduleGroupedNotifications(steaks);
-    await scheduleCompleteNotification(calculatedEndTime);
+    try{
+      await scheduleGroupedNotifications();
+      await scheduleCompleteNotification(endTime);
+    }
+    catch(error){
+      console.error('Error while scheduling notifications', error);
+    }
   };
 
   const scheduleCompleteNotification = async (calculatedEndTime: Date) => {
@@ -330,12 +340,12 @@ const Home = () => {
 
       <BeforeYouGrill
         visible={beforeYouGrillVisible} onClose={() => setBeforeYouGrillVisible(false)}
-        />
+      />
 
       <StopTimerModal
         visible={stopTimerModalVisible} onClose={() => setStopTimerModalVisible(false)}
         onStop={stopTimer}
-        />
+      />
 
       <StartTimerModal
         visible={startTimeModalVisible}

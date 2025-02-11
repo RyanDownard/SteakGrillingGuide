@@ -9,6 +9,7 @@ interface SteakContextType {
     updateSteaks: (newSteaks: Steak[]) => void;
     updateSteaksWithSavedId: (updatedInfo: SavedSteak) => void;
     removeAnySavedSteakInfo: (id: number) => void;
+    handleSteaksWithLongestTime: (longestTime: number) => void;
     updateSteaksStatus: (timeRemaining: number) => void;
     getSteaks: () => Steak[];
     getCookingTimes: (centerCook: string, thickness: number) => { firstSide: number; secondSide: number } | null;
@@ -37,7 +38,7 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         setSteaks((prevSteaks) =>
             prevSteaks.map((steak) =>
                 steak.savedSteak && steak.savedSteak.id === updatedInfo.id
-                    ? { ...steak, personName: updatedInfo.personName, centerCook: updatedInfo.centerCook, thickness: steak.thickness, firstSideTime: steak.firstSideTime, secondSideTime: steak.secondSideTime, totalCookingTime: steak.totalCookingTime, description: steak.description }
+                    ? { ...steak, personName: updatedInfo.personName, centerCook: updatedInfo.centerCook, thickness: steak.thickness, firstSideTime: steak.firstSideTime, secondSideTime: steak.secondSideTime, totalCookingTime: steak.totalCookingTime }
                     : steak
             )
         );
@@ -47,31 +48,44 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         setSteaks((prevSteaks) =>
             prevSteaks.map((steak) =>
                 steak.savedSteak && steak.savedSteak.id === id
-                    ? { ...steak, savedSteak: null, personName: steak.personName, centerCook: steak.centerCook, thickness: steak.thickness, firstSideTime: steak.firstSideTime, secondSideTime: steak.secondSideTime, totalCookingTime: steak.totalCookingTime, description: steak.description }
+                    ? { ...steak, savedSteak: null, personName: steak.personName, centerCook: steak.centerCook, thickness: steak.thickness, firstSideTime: steak.firstSideTime, secondSideTime: steak.secondSideTime, totalCookingTime: steak.totalCookingTime }
                     : steak
             )
         );
     };
 
-    const updateSteaksStatus = (remainingTime: number) => {
-        const steaksToPlace = steaks.filter((steak) => steak.firstSideTime + steak.secondSideTime < remainingTime && !steak.isPlaced);
+    const handleSteaksWithLongestTime = (longestTime: number) => {
+        const steaksToPlace = steaks.filter((steak) => steak.firstSideTime + steak.secondSideTime === longestTime);
         if (steaksToPlace.length > 0) {
             steaksToPlace.forEach((steakToPlace) => {
                 setSteaks((prevSteaks) =>
                     prevSteaks.map((steak) =>
-                        steak === steakToPlace ? { ...steak, isPlaced: true, totalCookingTime: steak.totalCookingTime, description: steak.description } : steak
+                        steak === steakToPlace ? { ...steak, isPlaced: true, totalCookingTime: steak.totalCookingTime } : steak
+                    )
+                );
+            });
+        }
+    };
+
+    const updateSteaksStatus = (remainingTime: number) => {
+        const steaksToPlace = steaks.filter((steak) => steak.totalCookingTime() > remainingTime && !steak.isPlaced);
+        if (steaksToPlace.length > 0) {
+            steaksToPlace.forEach((steakToPlace) => {
+                setSteaks((prevSteaks) =>
+                    prevSteaks.map((steak) =>
+                        steak === steakToPlace ? { ...steak, isPlaced: true, totalCookingTime: steak.totalCookingTime } : steak
                     )
                 );
             });
         }
 
-        const steaksToFlip = steaks.filter((steak) => steak.secondSideTime < remainingTime && !steak.isFlipped);
+        const steaksToFlip = steaks.filter((steak) => steak.secondSideTime > remainingTime && !steak.isFlipped);
 
-        if(steaksToFlip.length > 0){
+        if (steaksToFlip.length > 0) {
             steaksToFlip.forEach((steakToFlip) => {
                 setSteaks((prevSteaks) =>
                     prevSteaks.map((steak) =>
-                        steak === steakToFlip ? { ...steak, isFlipped: true, totalCookingTime: steak.totalCookingTime, description: steak.description } : steak
+                        steak === steakToFlip ? { ...steak, isFlipped: true, totalCookingTime: steak.totalCookingTime } : steak
                     )
                 );
             });
@@ -121,6 +135,8 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 updateSteaks,
                 updateSteaksWithSavedId,
                 removeAnySavedSteakInfo,
+                handleSteaksWithLongestTime,
+                updateSteaksStatus,
                 getSteaks,
                 getCookingTimes,
             }}

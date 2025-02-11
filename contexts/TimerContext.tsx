@@ -9,17 +9,19 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     const [endTime, setEndTime] = useState<Date | null>(null);
     const [duration, setDuration] = useState(0);
     const [remainingTime, setRemainingTime] = useState(0);
+    const { updateSteaksStatus, handleSteaksWithLongestTime } = useSteakContext();
 
     const stopContextTimer = async () => {
+        await AsyncStorage.removeItem('steakTimerData');
         setTimerRunning(false);
         setRemainingTime(0);
-        await AsyncStorage.removeItem('steakTimerData');
     };
 
     const startContextTimer = async () => {
         const now = new Date();
         const calculatedEndTime = new Date(now.getTime() + duration * 1000);
         setEndTime(calculatedEndTime);
+        handleSteaksWithLongestTime(duration);
         setTimerRunning(true);
     };
 
@@ -38,15 +40,16 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                 }
                 else {
                     setRemainingTime(diffInSeconds);
+                    updateSteaksStatus(diffInSeconds);
                 }
             }, 1000);
         }
 
         return () => clearInterval(timer);
-    }, [timerRunning, endTime]);
+    }, [timerRunning, endTime, remainingTime, updateSteaksStatus]);
 
     return (
-        <TimerContext.Provider value={{remainingTime, duration, timerRunning, endTime, startContextTimer, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime }}>
+        <TimerContext.Provider value={{ remainingTime, duration, timerRunning, endTime, startContextTimer, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime }}>
             {children}
         </TimerContext.Provider>
     );

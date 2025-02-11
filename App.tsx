@@ -11,6 +11,7 @@ import notifee from '@notifee/react-native';
 import { TimerProvider } from './contexts/TimerContext';
 import { SteakProvider } from './contexts/SteaksContext';
 import Timer from './components/Timer';
+import Toast from 'react-native-toast-message';
 
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +58,7 @@ const App = () => {
                 }} />
             </Tab.Navigator>
           </NavigationContainer>
+          <Toast/>
         </SavedSteaksProvider>
       </TimerProvider>
     </SteakProvider>

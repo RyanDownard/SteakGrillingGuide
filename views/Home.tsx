@@ -94,7 +94,7 @@ const Home = () => {
     for (const [time, names] of Object.entries(placeGrouped)) {
       await scheduleNotification(
         'Place Steaks',
-        `It's time to place ${names.join(' and ')}'s ${names.length === 1 ? 'steak' : 'steaks'} on the grill!`,
+        `It's time to place ${names.map((name) => name + "'s").join(' and ')} ${names.length === 1 ? 'steak' : 'steaks'} on the grill!`,
         duration - Number(time)
       );
     }
@@ -103,7 +103,7 @@ const Home = () => {
     for (const [time, names] of Object.entries(flipGrouped)) {
       await scheduleNotification(
         'Flip Steaks',
-        `Time to flip ${names.join(' and ')}'s ${names.length === 1 ? 'steak' : 'steaks'}!`,
+        `Time to flip ${names.map((name) => name + "'s").join(' and ')} ${names.length === 1 ? 'steak' : 'steaks'}!`,
         Number(time)
       );
     }

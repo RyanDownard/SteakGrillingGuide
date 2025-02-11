@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Steak, SavedSteak, CookData, Duration } from '../data/SteakData';
 import steakSettings from '../data/SteakSettings.json';
+import Toast from 'react-native-toast-message';
 
 interface SteakContextType {
     steaks: Steak[];
@@ -77,6 +78,11 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     )
                 );
             });
+            Toast.show({
+                type: 'success',
+                text1: `${steaksToPlace.map((steak) => steak.personName + "'s").join(', ')} ${steaksToPlace.length === 1 ? 'steak' : 'steaks'} ready to be placed on the grill`,
+                topOffset: 80,
+              });
         }
 
         const steaksToFlip = steaks.filter((steak) => steak.secondSideTime > remainingTime && !steak.isFlipped);
@@ -89,6 +95,11 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     )
                 );
             });
+            Toast.show({
+                type: 'success',
+                text1: `${steaksToFlip.map((steak) => steak.personName + "'s").join(', ')} ${steaksToFlip.length === 1 ? 'steak' : 'steaks'} ready to be flipped on the grill`,
+                topOffset: 80,
+              });
         }
 
 

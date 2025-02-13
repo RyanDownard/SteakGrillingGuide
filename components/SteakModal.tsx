@@ -151,7 +151,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
               <Text style={globalStyles.closeButton}>✕</Text>
             </TouchableOpacity>
           </View>
-          ({savedSteaks.length > 0 && (
+          {savedSteaks.length > 0 ? (
             <Dropdown
               style={globalStyles.dropdown}
               selectedTextStyle={globalStyles.selectedTextStyle}
@@ -162,15 +162,15 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
               value={selectedSavedSteak}
               onChange={handleDropdownChange}
             />
-          )})
+          ) : null}
 
-          ({selectedSavedSteak && (
+          {selectedSavedSteak ? (
             <TouchableOpacity style={globalStyles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
               <Text style={globalStyles.clearButton}>
                 Clear Saved
               </Text>
             </TouchableOpacity>
-          )})
+          ) : null}
 
           <Text style={globalStyles.label}>Person Name:</Text>
           <TextInput

@@ -21,7 +21,6 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
   const checkShowBeforeYouGrillModal = async () => {
     try {
       const value = await AsyncStorage.getItem('hideInfoModalOnStart');
-      console.log(value);
       if (value === undefined) {
         setHideOnStart(true);
       }

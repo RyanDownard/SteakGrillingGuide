@@ -11,13 +11,14 @@ interface Props {
   onStart: () => void;
   pauseEnabled: boolean;
   startEnabled: boolean;
+  addSteakEnabled: boolean;
 }
 
-const TopButtons: React.FC<Props> = ({ onAdd, onPause, onInfo, onStart, pauseEnabled, startEnabled }) => {
+const TopButtons: React.FC<Props> = ({ onAdd, onPause, onInfo, onStart, pauseEnabled, startEnabled, addSteakEnabled }) => {
   return (
     <View style={globalStyles.actionButtonsContainer}>
-      <TouchableOpacity style={[globalStyles.fontAwesomeButton, globalStyles.goodButtonOutline]} onPress={onAdd}>
-        <FontAwesomeIcon icon={faPlus} size={24} color={'#03911f'} />
+      <TouchableOpacity style={[globalStyles.fontAwesomeButton, globalStyles.goodButtonOutline, !addSteakEnabled && globalStyles.disabledButton]} onPress={onAdd} disabled={!addSteakEnabled}>
+        <FontAwesomeIcon icon={faPlus} size={24} color={addSteakEnabled ? '#03911f' : '#949799'} />
       </TouchableOpacity>
       <TouchableOpacity style={[globalStyles.fontAwesomeButton, globalStyles.badButtonOutline, !pauseEnabled && globalStyles.disabledButton]} onPress={onPause} disabled={!pauseEnabled}>
         <FontAwesomeIcon icon={faStop} size={24} color={!pauseEnabled ? '#949799' : '#c70404'} />

@@ -191,30 +191,20 @@ const Home = () => {
     }
 
     setStartTimerModalVisible(false);
-    startContextTimer();
-
-    try {
-      const dataToSave = {
-        steaks,
-        endTime: duration.toISOString(),
-        remainingTime: duration,
-      };
-      await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
-    } catch (error) {
-      console.error('Failed to save timer and steaks:', error);
-    }
+    await startContextTimer();
 
     try{
       await scheduleGroupedNotifications();
-      await scheduleCompleteNotification(endTime);
+      await scheduleCompleteNotification();
     }
     catch(error){
       console.error('Error while scheduling notifications', error);
     }
   };
 
-  const scheduleCompleteNotification = async (calculatedEndTime: Date) => {
-    const date = calculatedEndTime;
+  const scheduleCompleteNotification = async () => {
+    const now = new Date();
+    const endsAt = new Date(now.getTime() + (duration * 1000));
 
     const channelId = await notifee.createChannel({
       id: 'steak-timer',
@@ -227,7 +217,7 @@ const Home = () => {
 
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: date.getTime(),
+      timestamp: endsAt.getTime(),
     };
 
     await notifee.createTriggerNotification(
@@ -298,8 +288,10 @@ const Home = () => {
       }
     };
 
-    loadSteakData();
-  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks]);
+    if (steaks !== undefined && steaks.length === 0) {
+      loadSteakData();
+    }
+  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks, steaks]);
 
   useEffect(() => {
     checkShowBeforeYouGrillModal();
@@ -314,6 +306,7 @@ const Home = () => {
         }}
         onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
+        addSteakEnabled={!timerRunning}
         pauseEnabled={timerRunning}
         startEnabled={!timerRunning && steaks.length > 0}
       />

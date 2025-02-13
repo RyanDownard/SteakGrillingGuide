@@ -14,6 +14,7 @@ interface SteakContextType {
     updateSteaksStatus: (timeRemaining: number) => void;
     getSteaks: () => Steak[];
     getCookingTimes: (centerCook: string, thickness: number) => { firstSide: number; secondSide: number } | null;
+    resetSteaksStatus: () => void;
 }
 
 const SteakContext = createContext<SteakContextType | undefined>(undefined);
@@ -105,6 +106,14 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
     };
 
+    const resetSteaksStatus = () => {
+        steaks.forEach((steak) => {
+            steak.isPlaced = false;
+            steak.isFlipped = false;
+        });
+        updateSteaks([...steaks]);
+    };
+
     const getSteaks = () => {
         return steaks;
     };
@@ -150,6 +159,7 @@ const SteakProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 updateSteaksStatus,
                 getSteaks,
                 getCookingTimes,
+                resetSteaksStatus,
             }}
         >
             {children}

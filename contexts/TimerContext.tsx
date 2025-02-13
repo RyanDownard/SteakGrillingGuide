@@ -9,13 +9,14 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
     const [endTime, setEndTime] = useState<Date | null>(null);
     const [duration, setDuration] = useState(0);
     const [remainingTime, setRemainingTime] = useState(0);
-    const { steaks, updateSteaksStatus, handleSteaksWithLongestTime } = useSteakContext();
+    const { steaks, updateSteaksStatus, handleSteaksWithLongestTime, resetSteaksStatus } = useSteakContext();
 
     const stopContextTimer = async () => {
         await AsyncStorage.removeItem('steakTimerData');
         setTimerRunning(false);
         setRemainingTime(0);
         setEndTime(null);
+        resetSteaksStatus();
     };
 
     const startContextTimer = async () => {
@@ -35,7 +36,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
             console.error('Failed to save timer and steaks:', error);
         }
-    }
+    };
 
     useEffect(() => {
         let timer: any;
@@ -48,6 +49,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
                     clearInterval(timer);
                     setRemainingTime(0);
                     setTimerRunning(false);
+                    resetSteaksStatus();
                     await AsyncStorage.removeItem('steakTimerData');
                 }
                 else {
@@ -58,7 +60,7 @@ export const TimerProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         return () => clearInterval(timer);
-    }, [timerRunning, endTime, remainingTime, updateSteaksStatus]);
+    }, [timerRunning, endTime, remainingTime, updateSteaksStatus, resetSteaksStatus]);
 
     return (
         <TimerContext.Provider value={{ remainingTime, duration, timerRunning, endTime, startContextTimer, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime }}>

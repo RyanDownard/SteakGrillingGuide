@@ -153,18 +153,11 @@ const Home = () => {
     }
   };
 
-  const resetSteakStatus = () => {
-    steaks.forEach((steak) => {
-      steak.isPlaced = false;
-      steak.isFlipped = false;
-    });
-    updateSteaks([...steaks]);
-  };
+
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
     stopContextTimer();
-    resetSteakStatus();
     notifee.cancelAllNotifications();
   };
 

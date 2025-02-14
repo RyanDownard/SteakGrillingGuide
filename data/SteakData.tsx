@@ -29,6 +29,7 @@ class SavedSteak {
 
 
 class Steak {
+  id: number;
   personName: string;
   centerCook: string;
   thickness: number;
@@ -39,10 +40,12 @@ class Steak {
   savedSteak?: SavedSteak | null;
 
   constructor(
+    id: number,
     personName: string,
     centerCook: string,
     thickness: number
   ) {
+    this.id = id;
     this.personName = personName;
     this.centerCook = centerCook;
     this.thickness = thickness;
@@ -53,10 +56,6 @@ class Steak {
 
     this.isPlaced = false;
     this.isFlipped = false;
-  }
-
-  totalCookingTime(): number {
-    return this.firstSideTime + this.secondSideTime;
   }
 
   getCookingTimes = (

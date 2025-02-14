@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash, faSave } from '@fortawesome/free-solid-svg-icons';
 import { formatTime } from '../data/Helpers';
 import globalStyles from '../styles/globalStyles';
-import { useSavedSteaks } from '../contexts/SavedSteaksContext';
+import useSavedSteaksStore from '../stores/SavedSteakStore';
 
 interface Props {
     steak: Steak;
@@ -23,7 +23,7 @@ interface ListProps {
 
 const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }) => {
     const [expanded, setExpanded] = useState(false);
-    const { addSavedSteak } = useSavedSteaks();
+    const { addSavedSteak } = useSavedSteaksStore();
 
     const handleSaveSteakToDevice = (steakToSave: Steak) => {
         addSavedSteak(steakToSave);

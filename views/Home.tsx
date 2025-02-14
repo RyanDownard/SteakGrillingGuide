@@ -10,14 +10,14 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTimer } from '../contexts/TimerContext.tsx';
-import { useSteakContext } from '../contexts/SteaksContext.tsx';
+import useTimerStore from '../stores/TimerStore.tsx';
+import useSteakStore from '../stores/SteakStore.tsx';
 import { Steak } from '../data/SteakData.tsx';
 
 
 const Home = () => {
-  const { duration, timerRunning, endTime, startContextTimer, stopContextTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimer();
-  const { steaks, addSteak, editSteak, updateSteaks } = useSteakContext();
+  const { duration, timerRunning, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimerStore();
+  const { steaks, addSteak, editSteak, updateSteaks } = useSteakStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
@@ -157,7 +157,7 @@ const Home = () => {
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
-    stopContextTimer();
+    stopStoreTimer();
     notifee.cancelAllNotifications();
   };
 
@@ -184,7 +184,7 @@ const Home = () => {
     }
 
     setStartTimerModalVisible(false);
-    await startContextTimer();
+    await startStoreTimer();
 
     try{
       await scheduleGroupedNotifications();

@@ -4,13 +4,13 @@ import { SavedSteak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import globalStyles from '../styles/globalStyles';
-import { useSavedSteaks } from '../contexts/SavedSteaksContext';
+import useSavedSteaksStore from '../stores/SavedSteakStore';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
-import { useSteakContext } from '../contexts/SteaksContext.tsx';
+import useSteakStore from '../stores/SteakStore';
 
 const SavedSteaks = () => {
-    const { removeAnySavedSteakInfo } = useSteakContext();
-    const { savedSteaks, removeSavedSteak } = useSavedSteaks();
+    const { removeAnySavedSteakInfo } = useSteakStore();
+    const { savedSteaks, removeSavedSteak } = useSavedSteaksStore();
     const [editingSteak, setEditingSteak] = useState<SavedSteak | null>(null);
     const [editSavedSteakModalVisible, setEditSavedSteakmodalVisible] = useState(false);
 

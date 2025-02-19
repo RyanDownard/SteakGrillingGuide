@@ -48,10 +48,12 @@ const SavedSteaks = () => {
                 keyExtractor={(item: SavedSteak) => item.id.toString()}
                 renderItem={({ item }) =>
                     <View style={styles.container}>
-                        <Text style={styles.savedSteakName}>{item.personName}</Text>
-                        <Text style={styles.savedSteakCook}>{item.centerCook}</Text>
+                        <View style={styles.infoContainer}>
+                            <Text style={styles.savedSteakName}>{item.personName}</Text>
+                            <Text style={styles.savedSteakCook}>{item.centerCook}</Text>
+                        </View>
                         <TouchableOpacity onPress={() => handleEditSteak(item)} disabled={timerRunning} style={[globalStyles.actionButton, globalStyles.editButton, timerRunning && globalStyles.disabledButton]}>
-                            <FontAwesomeIcon icon={faPencil} size={24} color={ timerRunning ? '#949799' : '#e3cf17'} />
+                            <FontAwesomeIcon icon={faPencil} size={24} color={timerRunning ? '#949799' : '#e3cf17'} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDeleteSteak(item)} disabled={timerRunning} style={[globalStyles.actionButton, globalStyles.deleteButton, timerRunning && globalStyles.disabledButton]}>
                             <FontAwesomeIcon icon={faTrash} size={24} color={timerRunning ? '#949799' : '#c70404'} />
@@ -77,6 +79,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#eee',
         padding: 20,
         alignItems: 'center',
+    },
+    infoContainer: {
+        flex: 2,
+        flexDirection: 'column',
     },
     savedSteakName: {
         flex: 1,

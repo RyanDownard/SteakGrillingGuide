@@ -11,7 +11,7 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
-import { useSavedSteaks } from '../contexts/SavedSteaksContext';
+import useSavedSteaksStore from '../stores/SavedSteakStore';
 
 interface Props {
   visible: boolean;
@@ -25,7 +25,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const [centerCook, setCenterCook] = useState('');
   const [thickness, setThickness] = useState('');
   const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
-  const { savedSteaks, updateSavedSteak } = useSavedSteaks();
+  const { savedSteaks, updateSavedSteak } = useSavedSteaksStore();
 
 
   const centerCookOptions = [
@@ -66,7 +66,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     selectedSavedSteak!.personName = personName;
     selectedSavedSteak!.centerCook = centerCook;
 
-    updateSavedSteak(selectedSavedSteak);
+    updateSavedSteak(selectedSavedSteak!);
   };
 
   const handleSave = () => {
@@ -76,7 +76,8 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     }
 
     var thicknessNumber = Number(thickness);
-    const steak = new Steak(personName, centerCook, thicknessNumber);
+    const maxId = savedSteaks.reduce((max, steak) => (steak.id > max ? steak.id : max), 0);
+    const steak = new Steak(maxId + 1, personName, centerCook, thicknessNumber);
 
     if (selectedSavedSteak) {
       if (personName !== selectedSavedSteak.personName

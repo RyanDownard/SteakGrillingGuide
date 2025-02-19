@@ -11,8 +11,8 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import { SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
-import { useSavedSteaks } from '../contexts/SavedSteaksContext';
-import { useSteakContext } from '../contexts/SteaksContext';
+import useSavedSteaksStore from '../stores/SavedSteakStore';
+import useSteakStore from '../stores/SteakStore';
 
 interface Props {
   visible: boolean;
@@ -23,8 +23,8 @@ interface Props {
 const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
-  const { updateSavedSteak } = useSavedSteaks();
-  const { updateSteaksWithSavedId } = useSteakContext();
+  const { updateSavedSteak } = useSavedSteaksStore();
+  const { updateSteaksWithSavedId } = useSteakStore();
 
 
   const centerCookOptions = [
@@ -56,7 +56,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
     editingSteak!.personName = personName;
     editingSteak!.centerCook = centerCook;
 
-    updateSavedSteak(editingSteak);
+    updateSavedSteak(editingSteak!);
     updateSteaksWithSavedId(editingSteak!);
     onClose();
     clearInputs();

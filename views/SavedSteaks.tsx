@@ -7,9 +7,11 @@ import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
 import useSteakStore from '../stores/SteakStore';
+import useTimerStore from '../stores/TimerStore';
 
 const SavedSteaks = () => {
     const { removeAnySavedSteakInfo } = useSteakStore();
+    const { timerRunning } = useTimerStore();
     const { savedSteaks, removeSavedSteak } = useSavedSteaksStore();
     const [editingSteak, setEditingSteak] = useState<SavedSteak | null>(null);
     const [editSavedSteakModalVisible, setEditSavedSteakmodalVisible] = useState(false);
@@ -48,11 +50,11 @@ const SavedSteaks = () => {
                     <View style={styles.container}>
                         <Text style={styles.savedSteakName}>{item.personName}</Text>
                         <Text style={styles.savedSteakCook}>{item.centerCook}</Text>
-                        <TouchableOpacity onPress={() => handleEditSteak(item)} style={[globalStyles.actionButton, globalStyles.editButton]}>
-                            <FontAwesomeIcon icon={faPencil} size={24} color={'#e3cf17'} />
+                        <TouchableOpacity onPress={() => handleEditSteak(item)} disabled={timerRunning} style={[globalStyles.actionButton, globalStyles.editButton, timerRunning && globalStyles.disabledButton]}>
+                            <FontAwesomeIcon icon={faPencil} size={24} color={ timerRunning ? '#949799' : '#e3cf17'} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteSteak(item)} style={[globalStyles.actionButton, globalStyles.deleteButton]}>
-                            <FontAwesomeIcon icon={faTrash} size={24} color={'#c70404'} />
+                        <TouchableOpacity onPress={() => handleDeleteSteak(item)} disabled={timerRunning} style={[globalStyles.actionButton, globalStyles.deleteButton, timerRunning && globalStyles.disabledButton]}>
+                            <FontAwesomeIcon icon={faTrash} size={24} color={timerRunning ? '#949799' : '#c70404'} />
                         </TouchableOpacity>
                     </View>
                 }

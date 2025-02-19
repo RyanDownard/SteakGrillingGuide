@@ -147,7 +147,7 @@ const Home = () => {
 
   const handleDelete = (steakToDelete: Steak) => {
     if (steakToDelete) {
-      const updatedSteaks = steaks.filter((steak) => steak !== steakToDelete);
+      const updatedSteaks = steaks.filter((steak: Steak) => steak !== steakToDelete);
 
       updateSteaks(updatedSteaks);
     }
@@ -249,7 +249,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    setDuration(Math.max(...steaks.map((calcSteak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
+    setDuration(Math.max(...steaks.map((calcSteak: Steak) => calcSteak.firstSideTime + calcSteak.secondSideTime)));
   }, [steaks, setDuration]);
 
   useEffect(() => {

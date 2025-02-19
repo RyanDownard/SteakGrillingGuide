@@ -5962,6 +5962,13 @@ react-native-gesture-handler@^2.22.0:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
 
+react-native-progress@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.npmjs.org/react-native-progress/-/react-native-progress-5.0.1.tgz"
+  integrity sha512-TYfJ4auAe5vubDma2yfFvt7ktSI+UCfysqJnkdHEcLXqAitRFOozgF/cLgN5VNi/iLdaf3ga1ETi2RF4jVZ/+g==
+  dependencies:
+    prop-types "^15.7.2"
+
 react-native-reanimated@^3.16.6:
   version "3.16.6"
   resolved "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.16.6.tgz"
@@ -5992,7 +5999,7 @@ react-native-screens@^4.5.0, "react-native-screens@>= 4.0.0":
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
-react-native-svg@^15.10.1, "react-native-svg@>= 11.x":
+react-native-svg@*, react-native-svg@^15.10.1, "react-native-svg@>= 11.x":
   version "15.10.1"
   resolved "https://registry.npmjs.org/react-native-svg/-/react-native-svg-15.10.1.tgz"
   integrity sha512-Hqz/doQciVFK/Df2v+wsW96oY5jxlta7rZ31KQYo78dlgvAHEaGr6paEOAMvlIruw7EHNQ0Vc1ZmJPJF2kfIPQ==

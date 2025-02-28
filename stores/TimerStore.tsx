@@ -1,17 +1,19 @@
-// timerStore.ts
 import { create } from 'zustand';
 import { useEffect } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useSteakStore from './SteakStore';
 
 interface TimerStore {
   timerRunning: boolean;
+  startTime: Date | null;
   endTime: Date | null;
   duration: number;
   remainingTime: number;
 
   // Actions
   setTimerRunning: (running: boolean) => void;
+  setStartTime: (startTime: Date | null) => void;
   setEndTime: (time: Date | null) => void;
   setDuration: (duration: number) => void;
   setRemainingTime: (time: number) => void;
@@ -23,11 +25,13 @@ interface TimerStore {
 
 const useTimerStore = create<TimerStore>((set, get) => ({
   timerRunning: false,
+  startTime: null,
   endTime: null,
   duration: 0,
   remainingTime: 0,
 
   setTimerRunning: (running) => set({ timerRunning: running }),
+  setStartTime: (startTime) => set({ startTime: startTime }),
   setEndTime: (time) => set({ endTime: time }),
   setDuration: (duration) => set({ duration }),
   setRemainingTime: (time) => set({ remainingTime: time }),
@@ -58,9 +62,10 @@ const useTimerStore = create<TimerStore>((set, get) => ({
     const newEndTime = new Date(now.getTime() + (duration * 1000));
 
     set({
+      startTime: now,
       endTime: newEndTime,
       timerRunning: true,
-      remainingTime: duration, // Set initial remaining time immediately
+      remainingTime: duration,
     });
 
     const steakStore = useSteakStore.getState();
@@ -107,6 +112,8 @@ export const useTimerEffect = () => {
           setTimerRunning(false);
           resetSteaksStatus();
           await AsyncStorage.removeItem('steakTimerData');
+          Alert.alert('Steaks Finished!', 
+            'Your steaks are finished. Be sure to let them rest for 5 minutes and verify they are cooked properly before eating.');
         } else {
           setRemainingTime(diffInSeconds);
           useSteakStore.getState().updateSteaksStatus(diffInSeconds);

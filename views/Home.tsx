@@ -7,7 +7,7 @@ import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
+import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTimerStore from '../stores/TimerStore.tsx';
@@ -28,7 +28,8 @@ const Home = () => {
 
   const scheduleNotification = async (title: string, body: string, secondsFromNow: number) => {
     try {
-      const triggerTime = Date.now() + secondsFromNow * 1000;
+      const currentStartTime = useTimerStore.getState().startTime;
+      const triggerTime = currentStartTime!.getTime() + secondsFromNow * 1000;
 
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
@@ -38,7 +39,10 @@ const Home = () => {
       await notifee.createChannel({
         id: 'sound',
         name: `Steak Timer Notifications ${new Date(triggerTime)}`,
+        lights: true,
+        importance: AndroidImportance.HIGH,
         sound: 'default',
+
       });
 
       await notifee.createTriggerNotification(
@@ -49,9 +53,6 @@ const Home = () => {
             channelId: 'sound',
             smallIcon: 'ic_launcher',
             sound: 'default',
-            showChronometer: true,
-            chronometerDirection: 'down',
-            timestamp: Date.now() + secondsFromNow * 1000,
             badgeCount: 1,
           },
           ios: {
@@ -153,8 +154,6 @@ const Home = () => {
     }
   };
 
-
-
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
     stopStoreTimer();
@@ -186,18 +185,17 @@ const Home = () => {
     setStartTimerModalVisible(false);
     await startStoreTimer();
 
-    try{
+    try {
       await scheduleGroupedNotifications();
       await scheduleCompleteNotification();
     }
-    catch(error){
+    catch (error) {
       console.error('Error while scheduling notifications', error);
     }
   };
 
   const scheduleCompleteNotification = async () => {
-    const now = new Date();
-    const endsAt = new Date(now.getTime() + (duration * 1000));
+    const endsAt = useTimerStore.getState().startTime!.getTime() + (duration * 1000);
 
     const channelId = await notifee.createChannel({
       id: 'steak-timer',
@@ -210,7 +208,10 @@ const Home = () => {
 
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: endsAt.getTime(),
+      timestamp: endsAt,
+      alarmManager: {
+        allowWhileIdle: true,
+      },
     };
 
     await notifee.createTriggerNotification(

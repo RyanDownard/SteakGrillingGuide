@@ -260,6 +260,7 @@ const globalStyles = StyleSheet.create({
     },
     goodButtonOutline: {
         borderColor: '#5cb85c',
+        color: '#5cb85c',
     },
     badButtonOutline: {
         borderColor: '#c70404',

@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { useEffect } from 'react';
-import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useSteakStore from './SteakStore';
 
 interface TimerStore {
   timerRunning: boolean;
+  timerComplete: boolean;
   startTime: Date | null;
   endTime: Date | null;
   duration: number;
@@ -13,6 +13,7 @@ interface TimerStore {
 
   // Actions
   setTimerRunning: (running: boolean) => void;
+  setTimerComplete: (completed: boolean) => void;
   setStartTime: (startTime: Date | null) => void;
   setEndTime: (time: Date | null) => void;
   setDuration: (duration: number) => void;
@@ -25,12 +26,14 @@ interface TimerStore {
 
 const useTimerStore = create<TimerStore>((set, get) => ({
   timerRunning: false,
+  timerComplete: false,
   startTime: null,
   endTime: null,
   duration: 0,
   remainingTime: 0,
 
   setTimerRunning: (running) => set({ timerRunning: running }),
+  setTimerComplete: (completed) => set({ timerComplete: completed }),
   setStartTime: (startTime) => set({ startTime: startTime }),
   setEndTime: (time) => set({ endTime: time }),
   setDuration: (duration) => set({ duration }),
@@ -84,13 +87,13 @@ const useTimerStore = create<TimerStore>((set, get) => ({
   },
 }));
 
-// Custom hook for the timer effect
 export const useTimerEffect = () => {
   const {
     timerRunning,
     endTime,
     setRemainingTime,
     setTimerRunning,
+    setTimerComplete,
     updateRemainingTime,
   } = useTimerStore();
   const { resetSteaksStatus } = useSteakStore();
@@ -112,8 +115,7 @@ export const useTimerEffect = () => {
           setTimerRunning(false);
           resetSteaksStatus();
           await AsyncStorage.removeItem('steakTimerData');
-          Alert.alert('Steaks Finished!', 
-            'Your steaks are finished. Be sure to let them rest for 5 minutes and verify they are cooked properly before eating.');
+          setTimerComplete(true);
         } else {
           setRemainingTime(diffInSeconds);
           useSteakStore.getState().updateSteaksStatus(diffInSeconds);
@@ -122,7 +124,7 @@ export const useTimerEffect = () => {
     }
 
     return () => clearInterval(timer);
-  }, [timerRunning, endTime, setRemainingTime, setTimerRunning, resetSteaksStatus, updateRemainingTime]);
+  }, [timerRunning, endTime, setRemainingTime, setTimerRunning, resetSteaksStatus, updateRemainingTime, setTimerComplete]);
 };
 
 export default useTimerStore;

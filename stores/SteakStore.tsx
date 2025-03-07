@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 interface SteakStore {
     steaks: Steak[];
     addSteak: (steak: Steak) => void;
+    clearSteaks: () => void;
     editSteak: (index: number, updatedSteak: Steak) => void;
     updateSteaks: (newSteaks: Steak[]) => void;
     updateSteaksWithSavedId: (updatedInfo: SavedSteak) => void;
@@ -21,6 +22,8 @@ const useSteakStore = create<SteakStore>((set, get) => ({
     steaks: [],
 
     addSteak: (steak) => set((state) => ({ steaks: [...state.steaks, steak] })),
+
+    clearSteaks: () => set(() => ({ steaks: []})),
 
     editSteak: (index, updatedSteak) =>
         set((state) => ({

@@ -45,7 +45,7 @@ const useTimerStore = create<TimerStore>((set, get) => ({
       const now = new Date();
       const diffInSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
       set({ remainingTime: diffInSeconds });
-      useSteakStore.getState().updateSteaksStatus(diffInSeconds);
+      useSteakStore.getState().updateSteaksStatus(diffInSeconds, endTime);
     }
   },
 
@@ -71,14 +71,12 @@ const useTimerStore = create<TimerStore>((set, get) => ({
       remainingTime: duration,
     });
 
-    const steakStore = useSteakStore.getState();
-    steakStore.handleSteaksWithLongestTime(duration);
+    useSteakStore.getState().handleSteaksWithLongestTime(duration);
 
     try {
       const dataToSave = {
-        steaks: steakStore.steaks,
+        steaks: useSteakStore.getState().steaks,
         endTime: newEndTime.toISOString(),
-        remainingTime: newEndTime,
       };
       await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
     } catch (error) {
@@ -118,7 +116,7 @@ export const useTimerEffect = () => {
           setTimerComplete(true);
         } else {
           setRemainingTime(diffInSeconds);
-          useSteakStore.getState().updateSteaksStatus(diffInSeconds);
+          useSteakStore.getState().updateSteaksStatus(diffInSeconds, endTime);
         }
       }, 1000);
     }

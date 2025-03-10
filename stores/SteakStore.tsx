@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Steak, SavedSteak, CookData, Duration } from '../data/SteakData';
 import steakSettings from '../data/SteakSettings.json';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SteakStore {
     steaks: Steak[];
@@ -12,7 +13,7 @@ interface SteakStore {
     updateSteaksWithSavedId: (updatedInfo: SavedSteak) => void;
     removeAnySavedSteakInfo: (id: number) => void;
     handleSteaksWithLongestTime: (longestTime: number) => void;
-    updateSteaksStatus: (timeRemaining: number) => void;
+    updateSteaksStatus: (timeRemaining: number, endsAt: Date) => void;
     getSteaks: () => Steak[];
     getCookingTimes: (centerCook: string, thickness: number) => { firstSide: number; secondSide: number } | null;
     resetSteaksStatus: () => void;
@@ -62,7 +63,7 @@ const useSteakStore = create<SteakStore>((set, get) => ({
         }
     },
 
-    updateSteaksStatus: (remainingTime) => {
+    updateSteaksStatus: async (remainingTime, endsAt) => {
         const steaksToPlace = get().steaks.filter(
             (steak) => steak.firstSideTime + steak.secondSideTime > remainingTime && !steak.isPlaced
         );
@@ -99,6 +100,18 @@ const useSteakStore = create<SteakStore>((set, get) => ({
                 } ready to be flipped on the grill`,
                 topOffset: 80,
             });
+        }
+
+        if(steaksToFlip.length > 0 || steaksToPlace.length > 0) {
+            try {
+                const dataToSave = {
+                  steaks: get().steaks,
+                  endTime: endsAt,
+                };
+                await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
+              } catch (error) {
+                console.error('Failed to save timer and steaks:', error);
+              }
         }
     },
 

@@ -5,13 +5,13 @@ import useSteakStore from '../stores/SteakStore';
 import { formatTime } from '../data/Helpers';
 
 const Timer = () => {
-    const { duration, remainingTime, timerRunning } = useTimerStore();
+    const { duration, remainingTime, timerRunning, timerComplete } = useTimerStore();
     const { steaks } = useSteakStore();
 
     useTimerEffect();
 
     return (
-        <SafeAreaView style={[steaks && steaks.length > 0 ? styles.container : styles.noDisplay]}>
+        <SafeAreaView style={[steaks && steaks.length > 0 && !timerComplete ? styles.container : styles.noDisplay]}>
             {steaks && steaks.length > 0 && (
                 <Text style={styles.longestTime}>
                     Timer: {timerRunning && remainingTime > 0 ? formatTime(remainingTime) : formatTime(duration)}
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
-        padding: 10,
+        paddingBottom: 5,
     },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, SafeAreaView, Alert, Linking } from 'react-native';
+import { Text, StyleSheet, SafeAreaView, Alert, Linking, View, TouchableOpacity } from 'react-native';
 import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
@@ -7,17 +7,20 @@ import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
+import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTimerStore from '../stores/TimerStore.tsx';
 import useSteakStore from '../stores/SteakStore.tsx';
 import { Steak } from '../data/SteakData.tsx';
+import globalStyles from '../styles/globalStyles.tsx';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 
 
 const Home = () => {
-  const { duration, timerRunning, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime } = useTimerStore();
-  const { steaks, addSteak, editSteak, updateSteaks } = useSteakStore();
+  const { duration, timerRunning, timerComplete, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime, setTimerComplete } = useTimerStore();
+  const { steaks, addSteak, clearSteaks, editSteak, updateSteaks } = useSteakStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
@@ -28,17 +31,24 @@ const Home = () => {
 
   const scheduleNotification = async (title: string, body: string, secondsFromNow: number) => {
     try {
-      const triggerTime = Date.now() + secondsFromNow * 1000;
+      const currentStartTime = useTimerStore.getState().startTime;
+      const triggerTime = currentStartTime!.getTime() + secondsFromNow * 1000;
 
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: triggerTime,
+        alarmManager: {
+          allowWhileIdle: true,
+        },
       };
 
       await notifee.createChannel({
         id: 'sound',
         name: `Steak Timer Notifications ${new Date(triggerTime)}`,
+        lights: true,
+        importance: AndroidImportance.HIGH,
         sound: 'default',
+
       });
 
       await notifee.createTriggerNotification(
@@ -49,9 +59,6 @@ const Home = () => {
             channelId: 'sound',
             smallIcon: 'ic_launcher',
             sound: 'default',
-            showChronometer: true,
-            chronometerDirection: 'down',
-            timestamp: Date.now() + secondsFromNow * 1000,
             badgeCount: 1,
           },
           ios: {
@@ -153,7 +160,10 @@ const Home = () => {
     }
   };
 
-
+  const resetState = async () => {
+    setTimerComplete(false);
+    clearSteaks();
+  };
 
   const stopTimer = async () => {
     setStopTimerModalVisible(false);
@@ -186,18 +196,17 @@ const Home = () => {
     setStartTimerModalVisible(false);
     await startStoreTimer();
 
-    try{
+    try {
       await scheduleGroupedNotifications();
       await scheduleCompleteNotification();
     }
-    catch(error){
+    catch (error) {
       console.error('Error while scheduling notifications', error);
     }
   };
 
   const scheduleCompleteNotification = async () => {
-    const now = new Date();
-    const endsAt = new Date(now.getTime() + (duration * 1000));
+    const endsAt = useTimerStore.getState().startTime!.getTime() + (duration * 1000);
 
     const channelId = await notifee.createChannel({
       id: 'steak-timer',
@@ -210,7 +219,10 @@ const Home = () => {
 
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: endsAt.getTime(),
+      timestamp: endsAt,
+      alarmManager: {
+        allowWhileIdle: true,
+      },
     };
 
     await notifee.createTriggerNotification(
@@ -299,20 +311,41 @@ const Home = () => {
         }}
         onInfo={() => setBeforeYouGrillVisible(true)}
         onStart={() => setStartTimerModalVisible(true)}
+        allDisabled={timerComplete}
         addSteakEnabled={!timerRunning}
         pauseEnabled={timerRunning}
         startEnabled={!timerRunning && steaks.length > 0}
       />
-      {(!steaks || steaks.length === 0) && (
+      {(!steaks || steaks.length === 0 && !timerComplete) && (
         <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added
         </Text>
       )}
-      <SteakList
-        steaks={steaks}
-        onEdit={handleEdit}
-        onDelete={showDeleteConfirm}
-        actionsDisabled={timerRunning} />
+
+      {timerComplete && (
+        <View style={styles.completeContainer}>
+          <Text style={styles.completedText}>
+            {steaks.length === 1 ? 'Steak' : 'Steaks'} Ready!
+          </Text>
+          <Text style={styles.prepText}>
+            Be sure to let rest for 5 minutes and ensure they are cooked properly before eating.
+          </Text>
+          <View style={styles.resetContainer}>
+            <TouchableOpacity onPress={resetState} style={[globalStyles.fontAwesomeButton, globalStyles.goodButtonOutline, styles.resetButton]} >
+            <FontAwesomeIcon icon={faRefresh} size={24} color="#5cb85c" />
+              <Text style={styles.resetText}>Reset</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {!timerComplete && (
+        <SteakList
+          steaks={steaks}
+          onEdit={handleEdit}
+          onDelete={showDeleteConfirm}
+          actionsDisabled={timerRunning} />
+      )}
 
       <SteakModal
         visible={modalVisible}
@@ -361,6 +394,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 20,
     fontSize: 20,
+  },
+  completeContainer: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  completedText: {
+    marginTop: 15,
+    marginBottom: 5,
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#5cb85c',
+  },
+  prepText: {
+    paddingVertical: 8,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  resetContainer: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  resetText: {
+    color: '#5cb85c',
+  },
+  resetButton: {
+    width: 150,
   },
 });
 

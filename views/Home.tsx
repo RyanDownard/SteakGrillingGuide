@@ -47,6 +47,7 @@ const Home = () => {
         name: `Steak Timer Notifications ${new Date(triggerTime)}`,
         lights: true,
         importance: AndroidImportance.HIGH,
+        vibration: true,
         sound: 'default',
 
       });
@@ -60,11 +61,14 @@ const Home = () => {
             smallIcon: 'ic_launcher',
             sound: 'default',
             badgeCount: 1,
+            importance: AndroidImportance.HIGH,
           },
           ios: {
             interruptionLevel: 'timeSensitive',
             sound: 'default',
             badgeCount: 1,
+            critical: true,
+            criticalVolume: 5,
           },
         },
         trigger

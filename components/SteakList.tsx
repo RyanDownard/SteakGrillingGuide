@@ -124,13 +124,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 15,
+        flexWrap: 'wrap',
     },
     name: {
         fontWeight: 'bold',
         fontSize: 18,
+        marginVertical: 5,
     },
     steakCookDetails: {
         fontSize: 16,
+        marginVertical: 5,
     },
     details: {
         marginTop: 5,

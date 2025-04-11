@@ -68,7 +68,7 @@ const Home = () => {
             sound: 'default',
             badgeCount: 1,
             critical: true,
-            criticalVolume: 5,
+            criticalVolume: 0.5,
           },
         },
         trigger
@@ -241,7 +241,6 @@ const Home = () => {
         ios: {
           interruptionLevel: 'timeSensitive',
           sound: 'default',
-
         },
       },
       trigger

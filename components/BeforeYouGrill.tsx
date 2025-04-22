@@ -62,25 +62,25 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
             Before you get started on your steaks, we have some suggestions for preparing and cooking your steak:
           </Text>
           <View style={globalStyles.modalBody}>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Make sure your grill is cleaned; higher temperatures can cause the grease to catch fire.
             </Text>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Sit steaks out at room temperature for 30 minutes prior to cooking.
             </Text>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Season steaks on both sides with favorite seasoning.
             </Text>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Preheat grill to approximately 500 degrees.
             </Text>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Let steaks rest for 5 minutes after grilling prior to eating.
             </Text>
-            <Text style={globalStyles.modalItem}>
+            <Text style={styles.modalItem}>
               - Verify steaks are properly cooked before eating.
             </Text>
-            <Text style={globalStyles.modalItem}>- Enjoy!</Text>
+            <Text style={styles.modalItem}>- Enjoy!</Text>
             <View style={styles.checkBoxContainer}>
               <BouncyCheckbox
                 size={25}
@@ -105,6 +105,11 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
 };
 
 const styles = StyleSheet.create({
+  modalItem: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 8,
+  },
   checkBoxContainer: {
     flexDirection: 'row',
     paddingVertical: 10,

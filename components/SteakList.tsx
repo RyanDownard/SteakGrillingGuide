@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash, faSave } from '@fortawesome/free-solid-svg-icons';
@@ -53,18 +53,18 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
 
     return (
         <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-            <View style={globalStyles.card}>
-                <View style={globalStyles.infoContainer}>
-                    <Text style={globalStyles.name}>{steak.personName}</Text>
-                    <Text style={globalStyles.steakCookDetails}>{`${steak.centerCook} - ${steak.thickness}"`}</Text>
+            <View style={styles.card}>
+                <View style={styles.infoContainer}>
+                    <Text style={styles.name}>{steak.personName}</Text>
+                    <Text style={styles.steakCookDetails}>{`${steak.centerCook} - ${steak.thickness}"`}</Text>
                     {timerRunning && (
                         <Progress.Circle progress={progress} color={steak.isPlaced ? '#017a40' : '#fcca03'} size={23} thickness={2} />
                     )}
                 </View>
 
                 {expanded ? (
-                    <View style={globalStyles.details}>
-                        <View style={globalStyles.buttonsContainer}>
+                    <View style={styles.details}>
+                        <View style={styles.buttonsContainer}>
                             {(steak.savedSteak === null || steak.savedSteak === undefined ? (
                                 <TouchableOpacity style={[globalStyles.actionButton, globalStyles.infoButtonOutline]} onPress={() => handleSaveSteakToDevice(steak)}>
                                     <FontAwesomeIcon icon={faSave} size={24} color={'#029af2'} />
@@ -77,14 +77,14 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                                 <FontAwesomeIcon icon={faTrash} size={24} color={actionsDisabled ? '#949799' : '#c70404'} />
                             </TouchableOpacity>
                         </View>
-                        <View style={globalStyles.table}>
-                            <View style={globalStyles.tableRow}>
-                                <Text style={globalStyles.tableHeader}>Starts At</Text>
-                                <Text style={globalStyles.tableHeader}>Flips At</Text>
+                        <View style={styles.table}>
+                            <View style={styles.tableRow}>
+                                <Text style={styles.tableHeader}>Starts At</Text>
+                                <Text style={styles.tableHeader}>Flips At</Text>
                             </View>
-                            <View style={globalStyles.tableRow}>
-                                <Text style={globalStyles.tableCell}>{formatTime(steak.firstSideTime + steak.secondSideTime)}</Text>
-                                <Text style={globalStyles.tableCell}>{formatTime(steak.secondSideTime)}</Text>
+                            <View style={styles.tableRow}>
+                                <Text style={styles.tableCell}>{formatTime(steak.firstSideTime + steak.secondSideTime)}</Text>
+                                <Text style={styles.tableCell}>{formatTime(steak.secondSideTime)}</Text>
                             </View>
                         </View>
 
@@ -104,5 +104,72 @@ const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisab
         />
     );
 };
+
+const styles = StyleSheet.create({
+    card: {
+        padding: 10,
+        paddingLeft: 15,
+        paddingRight: 15,
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#fff',
+        shadowRadius: 5,
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 5 },
+    },
+    infoContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 15,
+        flexWrap: 'wrap',
+    },
+    name: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginVertical: 5,
+    },
+    steakCookDetails: {
+        fontSize: 16,
+        marginVertical: 5,
+    },
+    details: {
+        marginTop: 5,
+    },
+    buttonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+    },
+    table: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        overflow: 'hidden',
+        marginTop: 8,
+    },
+    tableRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#f9f9f9',
+    },
+    tableHeader: {
+        flex: 1,
+        fontWeight: 'bold',
+        color: '#333',
+        textAlign: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        paddingBottom: 4,
+    },
+    tableCell: {
+        flex: 1,
+        textAlign: 'center',
+        color: '#555',
+    },
+});
 
 export default SteakList;

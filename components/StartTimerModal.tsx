@@ -5,6 +5,7 @@ import {
     Modal,
     TouchableOpacity,
     FlatList,
+    StyleSheet,
 } from 'react-native';
 import { Steak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
@@ -57,15 +58,17 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                     <Text style={globalStyles.modalWarning}>
                         The notifications and timer are meant to help guide you, but you are
                         responsible for being safe and ensuring your steak is properly
-                        cooked.
+                        cooked. This includes hearing the notification, if you miss them,
+                        your steak(s) may be cooked incorrectly.
                     </Text>
+
 
                     {longestTimeSteaks.length > 0 && (
                         <FlatList
                             data={longestTimeSteaks}
                             keyExtractor={(item: Steak) => item.personName}
                             renderItem={({ item }: { item: Steak }) =>
-                                <View style={globalStyles.steakStartDetails}>
+                                <View style={styles.steakStartDetails}>
                                     <Text>{item.personName}</Text>
                                     <Text>
                                         {item.centerCook} - {item.thickness}"
@@ -77,7 +80,7 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                     {longestTimeSteaks.length === 0 && (
                         <Text>No steaks added yet.</Text>
                     )}
-                    <View style={globalStyles.footerButtons}>
+                    <View style={globalStyles.buttonContainer}>
                         <TouchableOpacity
                             onPress={onClose}
                             style={[globalStyles.button, globalStyles.badButton]}
@@ -99,5 +102,14 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
         </Modal>
     );
 };
+
+const styles = StyleSheet.create({
+    steakStartDetails: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#f8f8f8',
+        borderRadius: 5,
+    },
+});
 
 export default StartTimerModal;

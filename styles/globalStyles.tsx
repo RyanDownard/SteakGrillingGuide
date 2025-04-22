@@ -39,11 +39,6 @@ const globalStyles = StyleSheet.create({
     modalBody: {
         marginBottom: 20,
     },
-    modalItem: {
-        fontSize: 14,
-        color: '#555',
-        marginBottom: 8,
-    },
     modalFooter: {
         alignSelf: 'flex-end',
         marginTop: 10,
@@ -56,9 +51,6 @@ const globalStyles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
-
-
-    //confirm delete
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -79,17 +71,6 @@ const globalStyles = StyleSheet.create({
         color: 'red',
         marginBottom: 10,
     },
-    steakStartDetails: {
-        marginTop: 10,
-        padding: 10,
-        backgroundColor: '#f8f8f8',
-        borderRadius: 5,
-    },
-    footerButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-    },
     button: {
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -102,52 +83,6 @@ const globalStyles = StyleSheet.create({
     disabledButton: {
         opacity: 0.5,
         borderColor: '#949799',
-    },
-    card: {
-        padding: 10,
-        paddingLeft: 15,
-        paddingRight: 15,
-        marginTop: 5,
-        marginBottom: 5,
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#fff',
-        shadowRadius: 5,
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 5 },
-    },
-    name: {
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    steakCookDetails: {
-        fontSize: 16,
-    },
-    details: {
-        marginTop: 5,
-    },
-    infoContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 15,
-    },
-    tableContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        textAlign: 'center',
-        padding: 15,
-    },
-    tableText: {
-        flex: 1,
-        borderColor: '#000',
-        borderWidth: 1,
-        textAlign: 'center',
-        width: '100%',
-    },
-    buttonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
     },
     actionButton: {
         borderColor: 'black',
@@ -167,34 +102,7 @@ const globalStyles = StyleSheet.create({
     deleteButton: {
         borderColor: '#c70404',
     },
-    table: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        overflow: 'hidden',
-        marginTop: 8,
-    },
-    tableRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#f9f9f9',
-    },
-    tableHeader: {
-        flex: 1,
-        fontWeight: 'bold',
-        color: '#333',
-        textAlign: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        paddingBottom: 4,
-    },
-    tableCell: {
-        flex: 1,
-        textAlign: 'center',
-        color: '#555',
-    },
+
     label: {
         fontSize: 14,
         fontWeight: 'bold',
@@ -275,21 +183,6 @@ const globalStyles = StyleSheet.create({
         fontFamily: 'Avenir-Book',
         backgroundColor: '#575555',
         color: '#ffffff',
-    },
-    clearButtonContainer:{
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-    },
-    clearButton: {
-        flex: 0.35,
-        marginBottom: 20,
-        fontSize: 15,
-        textAlign: 'center',
-        borderWidth: 1,
-        borderRadius: 5,
-        borderColor: '#d9534f',
-        backgroundColor: '#d9534f',
-        color: 'white',
     },
 });
 

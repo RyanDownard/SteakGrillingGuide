@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Keyboard,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Steak, SavedSteak } from '../data/SteakData';
@@ -166,8 +167,8 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
           ) : null}
 
           {selectedSavedSteak ? (
-            <TouchableOpacity style={globalStyles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
-              <Text style={globalStyles.clearButton}>
+            <TouchableOpacity style={styles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
+              <Text style={styles.clearButton}>
                 Clear Saved
               </Text>
             </TouchableOpacity>
@@ -232,5 +233,23 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  clearButtonContainer:{
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+},
+clearButton: {
+    flex: 0.35,
+    marginBottom: 20,
+    fontSize: 15,
+    textAlign: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#d9534f',
+    backgroundColor: '#d9534f',
+    color: 'white',
+},
+});
 
 export default SteakModal;

@@ -7,7 +7,7 @@ import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
-import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus, AndroidImportance } from '@notifee/react-native';
+import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTimerStore from '../stores/TimerStore.tsx';
@@ -34,6 +34,15 @@ const Home = () => {
       const currentStartTime = useTimerStore.getState().startTime;
       const triggerTime = currentStartTime!.getTime() + secondsFromNow * 1000;
 
+      const channelId = await notifee.createChannel({
+        id: 'steak-timer',
+        name: 'Steak Timer Notifications',
+        importance: 4,
+        sound: 'default',
+        vibration: true,
+        lights: true,
+      });
+
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: triggerTime,
@@ -42,33 +51,22 @@ const Home = () => {
         },
       };
 
-      await notifee.createChannel({
-        id: 'sound',
-        name: `Steak Timer Notifications ${new Date(triggerTime)}`,
-        lights: true,
-        importance: AndroidImportance.HIGH,
-        vibration: true,
-        sound: 'default',
-
-      });
-
       await notifee.createTriggerNotification(
         {
-          title,
-          body,
+          title: title,
+          body: body,
           android: {
-            channelId: 'sound',
-            smallIcon: 'ic_launcher',
+            channelId: channelId,
+            importance: 4,
             sound: 'default',
-            badgeCount: 1,
-            importance: AndroidImportance.HIGH,
+            pressAction: {
+              id: 'default',
+              launchActivity: 'default',
+            },
           },
           ios: {
             interruptionLevel: 'timeSensitive',
             sound: 'default',
-            badgeCount: 1,
-            critical: true,
-            criticalVolume: 0.5,
           },
         },
         trigger
@@ -210,41 +208,9 @@ const Home = () => {
   };
 
   const scheduleCompleteNotification = async () => {
-    const endsAt = useTimerStore.getState().startTime!.getTime() + (duration * 1000);
-
-    const channelId = await notifee.createChannel({
-      id: 'steak-timer',
-      name: 'Steak Timer Notifications',
-      importance: 4,
-      sound: 'default',
-      vibration: true,
-      lights: true,
-    });
-
-    const trigger: TimestampTrigger = {
-      type: TriggerType.TIMESTAMP,
-      timestamp: endsAt,
-      alarmManager: {
-        allowWhileIdle: true,
-      },
-    };
-
-    await notifee.createTriggerNotification(
-      {
-        title: 'Steaks Ready',
-        body: steaks.length === 1 ? 'Steak is done!' : 'Steaks are done!',
-        android: {
-          channelId: channelId,
-          importance: 4,
-          sound: 'default',
-        },
-        ios: {
-          interruptionLevel: 'timeSensitive',
-          sound: 'default',
-        },
-      },
-      trigger
-    );
+    const completeBody = steaks.length === 1 ? 'Steak is done!' : 'Steaks are done!';
+    const completeTitle = steaks.length === 1 ? 'Steak Ready!' : 'Steaks Ready!';
+    scheduleNotification(completeTitle, completeBody, duration);
   };
 
   const handleEdit = (steak: any) => {

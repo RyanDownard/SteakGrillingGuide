@@ -38,7 +38,7 @@ const Home = () => {
         id: 'steak-timer',
         name: 'Steak Timer Notifications',
         importance: 4,
-        sound: 'default',
+        sound: 'notification',
         vibration: true,
         lights: true,
       });
@@ -58,7 +58,7 @@ const Home = () => {
           android: {
             channelId: channelId,
             importance: 4,
-            sound: 'default',
+            sound: 'notification',
             pressAction: {
               id: 'default',
               launchActivity: 'default',
@@ -66,7 +66,7 @@ const Home = () => {
           },
           ios: {
             interruptionLevel: 'timeSensitive',
-            sound: 'default',
+            sound: 'notification',
           },
         },
         trigger

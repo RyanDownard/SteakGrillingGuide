@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     FlatList,
     StyleSheet,
+    ScrollView,
 } from 'react-native';
 import { Steak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
@@ -43,24 +44,26 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                             <Text style={globalStyles.closeButton}>✕</Text>
                         </TouchableOpacity>
                     </View>
-                    <Text style={globalStyles.modalText}>
-                        You are about to start the timer for your steaks. Be sure your
-                        steaks and grill are ready. When ready, place the following steaks
-                        on the grill and hit start.
-                    </Text>
+                    <ScrollView style={styles.longTextContainer}>
+                        <Text style={globalStyles.modalText}>
+                            You are about to start the timer for your steaks. Be sure your
+                            steaks and grill are ready. When ready, place the following steaks
+                            on the grill and hit start.
+                        </Text>
 
-                    <Text style={globalStyles.modalWarning}>
-                        Do not leave your grill unattended while steaks are being cooked.
-                        You will be notified when changes need to be made, but you must
-                        monitor the grill and steaks at all times.
-                    </Text>
+                        <Text style={globalStyles.modalWarning}>
+                            Do not leave your grill unattended while steaks are being cooked.
+                            You will be notified when changes need to be made, but you must
+                            monitor the grill and steaks at all times.
+                        </Text>
 
-                    <Text style={globalStyles.modalWarning}>
-                        The notifications and timer are meant to help guide you, but you are
-                        responsible for being safe and ensuring your steak is properly
-                        cooked. This includes hearing the notification, if you miss them,
-                        your steak(s) may be cooked incorrectly.
-                    </Text>
+                        <Text style={globalStyles.modalWarning}>
+                            The notifications and timer are meant to help guide you, but you are
+                            responsible for being safe and ensuring your steak is properly
+                            cooked. This includes hearing the notification, if you miss them,
+                            your steak(s) may be cooked incorrectly.
+                        </Text>
+                    </ScrollView>
 
 
                     {longestTimeSteaks.length > 0 && (
@@ -110,6 +113,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         borderRadius: 5,
     },
+    longTextContainer: {
+        maxHeight: 400,
+        paddingBottom: 10,
+    }
 });
 
 export default StartTimerModal;

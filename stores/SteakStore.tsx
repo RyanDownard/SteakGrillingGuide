@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { Steak, SavedSteak, CookData, Duration } from '../data/SteakData';
 import steakSettings from '../data/SteakSettings.json';
-import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SteakStore {
@@ -74,13 +73,6 @@ const useSteakStore = create<SteakStore>((set, get) => ({
                     steaksToPlace.includes(steak) ? { ...steak, isPlaced: true } : steak
                 ),
             }));
-            Toast.show({
-                type: 'success',
-                text1: `${steaksToPlace.map((s) => s.personName + "'s").join(', ')} ${
-                    steaksToPlace.length === 1 ? 'steak' : 'steaks'
-                } ready to be placed on the grill`,
-                topOffset: 80,
-            });
         }
 
         const steaksToFlip = get().steaks.filter(
@@ -93,13 +85,6 @@ const useSteakStore = create<SteakStore>((set, get) => ({
                     steaksToFlip.includes(steak) ? { ...steak, isFlipped: true } : steak
                 ),
             }));
-            Toast.show({
-                type: 'success',
-                text1: `${steaksToFlip.map((s) => s.personName + "'s").join(', ')} ${
-                    steaksToFlip.length === 1 ? 'steak' : 'steaks'
-                } ready to be flipped on the grill`,
-                topOffset: 80,
-            });
         }
 
         if(steaksToFlip.length > 0 || steaksToPlace.length > 0) {

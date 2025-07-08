@@ -47,7 +47,7 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                     <ScrollView style={styles.longTextContainer}>
                         <Text style={globalStyles.modalText}>
                             You are about to start the timer for your steaks. Be sure your
-                            steaks and grill are ready. When ready, place the following steaks
+                            steaks are ready and your grill is preheated. When ready, place the following steaks
                             on the grill and hit start.
                         </Text>
 

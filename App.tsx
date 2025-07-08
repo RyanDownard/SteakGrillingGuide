@@ -8,7 +8,6 @@ import { faSave, faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import notifee from '@notifee/react-native';
 import Timer from './components/Timer';
-import Toast from 'react-native-toast-message';
 import useSavedSteaksStore from './stores/SavedSteakStore';
 
 const Tab = createBottomTabNavigator();
@@ -61,7 +60,6 @@ const App = () => {
             }} />
         </Tab.Navigator>
       </NavigationContainer>
-      <Toast />
     </View>
   );
 };

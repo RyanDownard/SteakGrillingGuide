@@ -6,7 +6,6 @@ import StartTimerModal from '../components/StartTimerModal.tsx';
 import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +13,7 @@ import useTimerStore from '../stores/TimerStore.tsx';
 import useSteakStore from '../stores/SteakStore.tsx';
 import { Steak } from '../data/SteakData.tsx';
 import globalStyles from '../styles/globalStyles.tsx';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 

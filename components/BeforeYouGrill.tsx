@@ -63,7 +63,7 @@ const BeforeYouGrill: React.FC<GrillInfoModalProps> = ({ visible, onClose }) => 
           </Text>
           <View style={globalStyles.modalBody}>
             <Text style={styles.modalItem}>
-              - Make sure your grill is cleaned; higher temperatures can cause the grease to catch fire.
+              - Make sure you clean your grill regularly to prevent flare-ups and ensure even cooking.
             </Text>
             <Text style={styles.modalItem}>
               - Sit steaks out at room temperature for 30 minutes prior to cooking.

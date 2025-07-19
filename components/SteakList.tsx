@@ -61,7 +61,9 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                         <Progress.Circle progress={progress} color={steak.isPlaced ? '#017a40' : '#fcca03'} size={23} thickness={2} />
                     )}
                 </View>
-
+                <TouchableOpacity onPress={() => setExpanded(!expanded)} style={{ padding: 5, alignItems: 'center', borderWidth: 1, borderColor: '#ddd' }}>
+                    <FontAwesomeIcon icon={expanded ? 'angle-down' : 'angle-up'} size={20} color="#555" />
+                </TouchableOpacity>
                 {expanded ? (
                     <View style={styles.details}>
                         <View style={styles.buttonsContainer}>
@@ -107,9 +109,7 @@ const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisab
 
 const styles = StyleSheet.create({
     card: {
-        padding: 10,
-        paddingLeft: 15,
-        paddingRight: 15,
+        paddingTop: 10,
         marginTop: 5,
         marginBottom: 5,
         marginLeft: 10,
@@ -124,6 +124,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 15,
+        marginRight: 10,
+        marginLeft: 10,
         flexWrap: 'wrap',
     },
     name: {
@@ -137,6 +139,7 @@ const styles = StyleSheet.create({
     },
     details: {
         marginTop: 5,
+        marginBottom: 5,
     },
     buttonsContainer: {
         flexDirection: 'row',

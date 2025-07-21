@@ -184,6 +184,18 @@ const globalStyles = StyleSheet.create({
         backgroundColor: '#575555',
         color: '#ffffff',
     },
+    card: {
+        paddingTop: 10,
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#fff',
+        shadowRadius: 5,
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 5 },
+    },
 });
 
 export default globalStyles;

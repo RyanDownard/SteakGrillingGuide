@@ -47,7 +47,7 @@ const SavedSteaks = () => {
                 data={savedSteaks}
                 keyExtractor={(item: SavedSteak) => item.id.toString()}
                 renderItem={({ item }) =>
-                    <View style={styles.container}>
+                    <View style={[globalStyles.card, styles.cardContainer]}>
                         <View style={styles.infoContainer}>
                             <Text style={styles.savedSteakName}>{item.personName}</Text>
                             <Text style={styles.savedSteakCook}>{item.centerCook}</Text>
@@ -74,13 +74,13 @@ const SavedSteaks = () => {
 export default SavedSteaks;
 
 const styles = StyleSheet.create({
-    container: {
+    cardContainer: {
         flexDirection: 'row',
-        backgroundColor: '#eee',
         padding: 20,
         alignItems: 'center',
     },
     infoContainer: {
+        marginTop: 10,
         flex: 2,
         flexDirection: 'column',
     },

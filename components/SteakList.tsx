@@ -8,6 +8,8 @@ import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useTimerStore from '../stores/TimerStore';
 import * as Progress from 'react-native-progress';
+import ToggleContentButton from './ToggleContentButton';
+import Table from './Table';
 
 interface Props {
     steak: Steak;
@@ -52,8 +54,8 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
     }, [remainingTime, timerRunning, duration, steak.firstSideTime, steak.secondSideTime]);
 
     return (
-        <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-            <View style={styles.card}>
+        <View>
+            <View style={globalStyles.card}>
                 <View style={styles.infoContainer}>
                     <Text style={styles.name}>{steak.personName}</Text>
                     <Text style={styles.steakCookDetails}>{`${steak.centerCook} - ${steak.thickness}"`}</Text>
@@ -61,9 +63,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                         <Progress.Circle progress={progress} color={steak.isPlaced ? '#017a40' : '#fcca03'} size={23} thickness={2} />
                     )}
                 </View>
-                <TouchableOpacity onPress={() => setExpanded(!expanded)} style={{ padding: 5, alignItems: 'center', borderWidth: 1, borderColor: '#ddd' }}>
-                    <FontAwesomeIcon icon={expanded ? 'angle-down' : 'angle-up'} size={20} color="#555" />
-                </TouchableOpacity>
+                <ToggleContentButton expanded={expanded} onChange={() => setExpanded(!expanded)} />
                 {expanded ? (
                     <View style={styles.details}>
                         <View style={styles.buttonsContainer}>
@@ -79,21 +79,15 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                                 <FontAwesomeIcon icon={faTrash} size={24} color={actionsDisabled ? '#949799' : '#c70404'} />
                             </TouchableOpacity>
                         </View>
-                        <View style={styles.table}>
-                            <View style={styles.tableRow}>
-                                <Text style={styles.tableHeader}>Starts At</Text>
-                                <Text style={styles.tableHeader}>Flips At</Text>
-                            </View>
-                            <View style={styles.tableRow}>
-                                <Text style={styles.tableCell}>{formatTime(steak.firstSideTime + steak.secondSideTime)}</Text>
-                                <Text style={styles.tableCell}>{formatTime(steak.secondSideTime)}</Text>
-                            </View>
-                        </View>
-
+                        <Table
+                            headers={['Starts At', 'Flips At']}
+                            rows={[
+                                [formatTime(steak.firstSideTime + steak.secondSideTime), formatTime(steak.secondSideTime)],
+                            ]} />
                     </View>
                 ) : null}
             </View>
-        </TouchableOpacity>
+        </View>
     );
 };
 
@@ -108,18 +102,6 @@ const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisab
 };
 
 const styles = StyleSheet.create({
-    card: {
-        paddingTop: 10,
-        marginTop: 5,
-        marginBottom: 5,
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#fff',
-        shadowRadius: 5,
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 5 },
-    },
     infoContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

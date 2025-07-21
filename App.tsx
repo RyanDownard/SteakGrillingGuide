@@ -4,11 +4,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './views/Home';
 import SavedSteaks from './views/SavedSteaks';
-import { faSave, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import notifee from '@notifee/react-native';
 import Timer from './components/Timer';
 import useSavedSteaksStore from './stores/SavedSteakStore';
+import EditTimes from './views/EditTimes';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,10 @@ const homeIcon = ({ color, size }: { color: string; size: number }) => (
 
 const savedSteakIcon = ({ color, size }: { color: string; size: number }) => (
   <FontAwesomeIcon icon={faSave} size={size} color={color} />
+);
+
+const timerIcon = ({ color, size }: { color: string; size: number }) => (
+  <FontAwesomeIcon icon={faClock} size={size} color={color} />
 );
 
 const App = () => {
@@ -57,6 +62,12 @@ const App = () => {
             component={SavedSteaks}
             options={{
               tabBarIcon: savedSteakIcon,
+            }} />
+          <Tab.Screen
+            name="Edit Times"
+            component={EditTimes}
+            options={{
+              tabBarIcon: timerIcon,
             }} />
         </Tab.Navigator>
       </NavigationContainer>

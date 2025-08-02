@@ -3,7 +3,9 @@ import { View, Text, TextInput, Modal, TouchableOpacity, Alert, StyleSheet } fro
 import { Duration } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import { formatTime } from '../data/Helpers';
-
+import { faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import useOverrideStore from '../stores/OverrideStore';
 
 interface EditDurationModalProps {
     visible: boolean;
@@ -13,21 +15,24 @@ interface EditDurationModalProps {
 }
 
 const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCook, duration, handleClose }) => {
-    const [firstSideMinutes, setFirstSideMinutes] = useState(duration ? (duration.FirstSide / 60).toString() : '');
-    const [firstSideSeconds, setFirstSideSeconds] = useState(duration ? (duration.FirstSide % 60).toString() : '');
-    const [secondSideMinutes, setSecondSideMinutes] = useState(duration ? (duration.SecondSide / 60).toString() : '');
-    const [secondSideSeconds, setSecondSideSeconds] = useState(duration ? (duration.SecondSide % 60).toString() : '');
+    const [firstSideMinutes, setFirstSideMinutes] = useState('');
+    const [firstSideSeconds, setFirstSideSeconds] = useState('');
+    const [secondSideMinutes, setSecondSideMinutes] = useState('');
+    const [secondSideSeconds, setSecondSideSeconds] = useState('');
+    const overrideStore = useOverrideStore();
 
     useEffect(() => {
         if (visible && duration) {
-            setFirstSideMinutes((duration.FirstSide / 60).toString());
-            setFirstSideSeconds((duration.FirstSide % 60).toString());
-            setSecondSideMinutes((duration.SecondSide / 60).toString());
-            setSecondSideSeconds((duration.SecondSide % 60).toString());
-        }
-    }, [visible, duration]);
+            const override = overrideStore.getOverride(centerCook, duration.Thickness);
 
-    const validateAndSetValue = (text: string, setMethod: (value: string) => void) => {
+            setFirstSideMinutes(Math.floor((override?.FirstSideOverride ?? duration.FirstSide) / 60).toString());
+            setFirstSideSeconds(((override?.FirstSideOverride ?? duration.FirstSide) % 60).toString());
+            setSecondSideMinutes(Math.floor((override?.SecondSideOverride ?? duration.SecondSide) / 60).toString());
+            setSecondSideSeconds(((override?.SecondSideOverride ?? duration.SecondSide) % 60).toString());
+        }
+    }, [visible, duration, overrideStore, centerCook]);
+
+    const validateMinutesAndSetValue = (text: string, setMethod: (value: string) => void) => {
         if (text.includes('.')) {
             Alert.alert('Invalid input', 'Please enter a whole number without decimals');
             return;
@@ -35,6 +40,30 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
 
         if (isNaN(Number(text))) {
             Alert.alert('Invalid input', 'All values must be a number');
+            return;
+        }
+
+        if (parseInt(text, 10) < 0 || parseInt(text, 10) > 20) {
+            Alert.alert('Invalid input', 'Minutes must be between 0 and 20');
+            return;
+        }
+
+        setMethod(text);
+    };
+
+    const validateSecondsAndSetValue = (text: string, setMethod: (value: string) => void) => {
+        if (text.includes('.')) {
+            Alert.alert('Invalid input', 'Please enter a whole number without decimals');
+            return;
+        }
+
+        if (isNaN(Number(text))) {
+            Alert.alert('Invalid input', 'All values must be a number');
+            return;
+        }
+
+        if (parseInt(text, 10) < 0 || parseInt(text, 10) >= 60) {
+            Alert.alert('Invalid input', 'Seconds must be between 0 and 59');
             return;
         }
 
@@ -49,14 +78,23 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
         handleClose();
     };
 
+    const resetToDefault = () => {
+        if (!duration) { return; }
+
+        setFirstSideMinutes(Math.floor(duration.FirstSide / 60).toString());
+        setFirstSideSeconds((duration.FirstSide % 60).toString());
+        setSecondSideMinutes(Math.floor(duration.SecondSide / 60).toString());
+        setSecondSideSeconds((duration.SecondSide % 60).toString());
+    };
+
     const saveAndClose = () => {
         if (!firstSideMinutes || !firstSideSeconds || !secondSideMinutes || !secondSideSeconds) {
             Alert.alert('Incomplete data', 'Please fill in all fields before saving.');
             return;
         }
 
-        let firstSideTotalSeconds = parseInt(firstSideMinutes) * 60 + parseInt(firstSideSeconds);
-        let secondSideTotalSeconds = parseInt(secondSideMinutes) * 60 + parseInt(secondSideSeconds);
+        let firstSideTotalSeconds = parseInt(firstSideMinutes, 10) * 60 + parseInt(firstSideSeconds, 10);
+        let secondSideTotalSeconds = parseInt(secondSideMinutes, 10) * 60 + parseInt(secondSideSeconds, 10);
 
         if (firstSideTotalSeconds <= 0 || firstSideTotalSeconds > 1200) {
             Alert.alert('Invalid time', 'First side must be between 1 and 20 minutes.');
@@ -68,11 +106,17 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
             return;
         }
 
-        const newDuration: Duration = {
-            Thickness: duration ? duration.Thickness : 0,
-            FirstSide: parseInt(firstSideMinutes) * 60 + parseInt(firstSideSeconds),
-            SecondSide: parseInt(secondSideMinutes) * 60 + parseInt(secondSideSeconds),
-        };
+        if (duration?.FirstSide === firstSideTotalSeconds && duration.SecondSide === secondSideTotalSeconds) {
+            overrideStore.removeOverride(centerCook, duration!.Thickness);
+        }
+        else {
+            const override = {
+                FirstSideOverride: firstSideTotalSeconds !== duration?.FirstSide ? firstSideTotalSeconds : undefined,
+                SecondSideOverride: secondSideTotalSeconds !== duration?.SecondSide ? secondSideTotalSeconds : undefined,
+            };
+
+            overrideStore.setOverride(centerCook, duration!.Thickness, override);
+        }
 
         resetAndClose();
     };
@@ -97,87 +141,102 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
                             <Text style={globalStyles.closeButton}>✕</Text>
                         </TouchableOpacity>
                     </View>
-
-                    <View style={globalStyles.modalBody}>
-                        <Text style={styles.sideText}>First Side</Text>
-                        <View style={styles.sideContainer}>
-                            <View style={styles.settingContainer}>
-                                <Text style={[globalStyles.label]}>Minutes:</Text>
-                                <TextInput
-                                    style={globalStyles.input}
-                                    placeholder="First Side Minutes"
-                                    keyboardType="numeric"
-                                    placeholderTextColor={'#aaa'}
-                                    value={firstSideMinutes}
-                                    maxLength={2}
-                                    onChangeText={(text) => validateAndSetValue(text, setFirstSideMinutes)}
-                                    enterKeyHint={'done'}
-                                />
-                            </View>
-                            <View style={styles.settingContainer}>
-                                <Text style={globalStyles.label}>Seconds:</Text>
-                                <TextInput
-                                    style={globalStyles.input}
-                                    placeholder="First Side Seconds"
-                                    keyboardType="numeric"
-                                    placeholderTextColor={'#aaa'}
-                                    value={firstSideSeconds}
-                                    maxLength={2}
-                                    onChangeText={text => validateAndSetValue(text, setFirstSideSeconds)}
-                                    enterKeyHint={'done'}
-                                />
-                            </View>
+                    <Text style={styles.sideText}>First Side</Text>
+                    <View style={styles.sideContainer}>
+                        <View style={styles.settingContainer}>
+                            <Text style={[globalStyles.label]}>Minutes:</Text>
+                            <TextInput
+                                style={globalStyles.input}
+                                placeholder="First Side Minutes"
+                                keyboardType="numeric"
+                                placeholderTextColor={'#aaa'}
+                                value={firstSideMinutes}
+                                maxLength={2}
+                                onChangeText={(text) => validateMinutesAndSetValue(text, setFirstSideMinutes)}
+                                enterKeyHint={'done'}
+                            />
                         </View>
-
-                        {!isNaN(parseInt(firstSideMinutes, 10)) && !isNaN(parseInt(firstSideSeconds, 10)) ?
-                            <Text style={styles.totalText}>
-                                {formatTime((parseInt(firstSideMinutes, 10) * 60) + parseInt(firstSideSeconds, 10))}
-                            </Text>
-                            :
-                            <Text style={styles.totalText}>
-                                Invalid Time
-                            </Text>
-                        }
-
-                        <Text style={styles.sideText}>Second Side</Text>
-                        <View style={styles.sideContainer}>
-                            <View style={styles.settingContainer}>
-                                <Text style={[globalStyles.label]}>Minutes:</Text>
-                                <TextInput
-                                    style={globalStyles.input}
-                                    placeholder="Second Side Minutes"
-                                    keyboardType="numeric"
-                                    placeholderTextColor={'#aaa'}
-                                    value={secondSideMinutes}
-                                    onChangeText={(text) => validateAndSetValue(text, setSecondSideMinutes)}
-                                    maxLength={2}
-                                    enterKeyHint={'done'}
-                                />
-                            </View>
-                            <View style={styles.settingContainer}>
-                                <Text style={globalStyles.label}>Seconds:</Text>
-                                <TextInput
-                                    style={globalStyles.input}
-                                    placeholder="Second Side Seconds"
-                                    keyboardType="numeric"
-                                    maxLength={2}
-                                    placeholderTextColor={'#aaa'}
-                                    value={secondSideSeconds}
-                                    onChangeText={text => validateAndSetValue(text, setSecondSideSeconds)}
-                                    enterKeyHint={'done'}
-                                />
-                            </View>
+                        <View style={styles.settingContainer}>
+                            <Text style={globalStyles.label}>Seconds:</Text>
+                            <TextInput
+                                style={globalStyles.input}
+                                placeholder="First Side Seconds"
+                                keyboardType="numeric"
+                                placeholderTextColor={'#aaa'}
+                                value={firstSideSeconds}
+                                maxLength={2}
+                                onChangeText={text => validateSecondsAndSetValue(text, setFirstSideSeconds)}
+                                enterKeyHint={'done'}
+                            />
                         </View>
+                    </View>
 
-                        {!isNaN(parseInt(secondSideMinutes, 10)) && !isNaN(parseInt(secondSideSeconds, 10)) ?
-                            <Text style={styles.totalText}>
-                                {formatTime((parseInt(secondSideMinutes, 10) * 60) + parseInt(secondSideSeconds, 10))}
-                            </Text>
-                            :
-                            <Text style={styles.totalText}>
-                                Invalid Time
-                            </Text>
-                        }
+                    {!isNaN(parseInt(firstSideMinutes, 10)) && !isNaN(parseInt(firstSideSeconds, 10)) ?
+                        <Text style={styles.totalText}>
+                            {formatTime((parseInt(firstSideMinutes, 10) * 60) + parseInt(firstSideSeconds, 10))}
+                        </Text>
+                        :
+                        <Text style={styles.totalText}>
+                            Invalid Time
+                        </Text>
+                    }
+
+                    <Text style={styles.sideText}>Second Side</Text>
+                    <View style={styles.sideContainer}>
+                        <View style={styles.settingContainer}>
+                            <Text style={[globalStyles.label]}>Minutes:</Text>
+                            <TextInput
+                                style={globalStyles.input}
+                                placeholder="Second Side Minutes"
+                                keyboardType="numeric"
+                                placeholderTextColor={'#aaa'}
+                                value={secondSideMinutes}
+                                onChangeText={(text) => validateMinutesAndSetValue(text, setSecondSideMinutes)}
+                                maxLength={2}
+                                enterKeyHint={'done'}
+                            />
+                        </View>
+                        <View style={styles.settingContainer}>
+                            <Text style={globalStyles.label}>Seconds:</Text>
+                            <TextInput
+                                style={globalStyles.input}
+                                placeholder="Second Side Seconds"
+                                keyboardType="numeric"
+                                maxLength={2}
+                                placeholderTextColor={'#aaa'}
+                                value={secondSideSeconds}
+                                onChangeText={text => validateSecondsAndSetValue(text, setSecondSideSeconds)}
+                                enterKeyHint={'done'}
+                            />
+                        </View>
+                    </View>
+
+                    {!isNaN(parseInt(secondSideMinutes, 10)) && !isNaN(parseInt(secondSideSeconds, 10)) ?
+                        <Text style={styles.totalText}>
+                            {formatTime((parseInt(secondSideMinutes, 10) * 60) + parseInt(secondSideSeconds, 10))}
+                        </Text>
+                        :
+                        <Text style={styles.totalText}>
+                            Invalid Time
+                        </Text>
+                    }
+
+                    <View style={globalStyles.buttonContainer}>
+                        <TouchableOpacity
+                            style={[globalStyles.button, globalStyles.cancelButton]}
+                            onPress={resetAndClose}
+                        >
+                            <Text style={globalStyles.buttonText}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.resetButton} onPress={resetToDefault}>
+                            <FontAwesomeIcon icon={faRotateLeft} size={25} color={'#2ea7f3ff'} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[globalStyles.button, globalStyles.saveButton]}
+                            onPress={saveAndClose}
+                        >
+                            <Text style={globalStyles.buttonText}>Save</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -209,5 +268,8 @@ const styles = StyleSheet.create({
     totalText: {
         fontSize: 16,
         textAlign: 'center',
-    }
+    },
+    resetButton: {
+        marginTop: 5,
+    },
 });

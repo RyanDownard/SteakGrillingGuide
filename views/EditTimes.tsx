@@ -1,14 +1,15 @@
-import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
 import steakSettings from '../data/SteakSettings.json';
 import { CookData, Duration } from '../data/SteakData';
 import ToggleContentButton from '../components/ToggleContentButton';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPencil } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import globalStyles from '../styles/globalStyles';
 import Table from '../components/Table';
 import { formatTime } from '../data/Helpers';
 import EditDurationModal from '../components/EditDurationModal';
+import useOverrideStore from '../stores/OverrideStore';
 
 interface SteakSettingProps {
     steakSetting: CookData;
@@ -17,20 +18,42 @@ interface SteakSettingProps {
     setModalVisible: (visible: boolean) => void;
 }
 
-const SteakSetting: React.FC<SteakSettingProps> = ({steakSetting, setCenterCook, setDuration, setModalVisible}) => {
+const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook, setDuration, setModalVisible }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-
+    const overrideStore = useOverrideStore();
 
     const editSteakSetting = (duration: Duration) => {
-        console.log(duration);
         setCenterCook(steakSetting.CenterCook);
         setDuration(duration);
         setModalVisible(true);
     };
 
+    const resetCenterCookDefaults = async (cookData: CookData) => {
+        Alert.alert('Reset Times', `Are you sure you want to reset all times for ${cookData.CenterCook}?`,
+            [
+                {
+                    text: 'Cancel',
+                },
+                {
+                    text: 'Reset',
+                    onPress: async () => {
+                        cookData.Durations.forEach(async (duration: Duration) => {
+                            await overrideStore.removeOverride(cookData.CenterCook, duration.Thickness);
+                        });
+                    },
+                },
+            ]
+        );
+    };
+
     return (
         <View style={globalStyles.card}>
-            <Text style={styles.settingText}>{steakSetting.CenterCook}</Text>
+            <View style={styles.resetAllContainer}>
+                <Text style={styles.settingText}>{steakSetting.CenterCook}</Text>
+                <TouchableOpacity style={styles.resetButton} onPress={() => resetCenterCookDefaults(steakSetting)}>
+                    <FontAwesomeIcon icon={faRotateLeft} size={25} color={'#2ea7f3ff'} />
+                </TouchableOpacity>
+            </View>
             <ToggleContentButton
                 expanded={isExpanded}
                 onChange={() => setIsExpanded(!isExpanded)}
@@ -38,26 +61,55 @@ const SteakSetting: React.FC<SteakSettingProps> = ({steakSetting, setCenterCook,
             {isExpanded && (
                 <Table
                     headers={['Thickness', 'First Side', 'Second Side', 'Edit']}
-                    rows={steakSetting.Durations.map((duration: Duration) => [
-                        `${duration.Thickness}"`,
-                        formatTime(duration.FirstSide),
-                        formatTime(duration.SecondSide),
-                        <TouchableOpacity onPress={() => editSteakSetting(duration)}>
-                            <FontAwesomeIcon icon={faPencil} size={20} color={'#e3cf17'} />
-                        </TouchableOpacity>,
-                    ])} />
+                    rows={steakSetting.Durations.map((duration: Duration) => {
+                        const override = overrideStore.getOverride(steakSetting.CenterCook, duration.Thickness);
+                        return [
+                            `${duration.Thickness}"`,
+                            override?.FirstSideOverride === undefined ? formatTime(duration.FirstSide) : `${formatTime(override.FirstSideOverride)}*`,
+                            override?.SecondSideOverride === undefined ? formatTime(duration.SecondSide) : `${formatTime(override.SecondSideOverride)}*`,
+                            <TouchableOpacity onPress={() => editSteakSetting(duration)}>
+                                <FontAwesomeIcon icon={faPencil} size={20} color={'#e3cf17'} />
+                            </TouchableOpacity>,
+                        ];
+                    })}
+                />
             )}
         </View>
     );
-}
+};
 
 const EditTimes = () => {
     const [editingDuration, setEditingDuration] = useState<Duration | null>(null);
     const [editingCenterCook, setEditingCenterCook] = useState('');
     const [modalVisable, setModalVisible] = useState(false);
 
+    const overrideStore = useOverrideStore();
+
+    const resetAllDefaults = async () => {
+        Alert.alert('Reset All Times', 'Are you sure you want to reset all times to their default values for all cooks and thicknesses?',
+            [
+                {
+                    text: 'Cancel',
+                },
+                {
+                    text: 'Reset',
+                    onPress: async () => {
+                        await overrideStore.clearAllOverrides();
+                    },
+                },
+            ]
+        );
+    };
+
     return (
         <>
+            <View style={styles.resetAllContainer}>
+                <TouchableOpacity style={[globalStyles.fontAwesomeButton, globalStyles.infoButtonOutline]} onPress={resetAllDefaults}>
+                    <Text style={globalStyles.infoButtonText}>
+                        Reset All Defaults
+                    </Text>
+                </TouchableOpacity>
+            </View>
             <FlatList
                 data={steakSettings}
                 keyExtractor={(item: CookData) => item.CenterCook}
@@ -102,5 +154,14 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         padding: 10,
+    },
+    resetAllContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        padding: 10,
+    },
+    resetButton: {
+        marginRight: 5,
+        marginTop: 5,
     },
 });

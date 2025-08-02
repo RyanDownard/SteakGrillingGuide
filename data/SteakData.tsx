@@ -33,8 +33,8 @@ class Steak {
   personName: string;
   centerCook: string;
   thickness: number;
-  firstSideTime: number; // in seconds
-  secondSideTime: number; // in seconds
+  firstSideTime: number;
+  secondSideTime: number;
   isPlaced: boolean;
   isFlipped: boolean;
   savedSteak?: SavedSteak | null;

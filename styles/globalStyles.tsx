@@ -166,6 +166,9 @@ const globalStyles = StyleSheet.create({
     goodButton: {
         backgroundColor: '#5cb85c',
     },
+    infoButton: {
+        backgroundColor: '#007BFF',
+    },
     goodButtonOutline: {
         borderColor: '#5cb85c',
         color: '#5cb85c',
@@ -175,6 +178,9 @@ const globalStyles = StyleSheet.create({
     },
     infoButtonOutline: {
         borderColor: '#029af2',
+    },
+    infoButtonText:{
+        color: '#029af2',
     },
     appTitle: {
         fontSize: 30,

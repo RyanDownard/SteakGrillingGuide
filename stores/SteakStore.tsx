@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Steak, SavedSteak, CookData, Duration } from '../data/SteakData';
 import steakSettings from '../data/SteakSettings.json';
+import useOverrideStore from './OverrideStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SteakStore {
@@ -23,7 +24,7 @@ const useSteakStore = create<SteakStore>((set, get) => ({
 
     addSteak: (steak) => set((state) => ({ steaks: [...state.steaks, steak] })),
 
-    clearSteaks: () => set(() => ({ steaks: []})),
+    clearSteaks: () => set(() => ({ steaks: [] })),
 
     editSteak: (index, updatedSteak) =>
         set((state) => ({
@@ -87,16 +88,16 @@ const useSteakStore = create<SteakStore>((set, get) => ({
             }));
         }
 
-        if(steaksToFlip.length > 0 || steaksToPlace.length > 0) {
+        if (steaksToFlip.length > 0 || steaksToPlace.length > 0) {
             try {
                 const dataToSave = {
-                  steaks: get().steaks,
-                  endTime: endsAt,
+                    steaks: get().steaks,
+                    endTime: endsAt,
                 };
                 await AsyncStorage.setItem('steakTimerData', JSON.stringify(dataToSave));
-              } catch (error) {
+            } catch (error) {
                 console.error('Failed to save timer and steaks:', error);
-              }
+            }
         }
     },
 
@@ -119,6 +120,14 @@ const useSteakStore = create<SteakStore>((set, get) => ({
         if (!duration) {
             console.error('Thickness not found for the selected CenterCook');
             return null;
+        }
+
+        const override = useOverrideStore.getState().getOverride(centerCook, thickness);
+        if (override && (override.FirstSideOverride || override.SecondSideOverride)) {
+            return {
+                firstSide: override.FirstSideOverride ?? duration.FirstSide,
+                secondSide: override.SecondSideOverride ?? duration.SecondSide,
+            };
         }
 
         return { firstSide: duration.FirstSide, secondSide: duration.SecondSide };

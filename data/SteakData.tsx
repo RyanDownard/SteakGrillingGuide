@@ -3,7 +3,9 @@ import steakSettings from '../data/SteakSettings.json';
 interface Duration {
   Thickness: number;
   FirstSide: number;
+  FirstSideOverride?: number;
   SecondSide: number;
+  SecondSideOverride?: number;
 }
 
 interface CookData {

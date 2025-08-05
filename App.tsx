@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import notifee from '@notifee/react-native';
 import Timer from './components/Timer';
 import useSavedSteaksStore from './stores/SavedSteakStore';
-import useOverrideStore from './stores/OverrideStore';
+import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
 
 const Tab = createBottomTabNavigator();
@@ -29,7 +29,7 @@ const timerIcon = ({ color, size }: { color: string; size: number }) => (
 const App = () => {
 
   const { loadSavedSteaks } = useSavedSteaksStore();
-  const { loadOverrides } = useOverrideStore();
+  const { loadOverrides } = useSteakStore();
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState: any) => {

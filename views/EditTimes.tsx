@@ -1,6 +1,5 @@
 import { Text, View, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
-import steakSettings from '../data/SteakSettings.json';
 import { CookData, Duration } from '../data/SteakData';
 import ToggleContentButton from '../components/ToggleContentButton';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -9,7 +8,7 @@ import globalStyles from '../styles/globalStyles';
 import Table from '../components/Table';
 import { formatTime } from '../data/Helpers';
 import EditDurationModal from '../components/EditDurationModal';
-import useOverrideStore from '../stores/OverrideStore';
+import useSteakStore from '../stores/SteakStore';
 
 interface SteakSettingProps {
     steakSetting: CookData;
@@ -20,7 +19,7 @@ interface SteakSettingProps {
 
 const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook, setDuration, setModalVisible }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const overrideStore = useOverrideStore();
+    const { removeOverride } = useSteakStore();
 
     const editSteakSetting = (duration: Duration) => {
         setCenterCook(steakSetting.CenterCook);
@@ -38,7 +37,7 @@ const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook
                     text: 'Reset',
                     onPress: async () => {
                         cookData.Durations.forEach(async (duration: Duration) => {
-                            await overrideStore.removeOverride(cookData.CenterCook, duration.Thickness);
+                            await removeOverride(cookData.CenterCook, duration.Thickness);
                         });
                     },
                 },
@@ -62,11 +61,10 @@ const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook
                 <Table
                     headers={['Thickness', 'First Side', 'Second Side', 'Edit']}
                     rows={steakSetting.Durations.map((duration: Duration) => {
-                        const override = overrideStore.getOverride(steakSetting.CenterCook, duration.Thickness);
                         return [
                             `${duration.Thickness}"`,
-                            override?.FirstSideOverride === undefined ? formatTime(duration.FirstSide) : `${formatTime(override.FirstSideOverride)}*`,
-                            override?.SecondSideOverride === undefined ? formatTime(duration.SecondSide) : `${formatTime(override.SecondSideOverride)}*`,
+                            `${formatTime(duration.FirstSideOverride ?? duration.FirstSide)}${duration.FirstSideOverride ? '*' : ''}`,
+                            `${formatTime(duration.SecondSideOverride ?? duration.SecondSide)}${duration.SecondSideOverride ? '*' : ''}`,
                             <TouchableOpacity onPress={() => editSteakSetting(duration)}>
                                 <FontAwesomeIcon icon={faPencil} size={20} color={'#e3cf17'} />
                             </TouchableOpacity>,
@@ -83,7 +81,7 @@ const EditTimes = () => {
     const [editingCenterCook, setEditingCenterCook] = useState('');
     const [modalVisable, setModalVisible] = useState(false);
 
-    const overrideStore = useOverrideStore();
+    const { clearAllOverrides, settings } = useSteakStore();
 
     const resetAllDefaults = async () => {
         Alert.alert('Reset All Times', 'Are you sure you want to reset all times to their default values for all cooks and thicknesses?',
@@ -94,7 +92,7 @@ const EditTimes = () => {
                 {
                     text: 'Reset',
                     onPress: async () => {
-                        await overrideStore.clearAllOverrides();
+                        await clearAllOverrides();
                     },
                 },
             ]
@@ -111,7 +109,7 @@ const EditTimes = () => {
                 </TouchableOpacity>
             </View>
             <FlatList
-                data={steakSettings}
+                data={settings}
                 keyExtractor={(item: CookData) => item.CenterCook}
                 renderItem={({ item }) => (
                     <SteakSetting

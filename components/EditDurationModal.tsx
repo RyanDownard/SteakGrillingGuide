@@ -5,7 +5,7 @@ import globalStyles from '../styles/globalStyles';
 import { formatTime } from '../data/Helpers';
 import { faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import useOverrideStore from '../stores/OverrideStore';
+import useSteakStore from '../stores/SteakStore';
 
 interface EditDurationModalProps {
     visible: boolean;
@@ -19,18 +19,17 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
     const [firstSideSeconds, setFirstSideSeconds] = useState('');
     const [secondSideMinutes, setSecondSideMinutes] = useState('');
     const [secondSideSeconds, setSecondSideSeconds] = useState('');
-    const overrideStore = useOverrideStore();
+
+    const { setOverride, removeOverride } = useSteakStore();
 
     useEffect(() => {
         if (visible && duration) {
-            const override = overrideStore.getOverride(centerCook, duration.Thickness);
-
-            setFirstSideMinutes(Math.floor((override?.FirstSideOverride ?? duration.FirstSide) / 60).toString());
-            setFirstSideSeconds(((override?.FirstSideOverride ?? duration.FirstSide) % 60).toString());
-            setSecondSideMinutes(Math.floor((override?.SecondSideOverride ?? duration.SecondSide) / 60).toString());
-            setSecondSideSeconds(((override?.SecondSideOverride ?? duration.SecondSide) % 60).toString());
+            setFirstSideMinutes(Math.floor((duration?.FirstSideOverride ?? duration.FirstSide) / 60).toString());
+            setFirstSideSeconds(((duration?.FirstSideOverride ?? duration.FirstSide) % 60).toString());
+            setSecondSideMinutes(Math.floor((duration?.SecondSideOverride ?? duration.SecondSide) / 60).toString());
+            setSecondSideSeconds(((duration?.SecondSideOverride ?? duration.SecondSide) % 60).toString());
         }
-    }, [visible, duration, overrideStore, centerCook]);
+    }, [visible, duration, centerCook]);
 
     const validateMinutesAndSetValue = (text: string, setMethod: (value: string) => void) => {
         if (text.includes('.')) {
@@ -107,7 +106,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
         }
 
         if (duration?.FirstSide === firstSideTotalSeconds && duration.SecondSide === secondSideTotalSeconds) {
-            overrideStore.removeOverride(centerCook, duration!.Thickness);
+            removeOverride(centerCook, duration!.Thickness);
         }
         else {
             const override = {
@@ -115,7 +114,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
                 SecondSideOverride: secondSideTotalSeconds !== duration?.SecondSide ? secondSideTotalSeconds : undefined,
             };
 
-            overrideStore.setOverride(centerCook, duration!.Thickness, override);
+            setOverride(centerCook, duration!.Thickness, override);
         }
 
         resetAndClose();

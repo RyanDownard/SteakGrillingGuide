@@ -31,15 +31,15 @@ const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook
         Alert.alert('Reset Times', `Are you sure you want to reset all times for ${cookData.CenterCook}?`,
             [
                 {
-                    text: 'Cancel',
-                },
-                {
                     text: 'Reset',
                     onPress: async () => {
                         cookData.Durations.forEach(async (duration: Duration) => {
                             await removeOverride(cookData.CenterCook, duration.Thickness);
                         });
                     },
+                },
+                {
+                    text: 'Cancel',
                 },
             ]
         );
@@ -87,13 +87,13 @@ const EditTimes = () => {
         Alert.alert('Reset All Times', 'Are you sure you want to reset all times to their default values for all cooks and thicknesses?',
             [
                 {
-                    text: 'Cancel',
-                },
-                {
                     text: 'Reset',
                     onPress: async () => {
                         await clearAllOverrides();
                     },
+                },
+                {
+                    text: 'Cancel',
                 },
             ]
         );

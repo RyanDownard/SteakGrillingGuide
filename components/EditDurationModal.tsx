@@ -20,7 +20,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
     const [secondSideMinutes, setSecondSideMinutes] = useState('');
     const [secondSideSeconds, setSecondSideSeconds] = useState('');
 
-    const { setOverride, removeOverride } = useSteakStore();
+    const { setOverride, removeOverride, checkIfSteakIsInList } = useSteakStore();
 
     useEffect(() => {
         if (visible && duration) {
@@ -86,7 +86,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
         setSecondSideSeconds((duration.SecondSide % 60).toString());
     };
 
-    const saveAndClose = () => {
+    const saveAndClose = async () => {
         if (!firstSideMinutes || !firstSideSeconds || !secondSideMinutes || !secondSideSeconds) {
             Alert.alert('Incomplete data', 'Please fill in all fields before saving.');
             return;
@@ -103,6 +103,29 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
         if (secondSideTotalSeconds <= 0 || secondSideTotalSeconds > 1200) {
             Alert.alert('Invalid time', 'Second side must be between 1 and 20 minutes.');
             return;
+        }
+
+        if (checkIfSteakIsInList(centerCook, duration!.Thickness)) {
+            const userConfirmed = await new Promise<boolean>((resolve) => {
+                Alert.alert(
+                    'Settings In Use',
+                    `A steak with ${centerCook} and ${duration!.Thickness}" has already been added to your list and it's times will be updated, do you want to continue?`,
+                    [
+                        {
+                            text: 'Cancel',
+                            onPress: () => resolve(false),
+                            style: 'cancel',
+                        },
+                        {
+                            text: 'Continue',
+                            onPress: () => resolve(true),
+                        },
+                    ]
+                );
+            });
+            if (!userConfirmed) {
+                return;
+            }
         }
 
         if (duration?.FirstSide === firstSideTotalSeconds && duration.SecondSide === secondSideTotalSeconds) {
@@ -222,19 +245,19 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
 
                     <View style={globalStyles.buttonContainer}>
                         <TouchableOpacity
-                            style={[globalStyles.button, globalStyles.cancelButton]}
-                            onPress={resetAndClose}
+                            style={[globalStyles.button, globalStyles.saveButton]}
+                            onPress={saveAndClose}
                         >
-                            <Text style={globalStyles.buttonText}>Cancel</Text>
+                            <Text style={globalStyles.buttonText}>Save</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.resetButton} onPress={resetToDefault}>
                             <FontAwesomeIcon icon={faRotateLeft} size={25} color={'#2ea7f3ff'} />
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[globalStyles.button, globalStyles.saveButton]}
-                            onPress={saveAndClose}
+                            style={[globalStyles.button, globalStyles.cancelButton]}
+                            onPress={resetAndClose}
                         >
-                            <Text style={globalStyles.buttonText}>Save</Text>
+                            <Text style={globalStyles.buttonText}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

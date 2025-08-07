@@ -85,12 +85,6 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                     )}
                     <View style={globalStyles.buttonContainer}>
                         <TouchableOpacity
-                            onPress={onClose}
-                            style={[globalStyles.button, globalStyles.badButton]}
-                        >
-                            <Text style={globalStyles.buttonText}>Close</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
                             style={[
                                 globalStyles.button,
                                 globalStyles.goodButton,
@@ -98,6 +92,12 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                             onPress={onStart}
                         >
                             <Text style={globalStyles.buttonText}>Start!</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            style={[globalStyles.button, globalStyles.badButton]}
+                        >
+                            <Text style={globalStyles.buttonText}>Close</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

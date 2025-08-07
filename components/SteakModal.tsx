@@ -51,7 +51,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
-      setThickness(editingSteak.thickness.toFixed(1).toString());
+      setThickness(editingSteak.thickness.toString());
       if (editingSteak.savedSteak) {
         setSelectedSavedSteak(editingSteak.savedSteak);
       }
@@ -70,7 +70,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     updateSavedSteak(selectedSavedSteak!);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (personName.length === 0 || centerCook.length === 0 || thickness === '') {
       Alert.alert('Name, center cook, and thickness must have a value before saving.');
       return;
@@ -83,29 +83,37 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
     if (selectedSavedSteak) {
       if (personName !== selectedSavedSteak.personName
         || centerCook !== selectedSavedSteak.centerCook) {
-        Alert.alert(
-          'Details Changed',
-          'You selected a saved steak and changed the details, do you want to update the saved steak?',
-          [
-            {
-              text: 'Yes',
-              onPress: () => handleSavedDetailsChanged(),
-            },
-            {
-              text: 'No',
-              onPress: () => { steak.savedSteak = null; },
-            },
-          ],
-          { cancelable: false },
-        );
+
+        await new Promise<void>(() => {
+          Alert.alert(
+            'Details Changed',
+            'You selected a saved steak and changed the details, do you want to update the saved steak?',
+            [
+              {
+                text: 'Yes',
+                onPress: () => {
+                  handleSavedDetailsChanged();
+                  steak.savedSteak = selectedSavedSteak;
+                  saveAndClose(steak);
+                },
+              },
+              {
+                text: 'No',
+                onPress: () => {
+                  steak.savedSteak = null;
+                  saveAndClose(steak);
+                },
+              },
+            ],
+            { cancelable: false },
+          );
+        });
       }
-
-      steak.savedSteak = selectedSavedSteak;
+      else {
+        steak.savedSteak = selectedSavedSteak;
+      }
     }
-
-    onSave(steak);
-    onClose();
-    clearInputs();
+    saveAndClose(steak);
   };
 
   const clearInputs = () => {
@@ -118,6 +126,12 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const handleClose = () => {
     clearInputs();
     onClose();
+  };
+
+  const saveAndClose = (steak: Steak) => {
+    onSave(steak);
+    onClose();
+    clearInputs();
   };
 
   const personNameInputRef = useRef<TextInput>(null);
@@ -216,16 +230,16 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
 
           <View style={globalStyles.buttonContainer}>
             <TouchableOpacity
-              style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={handleClose}
-            >
-              <Text style={globalStyles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={[globalStyles.button, globalStyles.saveButton]}
               onPress={handleSave}
             >
               <Text style={globalStyles.buttonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[globalStyles.button, globalStyles.cancelButton]}
+              onPress={handleClose}
+            >
+              <Text style={globalStyles.buttonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -235,11 +249,11 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
 };
 
 const styles = StyleSheet.create({
-  clearButtonContainer:{
+  clearButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-},
-clearButton: {
+  },
+  clearButton: {
     flex: 0.35,
     marginBottom: 20,
     fontSize: 15,
@@ -249,7 +263,7 @@ clearButton: {
     borderColor: '#d9534f',
     backgroundColor: '#d9534f',
     color: 'white',
-},
+  },
 });
 
 export default SteakModal;

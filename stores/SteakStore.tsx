@@ -29,6 +29,7 @@ interface SteakStore {
     clearAllOverrides: () => Promise<void>;
     setOverride: (centerCook: string, thickness: number, override: TimeOverride) => Promise<void>;
     removeOverride: (centerCook: string, thickness: number) => Promise<void>;
+    checkIfSteakIsInList: (centerCook: string, thickness: number) => boolean;
 }
 
 const useSteakStore = create<SteakStore>((set, get) => ({
@@ -36,14 +37,31 @@ const useSteakStore = create<SteakStore>((set, get) => ({
     settings: steakSettings,
     steaks: [],
 
-    addSteak: (steak) => set((state) => ({ steaks: [...state.steaks, steak] })),
+    addSteak: (steak) => {
+        const steakTimes = get().getCookingTimes(steak.centerCook, steak.thickness);
+
+        if (steakTimes) {
+            steak.firstSideTime = steakTimes.firstSide;
+            steak.secondSideTime = steakTimes.secondSide;
+        }
+
+        set((state) => ({ steaks: [...state.steaks, steak] }));
+    },
 
     clearSteaks: () => set(() => ({ steaks: [] })),
 
-    editSteak: (index, updatedSteak) =>
+    editSteak: (index, updatedSteak) => {
+        const steakTimes = get().getCookingTimes(updatedSteak.centerCook, updatedSteak.thickness);
+
+        if (steakTimes) {
+            updatedSteak.firstSideTime = steakTimes.firstSide;
+            updatedSteak.secondSideTime = steakTimes.secondSide;
+        }
+
         set((state) => ({
             steaks: state.steaks.map((steak, i) => (i === index ? updatedSteak : steak)),
-        })),
+        }))
+    },
 
     updateSteaks: (newSteaks) => set(() => ({ steaks: [...newSteaks] })),
 
@@ -157,7 +175,7 @@ const useSteakStore = create<SteakStore>((set, get) => ({
         await AsyncStorage.removeItem(OVERRIDE_KEY);
         set({ overrides: {} });
 
-        const { settings } = get();
+        const { settings, steaks } = get();
         settings.forEach((data: CookData) => {
             data.Durations.forEach((duration: Duration) => {
                 duration.FirstSideOverride = undefined;
@@ -165,6 +183,14 @@ const useSteakStore = create<SteakStore>((set, get) => ({
             });
         });
         set({ settings: [...settings] });
+
+        steaks.forEach((steak) => {
+            const defaultTimes = steak.getDefaultCookingTimes(steak.centerCook, steak.thickness);
+            steak.firstSideTime = defaultTimes!.firstSide;
+            steak.secondSideTime = defaultTimes!.secondSide;
+        });
+
+        set({ steaks: [...steaks] });
     },
     setOverride: async (centerCook, thickness, override) => {
         const key = `${centerCook}:${thickness}`;
@@ -179,6 +205,8 @@ const useSteakStore = create<SteakStore>((set, get) => ({
             duration.SecondSideOverride = override.SecondSideOverride;
             set({ settings: [...settings] });
         }
+
+        updateSteaksToUseOverride(centerCook, thickness);
     },
     removeOverride: async (centerCook, thickness) => {
         const key = `${centerCook}:${thickness}`;
@@ -194,7 +222,40 @@ const useSteakStore = create<SteakStore>((set, get) => ({
             duration.SecondSideOverride = undefined;
             set({ settings: [...settings] });
         }
+
+        removeOverrideFromSteaks(centerCook, thickness);
+    },
+    checkIfSteakIsInList: (centerCook: string, thickness: number): boolean => {
+        const steaks = useSteakStore.getState().steaks;
+        return steaks.some((steak) => steak.centerCook === centerCook && steak.thickness === thickness);
     },
 }));
+
+//helper methods just for use in the store
+const removeOverrideFromSteaks = (centerCook: string, thickness: number) => {
+    const steaks = useSteakStore.getState().steaks.map((steak) => {
+        if (steak.centerCook === centerCook && steak.thickness === thickness) {
+            steak.firstSideTime = steak.getDefaultCookingTimes(steak.centerCook, steak.thickness)?.firstSide ?? 120;
+            steak.secondSideTime = steak.getDefaultCookingTimes(steak.centerCook, steak.thickness)?.secondSide ?? 240;
+        }
+        return steak;
+    });
+    useSteakStore.setState({ steaks });
+};
+
+const updateSteaksToUseOverride = (centerCook: string, thickness: number) => {
+    const steaks = useSteakStore.getState().steaks.map((steak) => {
+        if (steak.centerCook === centerCook && steak.thickness === thickness) {
+            const times = useSteakStore.getState().getCookingTimes(centerCook, thickness);
+            if (times) {
+                steak.firstSideTime = times.firstSide;
+                steak.secondSideTime = times.secondSide;
+            }
+        }
+        return steak;
+    });
+
+    useSteakStore.setState({ steaks });
+};
 
 export default useSteakStore;

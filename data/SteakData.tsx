@@ -51,7 +51,7 @@ class Steak {
     this.personName = personName;
     this.centerCook = centerCook;
     this.thickness = thickness;
-    var steakDurations = this.getCookingTimes(this.centerCook, this.thickness);
+    var steakDurations = this.getDefaultCookingTimes(this.centerCook, this.thickness);
 
     this.firstSideTime = steakDurations?.firstSide ?? 120;
     this.secondSideTime = steakDurations?.secondSide ?? 240;
@@ -60,7 +60,7 @@ class Steak {
     this.isFlipped = false;
   }
 
-  getCookingTimes = (
+  getDefaultCookingTimes = (
     centerCook: string,
     thickness: number
   ): { firstSide: number; secondSide: number } | null => {

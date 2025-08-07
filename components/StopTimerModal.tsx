@@ -40,16 +40,16 @@ const StopTimerModal: React.FC<StopTimerModalProps> = ({ visible, onClose, onSto
 
                     <View style={globalStyles.buttonContainer}>
                         <TouchableOpacity
-                            style={[globalStyles.button, globalStyles.goodButton]}
-                            onPress={onClose}
-                        >
-                            <Text style={globalStyles.buttonText}>No</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
                             style={[globalStyles.button, globalStyles.badButton]}
                             onPress={onStop}
                         >
                             <Text style={globalStyles.buttonText}>Yes</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[globalStyles.button, globalStyles.goodButton]}
+                            onPress={onClose}
+                        >
+                            <Text style={globalStyles.buttonText}>No</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

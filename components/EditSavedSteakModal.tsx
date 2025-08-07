@@ -36,11 +36,11 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
   ];
 
   useEffect(() => {
-    if(editingSteak){
+    if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
     }
-    else{
+    else {
       setPersonName('');
       setCenterCook('');
     }
@@ -126,16 +126,16 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
 
           <View style={globalStyles.buttonContainer}>
             <TouchableOpacity
-              style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={handleClose}
-            >
-              <Text style={globalStyles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={[globalStyles.button, globalStyles.saveButton]}
               onPress={handleSave}
             >
               <Text style={globalStyles.buttonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[globalStyles.button, globalStyles.cancelButton]}
+              onPress={handleClose}
+            >
+              <Text style={globalStyles.buttonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Steak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
+import useSteakStore from '../stores/SteakStore';
 
 
 interface StartTimerModalProps {
@@ -26,6 +27,7 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
     onStart,
 }) => {
     const longestTime = Math.max(...steaks.map(o => o.firstSideTime + o.secondSideTime));
+    const { checkIfListSteaksHaveOverrides } = useSteakStore();
 
     const longestTimeSteaks = steaks.filter(function (entry) { return entry.firstSideTime + entry.secondSideTime === longestTime; });
 
@@ -45,23 +47,24 @@ const StartTimerModal: React.FC<StartTimerModalProps> = ({
                         </TouchableOpacity>
                     </View>
                     <ScrollView style={styles.longTextContainer}>
-                        <Text style={globalStyles.modalText}>
-                            You are about to start the timer for your steaks. Be sure your
-                            steaks are ready and your grill is preheated. When ready, place the following steaks
-                            on the grill and hit start.
-                        </Text>
+                        {checkIfListSteaksHaveOverrides() && (
+                            <View style={globalStyles.dangerContainer}>
+                                <Text style={globalStyles.textDangerWhite}>
+                                    Some steaks have custom cooking times set. You are responsible for the final result and cook.
+                                </Text>
+                            </View>
+                        )}
 
                         <Text style={globalStyles.modalWarning}>
                             Do not leave your grill unattended while steaks are being cooked.
-                            You will be notified when changes need to be made, but you must
-                            monitor the grill and steaks at all times.
                         </Text>
 
                         <Text style={globalStyles.modalWarning}>
-                            The notifications and timer are meant to help guide you, but you are
-                            responsible for being safe and ensuring your steak is properly
-                            cooked. This includes hearing the notification, if you miss them,
-                            your steak(s) may be cooked incorrectly.
+                            You will be guided to grilling your steaks, but you must ensure they are cooked properly before serving.
+                        </Text>
+
+                        <Text style={globalStyles.modalText}>
+                            Be sure your grill is preheated and ready to go. When ready, place the following steak and hit "Start!".
                         </Text>
                     </ScrollView>
 
@@ -116,7 +119,7 @@ const styles = StyleSheet.create({
     longTextContainer: {
         maxHeight: 400,
         paddingBottom: 10,
-    }
+    },
 });
 
 export default StartTimerModal;

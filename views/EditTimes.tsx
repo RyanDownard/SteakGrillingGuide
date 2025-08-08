@@ -104,8 +104,8 @@ const EditTimes = () => {
     return (
         <>
             {timerRunning && (
-                <View style={globalStyles.timerRunningContainer}>
-                    <Text style={globalStyles.timerRunningText}>Timer is running, you cannot edit times</Text>
+                <View style={globalStyles.dangerContainer}>
+                    <Text style={globalStyles.textDangerWhite}>Timer is running, you cannot edit times</Text>
                 </View>
             )}
             <View style={styles.resetAllContainer}>

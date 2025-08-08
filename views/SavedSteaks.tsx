@@ -44,8 +44,8 @@ const SavedSteaks = () => {
     return (
         <View>
             {timerRunning && (
-                <View style={globalStyles.timerRunningContainer}>
-                    <Text style={globalStyles.timerRunningText}>Timer is running, you cannot edit saved steaks.</Text>
+                <View style={globalStyles.dangerContainer}>
+                    <Text style={globalStyles.textDangerWhite}>Timer is running, you cannot edit saved steaks.</Text>
                 </View>
             )}
             <FlatList

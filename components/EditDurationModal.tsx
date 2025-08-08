@@ -112,13 +112,12 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
                     `A steak with ${centerCook} and ${duration!.Thickness}" has already been added to your list and it's times will be updated, do you want to continue?`,
                     [
                         {
-                            text: 'Cancel',
-                            onPress: () => resolve(false),
-                            style: 'cancel',
-                        },
-                        {
                             text: 'Continue',
                             onPress: () => resolve(true),
+                        },
+                        {
+                            text: 'Cancel',
+                            onPress: () => resolve(false),
                         },
                     ]
                 );

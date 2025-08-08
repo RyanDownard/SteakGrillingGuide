@@ -59,15 +59,15 @@ const globalStyles = StyleSheet.create({
     },
 
     modalText: {
-        fontSize: 20,
-        marginBottom: 20,
+        fontSize: 16,
+        marginBottom: 10,
     },
     modalButtons: {
         flexDirection: 'row',
         justifyContent: 'space-around',
     },
     modalWarning: {
-        fontSize: 14,
+        fontSize: 16,
         color: 'red',
         marginBottom: 10,
     },
@@ -202,13 +202,14 @@ const globalStyles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowOffset: { width: 0, height: 5 },
     },
-    timerRunningContainer: {
+    dangerContainer: {
         backgroundColor: '#c30212ff',
-        padding: 10,
+        padding: 5,
         borderRadius: 5,
-        margin: 10,
+        marginTop: 5,
+        marginBottom: 5,
     },
-    timerRunningText: {
+    textDangerWhite: {
         color: '#fff',
         textAlign: 'center',
         fontSize: 16,

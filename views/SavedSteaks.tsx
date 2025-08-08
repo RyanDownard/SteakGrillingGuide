@@ -43,6 +43,11 @@ const SavedSteaks = () => {
 
     return (
         <View>
+            {timerRunning && (
+                <View style={globalStyles.timerRunningContainer}>
+                    <Text style={globalStyles.timerRunningText}>Timer is running, you cannot edit saved steaks.</Text>
+                </View>
+            )}
             <FlatList
                 data={savedSteaks}
                 keyExtractor={(item: SavedSteak) => item.id.toString()}

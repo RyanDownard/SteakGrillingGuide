@@ -179,7 +179,7 @@ const globalStyles = StyleSheet.create({
     infoButtonOutline: {
         borderColor: '#029af2',
     },
-    infoButtonText:{
+    infoButtonText: {
         color: '#029af2',
     },
     appTitle: {
@@ -201,6 +201,18 @@ const globalStyles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.25,
         shadowOffset: { width: 0, height: 5 },
+    },
+    timerRunningContainer: {
+        backgroundColor: '#c30212ff',
+        padding: 10,
+        borderRadius: 5,
+        margin: 10,
+    },
+    timerRunningText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 16,
+        marginVertical: 10,
     },
 });
 

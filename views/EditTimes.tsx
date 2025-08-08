@@ -9,7 +9,7 @@ import Table from '../components/Table';
 import { formatTime } from '../data/Helpers';
 import EditDurationModal from '../components/EditDurationModal';
 import useSteakStore from '../stores/SteakStore';
-
+import useTimerStore from '../stores/TimerStore';
 interface SteakSettingProps {
     steakSetting: CookData;
     setCenterCook: (centerCook: string) => void;
@@ -20,6 +20,7 @@ interface SteakSettingProps {
 const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook, setDuration, setModalVisible }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const { removeOverride } = useSteakStore();
+    const { timerRunning } = useTimerStore();
 
     const editSteakSetting = (duration: Duration) => {
         setCenterCook(steakSetting.CenterCook);
@@ -49,8 +50,8 @@ const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook
         <View style={globalStyles.card}>
             <View style={styles.resetAllContainer}>
                 <Text style={styles.settingText}>{steakSetting.CenterCook}</Text>
-                <TouchableOpacity style={styles.resetButton} onPress={() => resetCenterCookDefaults(steakSetting)}>
-                    <FontAwesomeIcon icon={faRotateLeft} size={25} color={'#2ea7f3ff'} />
+                <TouchableOpacity disabled={timerRunning} style={styles.resetButton} onPress={() => resetCenterCookDefaults(steakSetting)}>
+                    <FontAwesomeIcon icon={faRotateLeft} size={25} color={timerRunning ? '#949799' : '#2ea7f3ff'} />
                 </TouchableOpacity>
             </View>
             <ToggleContentButton
@@ -65,8 +66,8 @@ const SteakSetting: React.FC<SteakSettingProps> = ({ steakSetting, setCenterCook
                             `${duration.Thickness}"`,
                             `${formatTime(duration.FirstSideOverride ?? duration.FirstSide)}${duration.FirstSideOverride ? '*' : ''}`,
                             `${formatTime(duration.SecondSideOverride ?? duration.SecondSide)}${duration.SecondSideOverride ? '*' : ''}`,
-                            <TouchableOpacity onPress={() => editSteakSetting(duration)}>
-                                <FontAwesomeIcon icon={faPencil} size={20} color={'#e3cf17'} />
+                            <TouchableOpacity disabled={timerRunning} onPress={() => editSteakSetting(duration)}>
+                                <FontAwesomeIcon icon={faPencil} size={20} color={timerRunning ? '#949799' : '#e3cf17'} />
                             </TouchableOpacity>,
                         ];
                     })}
@@ -81,6 +82,7 @@ const EditTimes = () => {
     const [editingCenterCook, setEditingCenterCook] = useState('');
     const [modalVisable, setModalVisible] = useState(false);
 
+    const { timerRunning } = useTimerStore();
     const { clearAllOverrides, settings } = useSteakStore();
 
     const resetAllDefaults = async () => {
@@ -101,9 +103,14 @@ const EditTimes = () => {
 
     return (
         <>
+            {timerRunning && (
+                <View style={globalStyles.timerRunningContainer}>
+                    <Text style={globalStyles.timerRunningText}>Timer is running, you cannot edit times</Text>
+                </View>
+            )}
             <View style={styles.resetAllContainer}>
-                <TouchableOpacity style={[globalStyles.fontAwesomeButton, globalStyles.infoButtonOutline]} onPress={resetAllDefaults}>
-                    <Text style={globalStyles.infoButtonText}>
+                <TouchableOpacity disabled={timerRunning} style={[globalStyles.fontAwesomeButton, globalStyles.infoButtonOutline, timerRunning && globalStyles.disabledButton]} onPress={resetAllDefaults}>
+                    <Text style={!timerRunning && globalStyles.infoButtonText}>
                         Reset All Defaults
                     </Text>
                 </TouchableOpacity>

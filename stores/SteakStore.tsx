@@ -30,6 +30,7 @@ interface SteakStore {
     setOverride: (centerCook: string, thickness: number, override: TimeOverride) => Promise<void>;
     removeOverride: (centerCook: string, thickness: number) => Promise<void>;
     checkIfSteakIsInList: (centerCook: string, thickness: number) => boolean;
+    checkIfListSteaksHaveOverrides: () => boolean;
 }
 
 const useSteakStore = create<SteakStore>((set, get) => ({
@@ -229,6 +230,14 @@ const useSteakStore = create<SteakStore>((set, get) => ({
         const steaks = useSteakStore.getState().steaks;
         return steaks.some((steak) => steak.centerCook === centerCook && steak.thickness === thickness);
     },
+    checkIfListSteaksHaveOverrides: (): boolean => {
+        const steaks = useSteakStore.getState().steaks;
+        const overrides = useSteakStore.getState().overrides;
+        return steaks.some((steak) => {
+            const key = `${steak.centerCook}:${steak.thickness}`;
+            return overrides[key] && (overrides[key].FirstSideOverride !== undefined || overrides[key].SecondSideOverride !== undefined);
+        });
+    }
 }));
 
 //helper methods just for use in the store

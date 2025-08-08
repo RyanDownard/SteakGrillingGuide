@@ -185,11 +185,11 @@ const Home = () => {
         'Notification Permission Required',
         'This app needs notification permissions to notify you about steak timers. Please enable them in the app settings.',
         [
-          { text: 'Cancel', style: 'cancel' },
           {
             text: 'Open Settings',
             onPress: () => Linking.openSettings(),
           },
+          { text: 'Cancel' },
         ]
       );
       return;
@@ -301,7 +301,7 @@ const Home = () => {
           </Text>
           <View style={styles.resetContainer}>
             <TouchableOpacity onPress={resetState} style={[globalStyles.fontAwesomeButton, globalStyles.goodButtonOutline, styles.resetButton]} >
-            <FontAwesomeIcon icon={faRefresh} size={24} color="#5cb85c" />
+              <FontAwesomeIcon icon={faRefresh} size={24} color="#5cb85c" />
               <Text style={styles.resetText}>Reset</Text>
             </TouchableOpacity>
           </View>

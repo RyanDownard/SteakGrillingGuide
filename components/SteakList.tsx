@@ -10,6 +10,7 @@ import useTimerStore from '../stores/TimerStore';
 import * as Progress from 'react-native-progress';
 import ToggleContentButton from './ToggleContentButton';
 import Table from './Table';
+import SteakProgress from './SteakProgress';
 
 interface Props {
     steak: Steak;
@@ -37,15 +38,15 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
 
     useEffect(() => {
         if (timerRunning) {
-            if(remainingTime > steak.firstSideTime + steak.secondSideTime){
+            if (remainingTime > steak.firstSideTime + steak.secondSideTime) {
                 const totalWaitTime = duration - (steak.firstSideTime + steak.secondSideTime);
                 setProgress((remainingTime - steak.firstSideTime - steak.secondSideTime) / totalWaitTime);
             }
-            else if(remainingTime > steak.secondSideTime){
+            else if (remainingTime > steak.secondSideTime) {
                 const interRemaining = remainingTime - steak.secondSideTime;
                 setProgress(interRemaining / steak.firstSideTime);
             }
-            else{
+            else {
                 setProgress(remainingTime / steak.secondSideTime);
             }
         } else {
@@ -63,6 +64,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                         <Progress.Circle progress={progress} color={steak.isPlaced ? '#017a40' : '#fcca03'} size={23} thickness={2} />
                     )}
                 </View>
+                <SteakProgress steak={steak} />
                 <ToggleContentButton expanded={expanded} onChange={() => setExpanded(!expanded)} />
                 {expanded ? (
                     <View style={styles.details}>

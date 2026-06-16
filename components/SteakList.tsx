@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faPencil, faTrash, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import { formatTime } from '../data/Helpers';
-import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useTimerStore from '../stores/TimerStore';
 import * as Progress from 'react-native-progress';
-import ToggleContentButton from './ToggleContentButton';
-import Table from './Table';
 import SteakProgress from './SteakProgress';
+import { Menu, IconButton } from 'react-native-paper';
 
 interface Props {
     steak: Steak;
@@ -27,13 +26,31 @@ interface ListProps {
 }
 
 const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }) => {
-    const [expanded, setExpanded] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [menuVisible, setMenuVisible] = useState(false);
     const { addSavedSteak } = useSavedSteaksStore();
     const { timerRunning, remainingTime, duration } = useTimerStore();
 
+    const menuIcon = ({ color, size }: { color: string; size: number }) => (
+        <FontAwesomeIcon icon={faEllipsisVertical} size={size} color={color} />
+    );
+
+    const openMenu = () => setMenuVisible(true);
+    const closeMenu = () => setMenuVisible(false);
+
     const handleSaveSteakToDevice = (steakToSave: Steak) => {
         addSavedSteak(steakToSave);
+        closeMenu();
+    };
+
+    const handleEditSteak = (steakToEdit: Steak) => {
+        onEdit(steakToEdit);
+        closeMenu();
+    };
+
+    const handleDeleteSteak = (steakToDelete: Steak) => {
+        onDelete(steakToDelete);
+        closeMenu();
     };
 
     useEffect(() => {
@@ -55,40 +72,31 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
     }, [remainingTime, timerRunning, duration, steak.firstSideTime, steak.secondSideTime]);
 
     return (
-        <View>
-            <View style={globalStyles.card}>
-                <View style={styles.infoContainer}>
+        <View style={styles.steakContainer}>
+            <View style={styles.infoContainer}>
+                <View style={styles.detailsContainer}>
                     <Text style={styles.name}>{steak.personName}</Text>
                     <Text style={styles.steakCookDetails}>{`${steak.centerCook} - ${steak.thickness}"`}</Text>
-                    {timerRunning && (
-                        <Progress.Circle progress={progress} color={steak.isPlaced ? '#017a40' : '#fcca03'} size={23} thickness={2} />
-                    )}
                 </View>
-                <SteakProgress steak={steak} />
-                <ToggleContentButton expanded={expanded} onChange={() => setExpanded(!expanded)} />
-                {expanded ? (
-                    <View style={styles.details}>
-                        <View style={styles.buttonsContainer}>
-                            {(steak.savedSteak === null || steak.savedSteak === undefined ? (
-                                <TouchableOpacity style={[globalStyles.actionButton, globalStyles.infoButtonOutline]} onPress={() => handleSaveSteakToDevice(steak)}>
-                                    <FontAwesomeIcon icon={faSave} size={24} color={'#029af2'} />
-                                </TouchableOpacity>
-                            ) : null)}
-                            <TouchableOpacity style={[globalStyles.actionButton, globalStyles.editButton, actionsDisabled && globalStyles.disabledButton]} onPress={() => onEdit(steak)} disabled={actionsDisabled}>
-                                <FontAwesomeIcon icon={faPencil} size={24} color={actionsDisabled ? '#949799' : '#e3cf17'} />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[globalStyles.actionButton, globalStyles.deleteButton, actionsDisabled && globalStyles.disabledButton]} onPress={() => onDelete(steak)} disabled={actionsDisabled}>
-                                <FontAwesomeIcon icon={faTrash} size={24} color={actionsDisabled ? '#949799' : '#c70404'} />
-                            </TouchableOpacity>
-                        </View>
-                        <Table
-                            headers={['Starts At', 'Flips At']}
-                            rows={[
-                                [formatTime(steak.firstSideTime + steak.secondSideTime), formatTime(steak.secondSideTime)],
-                            ]} />
-                    </View>
-                ) : null}
+                <View style={styles.menuContainer}>
+                    {steak.savedSteak && <FontAwesomeIcon style={ styles.savedIcon } icon={faCheckCircle} size={24} color={'green'} />}
+                    <Menu
+                        visible={menuVisible}
+                        onDismiss={closeMenu}
+                        anchorPosition="top"
+                        anchor={
+                            <IconButton
+                                icon={menuIcon}
+                                onPress={() => openMenu()}
+                            />}
+                    >
+                        <Menu.Item onPress={() => handleEditSteak(steak)} disabled={actionsDisabled} title="Edit" />
+                        {(steak.savedSteak == null || steak.savedSteak === undefined) && <Menu.Item onPress={() => handleSaveSteakToDevice(steak)} title="Save" />}
+                        <Menu.Item onPress={() => handleDeleteSteak(steak)} disabled={actionsDisabled} title="Delete" />
+                    </Menu>
+                </View>
             </View>
+            <SteakProgress steak={steak} />
         </View>
     );
 };
@@ -104,10 +112,16 @@ const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisab
 };
 
 const styles = StyleSheet.create({
+    steakContainer: {
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: 'black',
+        margin: 5,
+    },
     infoContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 15,
+        padding: 5,
         marginRight: 10,
         marginLeft: 10,
         flexWrap: 'wrap',
@@ -121,41 +135,21 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginVertical: 5,
     },
+    detailsContainer: {
+        flex: 1,
+    },
     details: {
         marginTop: 5,
         marginBottom: 5,
     },
-    buttonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-    },
-    table: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        overflow: 'hidden',
-        marginTop: 8,
-    },
-    tableRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#f9f9f9',
-    },
-    tableHeader: {
+    menuContainer: {
         flex: 1,
-        fontWeight: 'bold',
-        color: '#333',
-        textAlign: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        paddingBottom: 4,
+        justifyContent: 'flex-end',
+        flexDirection: 'row',
     },
-    tableCell: {
-        flex: 1,
-        textAlign: 'center',
-        color: '#555',
+    savedIcon: {
+        marginTop: 12,
+        marginRight: 10,
     },
 });
 

@@ -11,6 +11,7 @@ import Timer from './components/Timer';
 import useSavedSteaksStore from './stores/SavedSteakStore';
 import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
+import { PaperProvider } from 'react-native-paper';
 
 const Tab = createBottomTabNavigator();
 
@@ -49,32 +50,34 @@ const App = () => {
   }, [loadSavedSteaks, loadOverrides]);
 
   return (
-    <View style={styles.container}>
-      <NavigationContainer>
-        <Timer />
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerTitle: 'Steak Grilling Guide',
-              tabBarIcon: homeIcon,
-            }} />
-          <Tab.Screen
-            name="Saved Steaks"
-            component={SavedSteaks}
-            options={{
-              tabBarIcon: savedSteakIcon,
-            }} />
-          <Tab.Screen
-            name="Edit Times"
-            component={EditTimes}
-            options={{
-              tabBarIcon: timerIcon,
-            }} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </View>
+    <PaperProvider>
+      <View style={styles.container}>
+        <NavigationContainer>
+          <Timer />
+          <Tab.Navigator>
+            <Tab.Screen
+              name="Home"
+              component={Home}
+              options={{
+                headerTitle: 'Steak Grilling Guide',
+                tabBarIcon: homeIcon,
+              }} />
+            <Tab.Screen
+              name="Saved Steaks"
+              component={SavedSteaks}
+              options={{
+                tabBarIcon: savedSteakIcon,
+              }} />
+            <Tab.Screen
+              name="Edit Times"
+              component={EditTimes}
+              options={{
+                tabBarIcon: timerIcon,
+              }} />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </View>
+    </PaperProvider>
   );
 };
 

@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
-import { faCheckCircle } from '@fortawesome/free-regular-svg-icons';
+import { faEllipsisVertical, faStar } from '@fortawesome/free-solid-svg-icons';
+import { CookData } from '../data/SteakData';
 import { formatTime } from '../data/Helpers';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useTimerStore from '../stores/TimerStore';
 import * as Progress from 'react-native-progress';
 import SteakProgress from './SteakProgress';
 import { Menu, IconButton } from 'react-native-paper';
+import useSteakStore from '../stores/SteakStore';
 
 interface Props {
     steak: Steak;
@@ -30,6 +31,10 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
     const [menuVisible, setMenuVisible] = useState(false);
     const { addSavedSteak } = useSavedSteaksStore();
     const { timerRunning, remainingTime, duration } = useTimerStore();
+    const { settings } = useSteakStore();
+
+    const backgroundColor = settings.find((data: CookData) => data.CenterCook === steak.centerCook)?.BackgroundColor;
+    const textColor = settings.find((data: CookData) => data.CenterCook === steak.centerCook)?.TextColor;
 
     const menuIcon = ({ color, size }: { color: string; size: number }) => (
         <FontAwesomeIcon icon={faEllipsisVertical} size={size} color={color} />
@@ -76,27 +81,62 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
             <View style={styles.infoContainer}>
                 <View style={styles.detailsContainer}>
                     <Text style={styles.name}>{steak.personName}</Text>
-                    <Text style={styles.steakCookDetails}>{`${steak.centerCook} - ${steak.thickness}"`}</Text>
+                    <View style={styles.steakCookDetails}>
+                        <View style={[styles.cookDetails, { backgroundColor: backgroundColor }]}>
+                            <Text style={[styles.cookText, { color: textColor }]}>
+                                {steak.centerCook}
+                            </Text>
+
+                        </View>
+                        <Text style={[styles.cookText, styles.detailsItemPadding]}>
+                            •
+                        </Text>
+                        <Text style={[styles.cookText, styles.detailsItemPadding]}>
+                            {`${steak.thickness}"`}
+                        </Text>
+                    </View>
                 </View>
-                <View style={styles.menuContainer}>
-                    {steak.savedSteak && <FontAwesomeIcon style={ styles.savedIcon } icon={faCheckCircle} size={24} color={'green'} />}
-                    <Menu
-                        visible={menuVisible}
-                        onDismiss={closeMenu}
-                        anchorPosition="top"
-                        anchor={
-                            <IconButton
-                                icon={menuIcon}
-                                onPress={() => openMenu()}
-                            />}
-                    >
-                        <Menu.Item onPress={() => handleEditSteak(steak)} disabled={actionsDisabled} title="Edit" />
-                        {(steak.savedSteak == null || steak.savedSteak === undefined) && <Menu.Item onPress={() => handleSaveSteakToDevice(steak)} title="Save" />}
-                        <Menu.Item onPress={() => handleDeleteSteak(steak)} disabled={actionsDisabled} title="Delete" />
-                    </Menu>
+                <View>
+                    <View style={styles.menuContainer}>
+                        {steak.savedSteak && <FontAwesomeIcon style={styles.savedIcon} icon={faStar} size={24} color={'#f9de2e'} />}
+                        <Menu
+                            visible={menuVisible}
+                            onDismiss={closeMenu}
+                            anchorPosition="top"
+                            anchor={
+                                <IconButton
+                                    icon={menuIcon}
+                                    onPress={() => openMenu()}
+                                />}
+                        >
+                            <Menu.Item onPress={() => handleEditSteak(steak)} disabled={actionsDisabled} title="Edit" />
+                            {(steak.savedSteak == null || steak.savedSteak === undefined) && <Menu.Item onPress={() => handleSaveSteakToDevice(steak)} title="Save" />}
+                            <Menu.Item onPress={() => handleDeleteSteak(steak)} disabled={actionsDisabled} title="Delete" />
+                        </Menu>
+                    </View>
                 </View>
             </View>
             <SteakProgress steak={steak} />
+            <View style={styles.timesContainer}>
+                <View style={styles.timesBackgroundContainer}>
+                    <View style={styles.startTimeInfo}>
+                        <Text style={styles.timeDescriptionText}>
+                            Place At:
+                        </Text>
+                        <Text style={styles.timeText}>
+                            {formatTime(steak.firstSideTime + steak.secondSideTime)}
+                        </Text>
+                    </View>
+                    <View style={styles.flipTimeInfo}>
+                        <Text style={styles.timeDescriptionText}>
+                            Flip At:
+                        </Text>
+                        <Text style={styles.timeText}>
+                            {formatTime(steak.firstSideTime)}
+                        </Text>
+                    </View>
+                </View>
+            </View>
         </View>
     );
 };
@@ -115,8 +155,11 @@ const styles = StyleSheet.create({
     steakContainer: {
         borderRadius: 15,
         borderWidth: 1,
-        borderColor: 'black',
-        margin: 5,
+        borderColor: '#f0e8df',
+        backgroundColor: '#ffffff',
+        shadowColor: 'black',
+        margin: 15,
+        padding: 5,
     },
     infoContainer: {
         flexDirection: 'row',
@@ -124,16 +167,18 @@ const styles = StyleSheet.create({
         padding: 5,
         marginRight: 10,
         marginLeft: 10,
+        marginBottom: 5,
         flexWrap: 'wrap',
     },
     name: {
-        fontWeight: 'bold',
-        fontSize: 18,
-        marginVertical: 5,
+        fontWeight: 700,
+        fontSize: 26,
+        marginVertical: 8,
+        fontFamily: 'CormorantGaramond-Bold',
+        color: '#2a1a0e',
     },
     steakCookDetails: {
-        fontSize: 16,
-        marginVertical: 5,
+        flexDirection: 'row',
     },
     detailsContainer: {
         flex: 1,
@@ -150,6 +195,66 @@ const styles = StyleSheet.create({
     savedIcon: {
         marginTop: 12,
         marginRight: 10,
+    },
+    cookDetails: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 20,
+        fontFamily: 'DMSans',
+        fontSize: 10,
+        fontWeight: '500',
+        overflow: 'hidden',
+        alignSelf: 'flex-start',
+    },
+    cookText: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    timesContainer: {
+        marginVertical: 5,
+        marginHorizontal: 10,
+    },
+    timesBackgroundContainer: {
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: '#e8d8cc',
+        backgroundColor: '#fdf8f4',
+        paddingHorizontal: 15,
+        flexDirection: 'row',
+    },
+    startTimeInfo: {
+        flex: 1,
+        alignItems: 'center',
+        borderColor: '#e8d8cc',
+        borderRightWidth: 0.5,
+        height: 70,
+        justifyContent: 'center',
+    },
+    flipTimeInfo: {
+        flex: 1,
+        alignItems: 'center',
+        borderColor: '#e8d8cc',
+        borderLeftWidth: 0.5,
+        height: 70,
+        justifyContent: 'center',
+    },
+    timeDescriptionText: {
+        fontSize: 12,
+        marginBottom: 3,
+        fontFamily: 'DMSans-Regular',
+        color: '#a08070',
+        letterSpacing: 0.08,
+        textTransform: 'uppercase',
+    },
+    timeText: {
+        fontSize: 20,
+        fontFamily: 'CourierPrime-Regular',
+        fontWeight: 700,
+        color: '#2a1a0e',
+    },
+    detailsItemPadding: {
+        paddingHorizontal: 3,
+        paddingVertical: 5,
     },
 });
 

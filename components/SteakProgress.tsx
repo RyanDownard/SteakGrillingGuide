@@ -20,19 +20,19 @@ const SteakProgress: React.FC<Props> = ({ steak }) => {
             <View style={styles.rowContainer} >
                 <View style={styles.stepContainer}>
                     <View style={[styles.iconContainer, styles.activeIconContainer]}>
-                        <FontAwesomeIcon icon={faHourglass} size={24} color="#000" />
+                        <FontAwesomeIcon icon={faHourglass} size={18} color="#000" />
                     </View>
                 </View>
                 <View style={timerRunning && firstSideReady ? styles.activeLine : styles.inactiveLine} />
                 <View style={styles.stepContainer}>
                     <View style={[styles.iconContainer, timerRunning && firstSideReady ? styles.activeIconContainer : styles.inactiveIconContainer]}>
-                        <FontAwesomeIcon icon={faFire} size={24} color={timerRunning && firstSideReady ? '#000' : '#ccc'} />
+                        <FontAwesomeIcon icon={faFire} size={18} color={timerRunning && firstSideReady ? '#000' : '#ccc'} />
                     </View>
                 </View>
                 <View style={timerRunning && secondSideReady ? styles.activeLine : styles.inactiveLine} />
                 <View style={styles.stepContainer}>
                     <View style={[styles.iconContainer, timerRunning && secondSideReady ? styles.activeIconContainer : styles.inactiveIconContainer]}>
-                        <FontAwesomeIcon icon={faRotate} size={24} color={timerRunning && secondSideReady ? '#000' : '#ccc'} />
+                        <FontAwesomeIcon icon={faRotate} size={18} color={timerRunning && secondSideReady ? '#000' : '#ccc'} />
                     </View>
                 </View>
             </View>
@@ -59,12 +59,12 @@ const SteakProgress: React.FC<Props> = ({ steak }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 15,
+        paddingHorizontal: 5,
     },
     rowContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 5,
     },
     inactiveLine: {
         flex: 1,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderWidth: 2,
         borderRadius: 25,
-        width: 50,
+        width: 43,
     },
     inactiveIconContainer: {
 
@@ -94,11 +94,12 @@ const styles = StyleSheet.create({
     stepText: {
         flexShrink: 1,
         textAlign: 'center',
+        fontSize: 12,
     },
     stepContainer: {
         flexDirection: 'column',
         alignItems: 'center',
-        width: 50,
+        width: 75,
     },
     textSpacing: {
         flex: 1,

@@ -7,7 +7,6 @@ import { CookData } from '../data/SteakData';
 import { formatTime } from '../data/Helpers';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useTimerStore from '../stores/TimerStore';
-import * as Progress from 'react-native-progress';
 import SteakProgress from './SteakProgress';
 import { Menu, IconButton } from 'react-native-paper';
 import useSteakStore from '../stores/SteakStore';
@@ -24,10 +23,11 @@ interface ListProps {
     onEdit: (steak: Steak) => void;
     onDelete: (steak: Steak) => void;
     actionsDisabled: boolean;
+    bottomPadding?: number;
 }
 
 const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }) => {
-    const [progress, setProgress] = useState(0);
+    const [, setProgress] = useState(0);
     const [menuVisible, setMenuVisible] = useState(false);
     const { addSavedSteak } = useSavedSteaksStore();
     const { timerRunning, remainingTime, duration } = useTimerStore();
@@ -132,7 +132,7 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
                             Flip At:
                         </Text>
                         <Text style={styles.timeText}>
-                            {formatTime(steak.firstSideTime)}
+                            {formatTime(steak.secondSideTime)}
                         </Text>
                     </View>
                 </View>
@@ -141,10 +141,12 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
     );
 };
 
-const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisabled }) => {
+const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisabled, bottomPadding = 120 }) => {
     return (
         <FlatList
             data={steaks}
+            style={styles.list}
+            contentContainerStyle={[styles.listContentContainer, { paddingBottom: bottomPadding }]}
             keyExtractor={(item) => item.personName}
             renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} onDelete={onDelete} actionsDisabled={actionsDisabled} />}
         />
@@ -152,13 +154,20 @@ const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisab
 };
 
 const styles = StyleSheet.create({
+    list: {
+        flex: 1,
+    },
+    listContentContainer: {
+        paddingBottom: 160,
+    },
     steakContainer: {
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#f0e8df',
         backgroundColor: '#ffffff',
         shadowColor: 'black',
-        margin: 15,
+        marginHorizontal: 15,
+        marginVertical: 7,
         padding: 5,
     },
     infoContainer: {

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, SafeAreaView, Alert, Linking, View, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
+import FloatingActions from '../components/FloatingActions.tsx';
 import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -25,6 +27,7 @@ const Home = () => {
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
+  const insets = useSafeAreaInsets();
 
   library.add(fas);
 
@@ -312,7 +315,8 @@ const Home = () => {
           steaks={steaks}
           onEdit={handleEdit}
           onDelete={showDeleteConfirm}
-          actionsDisabled={timerRunning} />
+          actionsDisabled={timerRunning}
+          bottomPadding={insets.bottom + 130} />
       )}
 
       <SteakModal
@@ -340,6 +344,12 @@ const Home = () => {
         onClose={() => setStartTimerModalVisible(false)}
         onStart={startTimer}
       />
+      <FloatingActions
+        hasSteak={steaks.length > 0}
+        onAddSteak={() => handleOnAddSteak()}
+        onStartCook={() => setStartTimerModalVisible(true)}
+        onStopCook={() => showStopTimerModal()}
+    />
     </SafeAreaView>
   );
 };

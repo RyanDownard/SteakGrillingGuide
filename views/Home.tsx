@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
-import FloatingActions from '../components/FloatingActions.tsx';
+import HomeActions from '../components/HomeActions.tsx';
 import SteakList from '../components/SteakList.tsx';
 import Timer from '../components/Timer';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -333,7 +333,7 @@ const Home = () => {
         onClose={() => setStartTimerModalVisible(false)}
         onStart={startTimer}
       />
-      <FloatingActions
+      <HomeActions
         hasSteak={steaks.length > 0}
         onAddSteak={() => handleOnAddSteak()}
         onStartCook={() => setStartTimerModalVisible(true)}

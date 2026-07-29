@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { SavedSteak } from '../data/SteakData';
+import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useSteakStore from '../stores/SteakStore';
@@ -23,7 +23,7 @@ interface Props {
 const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
-  const { updateSavedSteak } = useSavedSteaksStore();
+  const { addSavedSteak, updateSavedSteak } = useSavedSteaksStore();
   const { updateSteaksWithSavedId } = useSteakStore();
 
 
@@ -47,17 +47,23 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
 
   }, [editingSteak]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (personName.length === 0 || centerCook.length === 0) {
-      Alert.alert('Name, center cook, and thickness must have a value before saving.');
+      Alert.alert('Name and center cook must have a value before saving.');
       return;
     }
 
-    editingSteak!.personName = personName;
-    editingSteak!.centerCook = centerCook;
+    if (editingSteak) {
+      editingSteak.personName = personName;
+      editingSteak.centerCook = centerCook;
 
-    updateSavedSteak(editingSteak!);
-    updateSteaksWithSavedId(editingSteak!);
+      await updateSavedSteak(editingSteak);
+      updateSteaksWithSavedId(editingSteak);
+    } else {
+      const newSteak = new Steak(0, personName, centerCook, 1);
+      await addSavedSteak(newSteak);
+    }
+
     onClose();
     clearInputs();
   };
@@ -92,7 +98,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
         <View style={globalStyles.modalContent}>
           <View style={globalStyles.modalHeader}>
             <Text style={globalStyles.modalTitle}>
-              {editingSteak ? 'Edit Steak' : 'Add Steak'}
+              {editingSteak ? 'Edit Saved Steak' : 'Add Saved Steak'}
             </Text>
             <TouchableOpacity onPress={handleClose}>
               <Text style={globalStyles.closeButton}>✕</Text>

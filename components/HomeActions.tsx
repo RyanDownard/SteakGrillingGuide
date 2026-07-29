@@ -10,7 +10,7 @@ interface Props {
     onStopCook: () => void;
 }
 
-const FloatingActions: React.FC<Props> = ({ hasSteak, onAddSteak, onStartCook, onStopCook }) => {
+const HomeActions: React.FC<Props> = ({ hasSteak, onAddSteak, onStartCook, onStopCook }) => {
     const insets = useSafeAreaInsets();
     const { timerRunning } = useTimerStore();
 
@@ -99,4 +99,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default FloatingActions;
+export default HomeActions;

@@ -9,7 +9,7 @@ interface TableProps {
 const Table: React.FC<TableProps> = ({ headers, rows }) => {
     return (
         <View style={styles.table}>
-            <View style={styles.tableRow}>
+            <View style={styles.tableRowHeader}>
                 {headers.map((header: string, index: number) => (
                     <Text key={index} style={styles.tableHeader}>{header}</Text>
                 ))}
@@ -36,26 +36,36 @@ export default Table;
 const styles = StyleSheet.create({
     table: {
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
+        borderColor: '#f0e8df',
+        borderRadius: 12,
         overflow: 'hidden',
-        marginTop: 8,
+        backgroundColor: '#fffdfb',
+    },
+    tableRowHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        backgroundColor: '#fbf4ec',
     },
     tableRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: 8,
+        paddingVertical: 10,
         paddingHorizontal: 12,
-        backgroundColor: '#f9f9f9',
+        borderTopWidth: 1,
+        borderTopColor: '#f3e8de',
+        backgroundColor: '#fffdfb',
     },
     tableHeader: {
         flex: 1,
-        fontWeight: 'bold',
-        color: '#333',
+        fontSize: 12,
+        fontWeight: '700',
+        fontFamily: 'DMSans-Regular',
+        color: '#7a6d62',
         textAlign: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        paddingBottom: 4,
+        textTransform: 'uppercase',
+        letterSpacing: 0.4,
     },
     tableCell: {
         flex: 1,
@@ -64,6 +74,8 @@ const styles = StyleSheet.create({
     },
     cellText: {
         textAlign: 'center',
-        color: '#555',
+        color: '#2a1a0e',
+        fontFamily: 'DMSans-Regular',
+        fontSize: 14,
     },
 });

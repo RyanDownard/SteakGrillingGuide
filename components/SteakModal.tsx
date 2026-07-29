@@ -8,6 +8,9 @@ import {
   Keyboard,
   Alert,
   StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Steak, SavedSteak } from '../data/SteakData';
@@ -27,7 +30,6 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const [thickness, setThickness] = useState('');
   const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
   const { savedSteaks, updateSavedSteak } = useSavedSteaksStore();
-
 
   const centerCookOptions = [
     { label: 'Rare', value: 'Rare' },
@@ -76,14 +78,12 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       return;
     }
 
-    var thicknessNumber = Number(thickness);
+    const thicknessNumber = Number(thickness);
     const maxId = savedSteaks.reduce((max, steak) => (steak.id > max ? steak.id : max), 0);
     const steak = new Steak(maxId + 1, personName, centerCook, thicknessNumber);
 
     if (selectedSavedSteak) {
-      if (personName !== selectedSavedSteak.personName
-        || centerCook !== selectedSavedSteak.centerCook) {
-
+      if (personName !== selectedSavedSteak.personName || centerCook !== selectedSavedSteak.centerCook) {
         await new Promise<void>(() => {
           Alert.alert(
             'Details Changed',
@@ -108,8 +108,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
             { cancelable: false },
           );
         });
-      }
-      else {
+      } else {
         steak.savedSteak = selectedSavedSteak;
       }
     }
@@ -157,112 +156,261 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
       onRequestClose={handleClose}
       presentationStyle={'overFullScreen'}
     >
-      <View style={globalStyles.modalOverlay}>
-        <View style={globalStyles.modalContent}>
-          <View style={globalStyles.modalHeader}>
-            <Text style={globalStyles.modalTitle}>
-              {editingSteak ? 'Edit Steak' : 'Add Steak'}
-            </Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Text style={globalStyles.closeButton}>✕</Text>
-            </TouchableOpacity>
-          </View>
-          {savedSteaks.length > 0 ? (
-            <Dropdown
-              style={globalStyles.dropdown}
-              selectedTextStyle={globalStyles.selectedTextStyle}
-              data={savedSteaks}
-              labelField="personName"
-              valueField="id"
-              placeholder="Select a saved steak"
-              value={selectedSavedSteak}
-              onChange={handleDropdownChange}
-            />
-          ) : null}
+      <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.keyboardContainer}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.headerAccent} />
+            <View style={styles.modalHeader}>
+              <View style={styles.headerTextWrap}>
+                <Text style={styles.modalTitle}>
+                  {editingSteak ? 'Edit Steak' : 'Add Steak'}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  {editingSteak ? 'Adjust the details for this steak.' : 'Create a steak entry and save it for later.'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-          {selectedSavedSteak ? (
-            <TouchableOpacity style={styles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
-              <Text style={styles.clearButton}>
-                Clear Saved
-              </Text>
-            </TouchableOpacity>
-          ) : null}
-
-          <Text style={globalStyles.label}>Person Name:</Text>
-          <TextInput
-            ref={personNameInputRef}
-            style={globalStyles.input}
-            placeholder="Person Name"
-            placeholderTextColor={'#aaa'}
-            value={personName}
-            onChangeText={setPersonName}
-            enterKeyHint={'done'}
-          />
-
-          <Text style={globalStyles.label}>Center Cook:</Text>
-          <Dropdown
-            style={globalStyles.dropdown}
-            placeholderStyle={globalStyles.placeholderStyle}
-            selectedTextStyle={globalStyles.selectedTextStyle}
-            data={centerCookOptions}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Center Cook"
-            value={centerCook}
-            onFocus={handleDismissKeyboard}
-            onChange={(item) => setCenterCook(item.value)}
-          />
-
-          <Text style={globalStyles.label}>Thickness:</Text>
-          <Dropdown
-            style={globalStyles.dropdown}
-            placeholderStyle={globalStyles.placeholderStyle}
-            selectedTextStyle={globalStyles.selectedTextStyle}
-            data={thicknessOptions}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Thickness"
-            value={thickness}
-            onFocus={handleDismissKeyboard}
-            onChange={(item) => setThickness(item.value)}
-          />
-
-
-          <View style={globalStyles.buttonContainer}>
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.saveButton]}
-              onPress={handleSave}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
             >
-              <Text style={globalStyles.buttonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={handleClose}
-            >
-              <Text style={globalStyles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
+              {savedSteaks.length > 0 ? (
+                <View style={styles.fieldGroup}>
+                  <Dropdown
+                    style={[globalStyles.dropdown, styles.fieldControl]}
+                    selectedTextStyle={[globalStyles.selectedTextStyle, styles.selectedTextStyle]}
+                    placeholderStyle={styles.placeholderStyle}
+                    data={savedSteaks}
+                    labelField="personName"
+                    valueField="id"
+                    placeholder="Select a saved steak"
+                    value={selectedSavedSteak}
+                    onChange={handleDropdownChange}
+                  />
+                </View>
+              ) : null}
+
+              {selectedSavedSteak ? (
+                <TouchableOpacity style={styles.clearButtonContainer} onPress={() => setSelectedSavedSteak(null)}>
+                  <Text style={styles.clearButton}>Clear Saved</Text>
+                </TouchableOpacity>
+              ) : null}
+
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Person Name</Text>
+                <TextInput
+                  ref={personNameInputRef}
+                  style={[globalStyles.input, styles.fieldInput]}
+                  placeholder="Person Name"
+                  placeholderTextColor={'#a78d7a'}
+                  value={personName}
+                  onChangeText={setPersonName}
+                  enterKeyHint={'done'}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Center Cook</Text>
+                <Dropdown
+                  style={[globalStyles.dropdown, styles.fieldControl]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={[globalStyles.selectedTextStyle, styles.selectedTextStyle]}
+                  data={centerCookOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Center Cook"
+                  value={centerCook}
+                  onFocus={handleDismissKeyboard}
+                  onChange={(item) => setCenterCook(item.value)}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Thickness</Text>
+                <Dropdown
+                  style={[globalStyles.dropdown, styles.fieldControl]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={[globalStyles.selectedTextStyle, styles.selectedTextStyle]}
+                  data={thicknessOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Thickness"
+                  value={thickness}
+                  onFocus={handleDismissKeyboard}
+                  onChange={(item) => setThickness(item.value)}
+                />
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.primaryButton]}
+                  onPress={handleSave}
+                >
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.secondaryButton]}
+                  onPress={handleClose}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(46, 30, 20, 0.65)',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  keyboardContainer: {
+    width: '100%',
+    maxWidth: 480,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#fdf8f4',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#ecdccc',
+    shadowColor: '#5a3d2a',
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 7,
+  },
+  headerAccent: {
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: '#c97a45',
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  headerTextWrap: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#2a1a0e',
+    fontFamily: 'Avenir-Book',
+  },
+  modalSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#8b6a56',
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f6ebdf',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#8b6a56',
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 8,
+  },
+  fieldGroup: {
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#6d4f3b',
+    marginBottom: 6,
+  },
+  fieldInput: {
+    backgroundColor: '#fffdf9',
+    borderColor: '#e2d2c0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 0,
+  },
+  fieldControl: {
+    backgroundColor: '#fffdf9',
+    borderColor: '#e2d2c0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 0,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: '#a78d7a',
+  },
+  selectedTextStyle: {
+    color: '#2f241d',
+  },
   clearButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    marginBottom: 12,
   },
   clearButton: {
-    flex: 0.35,
-    marginBottom: 20,
-    fontSize: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    fontSize: 13,
+    fontWeight: '600',
     textAlign: 'center',
+    borderRadius: 999,
     borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#d9534f',
-    backgroundColor: '#d9534f',
-    color: 'white',
+    borderColor: '#d2a58f',
+    backgroundColor: '#fcefe7',
+    color: '#8a4f2e',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 10,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#c97a45',
+  },
+  secondaryButton: {
+    backgroundColor: '#8d6b56',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
 

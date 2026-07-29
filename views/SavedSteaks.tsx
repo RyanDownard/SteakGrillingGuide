@@ -135,8 +135,9 @@ const styles = StyleSheet.create({
         paddingBottom: 24,
     },
     emptyListContent: {
-        flex: 1,
+        flexGrow: 1,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     cardContainer: {
         flexDirection: 'row',

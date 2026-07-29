@@ -276,11 +276,6 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Timer onInfoPress={() => setBeforeYouGrillVisible(true)} />
-      {(!steaks || steaks.length === 0 && !timerComplete) && (
-        <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
-          No Steaks Added
-        </Text>
-      )}
 
       {timerComplete && (
         <View style={styles.completeContainer}>
@@ -356,11 +351,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'black',
-  },
-  noneAddedText: {
-    textAlign: 'center',
-    margin: 20,
-    fontSize: 20,
   },
   completeContainer: {
     flex: 1,

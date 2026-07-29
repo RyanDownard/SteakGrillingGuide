@@ -186,12 +186,20 @@ const SteakItem: React.FC<Props> = ({ steak, onEdit, onDelete, actionsDisabled }
 };
 
 const SteakList: React.FC<ListProps> = ({ steaks, onEdit, onDelete, actionsDisabled, bottomPadding = 120 }) => {
+    const renderEmptyState = () => (
+        <View style={styles.emptyStateContainer}>
+            <Text style={styles.emptyStateTitle}>No steaks added yet.</Text>
+            <Text style={styles.emptyStateSubtitle}>Add your first steak to start the grill timer.</Text>
+        </View>
+    );
+
     return (
         <FlatList
             data={steaks}
             style={styles.list}
-            contentContainerStyle={[styles.listContentContainer, { paddingBottom: bottomPadding }]}
+            contentContainerStyle={[styles.listContentContainer, { paddingBottom: bottomPadding }, steaks.length === 0 && styles.emptyListContent]}
             keyExtractor={(item) => item.personName}
+            ListEmptyComponent={renderEmptyState}
             renderItem={({ item }) => <SteakItem steak={item} onEdit={onEdit} onDelete={onDelete} actionsDisabled={actionsDisabled} />}
         />
     );
@@ -203,6 +211,31 @@ const styles = StyleSheet.create({
     },
     listContentContainer: {
         paddingBottom: 160,
+    },
+    emptyListContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyStateContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 32,
+        paddingVertical: 24,
+    },
+    emptyStateTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#2a1a0e',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    emptyStateSubtitle: {
+        fontSize: 16,
+        color: '#7a6d62',
+        textAlign: 'center',
+        lineHeight: 22,
     },
     steakContainer: {
         borderRadius: 15,

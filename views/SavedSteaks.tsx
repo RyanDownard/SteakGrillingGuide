@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import { SavedSteak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -8,6 +8,7 @@ import useSavedSteaksStore from '../stores/SavedSteakStore';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
 import useSteakStore from '../stores/SteakStore';
 import useTimerStore from '../stores/TimerStore';
+import Timer from '../components/Timer';
 
 const SavedSteaks = () => {
     const { removeAnySavedSteakInfo } = useSteakStore();
@@ -42,7 +43,8 @@ const SavedSteaks = () => {
     };
 
     return (
-        <View>
+        <SafeAreaView style={styles.container}>
+            <Timer />
             {timerRunning && (
                 <View style={globalStyles.dangerContainer}>
                     <Text style={globalStyles.textDangerWhite}>Timer is running, you cannot edit saved steaks.</Text>
@@ -72,13 +74,17 @@ const SavedSteaks = () => {
                 visible={editSavedSteakModalVisible}
                 editingSteak={editingSteak} />
 
-        </View>
+        </SafeAreaView>
     );
 };
 
 export default SavedSteaks;
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fdf8f4',
+    },
     cardContainer: {
         flexDirection: 'row',
         padding: 20,

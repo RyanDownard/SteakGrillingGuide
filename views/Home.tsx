@@ -5,8 +5,8 @@ import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
 import FloatingActions from '../components/FloatingActions.tsx';
-import TopButtons from '../components/TopButtons';
 import SteakList from '../components/SteakList.tsx';
+import Timer from '../components/Timer';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
@@ -275,18 +275,7 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopButtons
-        onAdd={() => handleOnAddSteak()}
-        onPause={() => {
-          showStopTimerModal();
-        }}
-        onInfo={() => setBeforeYouGrillVisible(true)}
-        onStart={() => setStartTimerModalVisible(true)}
-        allDisabled={timerComplete}
-        addSteakEnabled={!timerRunning}
-        pauseEnabled={timerRunning}
-        startEnabled={!timerRunning && steaks.length > 0}
-      />
+      <Timer onInfoPress={() => setBeforeYouGrillVisible(true)} />
       {(!steaks || steaks.length === 0 && !timerComplete) && (
         <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
           No Steaks Added
@@ -316,7 +305,7 @@ const Home = () => {
           onEdit={handleEdit}
           onDelete={showDeleteConfirm}
           actionsDisabled={timerRunning}
-          bottomPadding={insets.bottom + 130} />
+          bottomPadding={insets.bottom + 100} />
       )}
 
       <SteakModal

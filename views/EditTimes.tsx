@@ -1,4 +1,4 @@
-import { Text, View, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Text, View, FlatList, StyleSheet, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { CookData, Duration } from '../data/SteakData';
 import ToggleContentButton from '../components/ToggleContentButton';
@@ -10,6 +10,7 @@ import { formatTime } from '../data/Helpers';
 import EditDurationModal from '../components/EditDurationModal';
 import useSteakStore from '../stores/SteakStore';
 import useTimerStore from '../stores/TimerStore';
+import Timer from '../components/Timer';
 interface SteakSettingProps {
     steakSetting: CookData;
     setCenterCook: (centerCook: string) => void;
@@ -102,7 +103,8 @@ const EditTimes = () => {
     };
 
     return (
-        <>
+        <SafeAreaView style={styles.container}>
+            <Timer />
             {timerRunning && (
                 <View style={globalStyles.dangerContainer}>
                     <Text style={globalStyles.textDangerWhite}>Timer is running, you cannot edit times</Text>
@@ -133,13 +135,17 @@ const EditTimes = () => {
                 centerCook={editingCenterCook}
                 duration={editingDuration}
                 handleClose={() => setModalVisible(false)} />
-        </>
+        </SafeAreaView>
     );
 };
 
 export default EditTimes;
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fdf8f4',
+    },
     settingContainer: {
         paddingLeft: 10,
         paddingRight: 10,

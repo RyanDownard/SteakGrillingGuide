@@ -16,7 +16,7 @@ const FloatingActions: React.FC<Props> = ({ hasSteak, onAddSteak, onStartCook, o
 
     return (
         <View
-            style={[styles.wrapper, { bottom: insets.bottom + 16 }]}
+            style={[styles.wrapper, { bottom: insets.bottom - 20 }]}
             pointerEvents="box-none"
         >
             {timerRunning ? (

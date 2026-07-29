@@ -7,13 +7,33 @@ import SavedSteaks from './views/SavedSteaks';
 import { faSave, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import notifee from '@notifee/react-native';
-import Timer from './components/Timer';
 import useSavedSteaksStore from './stores/SavedSteakStore';
 import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
 import { PaperProvider } from 'react-native-paper';
 
 const Tab = createBottomTabNavigator();
+
+const screenOptions = {
+  headerStyle: {
+    backgroundColor: '#fdf8f4',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  headerTintColor: '#2a1a0e',
+  headerTitleStyle: {
+    fontFamily: 'CormorantGaramond-Bold',
+    fontSize: 22,
+    fontWeight: '700' as const,
+  },
+  headerTitleAlign: 'center' as const,
+  tabBarActiveTintColor: '#f46421',
+  tabBarInactiveTintColor: '#a08070',
+  tabBarStyle: {
+    backgroundColor: '#fffdf9',
+    borderTopColor: '#e8d8cc',
+  },
+};
 
 const homeIcon = ({ color, size }: { color: string; size: number }) => (
   <FontAwesomeIcon icon={faHome} size={size} color={color} />
@@ -53,8 +73,7 @@ const App = () => {
     <PaperProvider>
       <View style={styles.container}>
         <NavigationContainer>
-          <Timer />
-          <Tab.Navigator>
+          <Tab.Navigator screenOptions={screenOptions}>
             <Tab.Screen
               name="Home"
               component={Home}
@@ -66,12 +85,14 @@ const App = () => {
               name="Saved Steaks"
               component={SavedSteaks}
               options={{
+                headerTitle: 'Saved Steaks',
                 tabBarIcon: savedSteakIcon,
               }} />
             <Tab.Screen
               name="Edit Times"
               component={EditTimes}
               options={{
+                headerTitle: 'Edit Times',
                 tabBarIcon: timerIcon,
               }} />
           </Tab.Navigator>

@@ -13,6 +13,7 @@ import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTimerStore from '../stores/TimerStore.tsx';
 import useSteakStore from '../stores/SteakStore.tsx';
+import useToastStore from '../stores/ToastStore';
 import { Steak } from '../data/SteakData.tsx';
 import globalStyles from '../styles/globalStyles.tsx';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -22,6 +23,7 @@ import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 const Home = () => {
   const { duration, timerRunning, timerComplete, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime, setTimerComplete } = useTimerStore();
   const { steaks, addSteak, clearSteaks, editSteak, updateSteaks } = useSteakStore();
+  const { showToast } = useToastStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
@@ -255,8 +257,7 @@ const Home = () => {
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
-            Alert.alert('Unexpected Close',
-              "The app closed unexpectedly, if it's on us, we hope your steaks still turned out great and apologize for the inconvinence.");
+            showToast('The app closed unexpectedly, but your timer has been reset.');
           }
         }
       } catch (error) {
@@ -267,7 +268,7 @@ const Home = () => {
     if (steaks !== undefined && steaks.length === 0) {
       loadSteakData();
     }
-  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks, steaks]);
+  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks, steaks, showToast]);
 
   useEffect(() => {
     checkShowBeforeYouGrillModal();

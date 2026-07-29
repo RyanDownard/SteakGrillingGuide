@@ -6,6 +6,7 @@ import { formatTime } from '../data/Helpers';
 import { faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import useSteakStore from '../stores/SteakStore';
+import useToastStore from '../stores/ToastStore';
 
 interface EditDurationModalProps {
     visible: boolean;
@@ -21,6 +22,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
     const [secondSideSeconds, setSecondSideSeconds] = useState('');
 
     const { setOverride, removeOverride, checkIfSteakIsInList } = useSteakStore();
+    const { showToast } = useToastStore();
 
     useEffect(() => {
         if (visible && duration) {
@@ -33,17 +35,17 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
 
     const validateMinutesAndSetValue = (text: string, setMethod: (value: string) => void) => {
         if (text.includes('.')) {
-            Alert.alert('Invalid input', 'Please enter a whole number without decimals');
+            showToast('Please enter a whole number without decimals.');
             return;
         }
 
         if (isNaN(Number(text))) {
-            Alert.alert('Invalid input', 'All values must be a number');
+            showToast('All values must be a number.');
             return;
         }
 
         if (parseInt(text, 10) < 0 || parseInt(text, 10) > 20) {
-            Alert.alert('Invalid input', 'Minutes must be between 0 and 20');
+            showToast('Minutes must be between 0 and 20.');
             return;
         }
 
@@ -52,17 +54,17 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
 
     const validateSecondsAndSetValue = (text: string, setMethod: (value: string) => void) => {
         if (text.includes('.')) {
-            Alert.alert('Invalid input', 'Please enter a whole number without decimals');
+            showToast('Please enter a whole number without decimals.');
             return;
         }
 
         if (isNaN(Number(text))) {
-            Alert.alert('Invalid input', 'All values must be a number');
+            showToast('All values must be a number.');
             return;
         }
 
         if (parseInt(text, 10) < 0 || parseInt(text, 10) >= 60) {
-            Alert.alert('Invalid input', 'Seconds must be between 0 and 59');
+            showToast('Seconds must be between 0 and 59.');
             return;
         }
 
@@ -88,7 +90,7 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
 
     const saveAndClose = async () => {
         if (!firstSideMinutes || !firstSideSeconds || !secondSideMinutes || !secondSideSeconds) {
-            Alert.alert('Incomplete data', 'Please fill in all fields before saving.');
+            showToast('Please fill in all fields before saving.');
             return;
         }
 
@@ -96,12 +98,12 @@ const EditDurationModal: React.FC<EditDurationModalProps> = ({ visible, centerCo
         const secondSideTotalSeconds = parseInt(secondSideMinutes, 10) * 60 + parseInt(secondSideSeconds, 10);
 
         if (firstSideTotalSeconds <= 0 || firstSideTotalSeconds > 1200) {
-            Alert.alert('Invalid time', 'First side must be between 1 and 20 minutes.');
+            showToast('First side must be between 1 and 20 minutes.');
             return;
         }
 
         if (secondSideTotalSeconds <= 0 || secondSideTotalSeconds > 1200) {
-            Alert.alert('Invalid time', 'Second side must be between 1 and 20 minutes.');
+            showToast('Second side must be between 1 and 20 minutes.');
             return;
         }
 

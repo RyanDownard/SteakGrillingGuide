@@ -10,6 +10,7 @@ import { formatTime } from '../data/Helpers';
 import EditDurationModal from '../components/EditDurationModal';
 import useSteakStore from '../stores/SteakStore';
 import useTimerStore from '../stores/TimerStore';
+import useToastStore from '../stores/ToastStore';
 import Timer from '../components/Timer';
 
 interface SteakSettingProps {
@@ -103,6 +104,7 @@ const EditTimes = () => {
 
     const { timerRunning } = useTimerStore();
     const { clearAllOverrides, settings } = useSteakStore();
+    const { showToast } = useToastStore();
 
     const resetAllDefaults = async () => {
         Alert.alert(
@@ -113,6 +115,7 @@ const EditTimes = () => {
                     text: 'Reset',
                     onPress: async () => {
                         await clearAllOverrides();
+                        showToast('All custom times reset to defaults.');
                     },
                 },
                 {

@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
 import { SavedSteak, Steak } from '../data/SteakData';
+import useToastStore from './ToastStore';
 
 const SAVED_STEAKS_STORAGE_KEY = 'favoriteSteaks';
+const showToastMessage = (message: string) => useToastStore.getState().showToast(message);
 
 interface SavedSteaksState {
   savedSteaks: SavedSteak[];
@@ -35,7 +36,7 @@ const useSavedSteaksStore = create<SavedSteaksState>((set, get) => ({
       );
 
       if (matchSteak) {
-        Alert.alert('Steak with name and center cook already saved to device');
+        showToastMessage('Steak already saved for that name and cook level.');
         steakToSave = {
           ...steakToSave,
           id: matchSteak.id,
@@ -60,9 +61,9 @@ const useSavedSteaksStore = create<SavedSteaksState>((set, get) => ({
       set({ savedSteaks: updatedSteaks });
       steakToSave.savedSteak = savedSteakInfo;
 
-      Alert.alert('Steak saved!');
+      showToastMessage('Steak saved.');
     } catch (error) {
-      Alert.alert('An error occurred while attempting to save steak');
+      showToastMessage('Unable to save steak right now.');
       console.error('Failed to save favorite steak:', error);
     }
   },
@@ -77,7 +78,7 @@ const useSavedSteaksStore = create<SavedSteaksState>((set, get) => ({
       await AsyncStorage.setItem(SAVED_STEAKS_STORAGE_KEY, JSON.stringify(updatedSteaks));
       set({ savedSteaks: updatedSteaks });
     } catch (error) {
-      Alert.alert('Failed to update saved steak.');
+      showToastMessage('Unable to update saved steak.');
       console.error('Failed to update favorite steak:', error);
     }
   },
@@ -90,9 +91,9 @@ const useSavedSteaksStore = create<SavedSteaksState>((set, get) => ({
       await AsyncStorage.setItem(SAVED_STEAKS_STORAGE_KEY, JSON.stringify(updatedSteaks));
       set({ savedSteaks: updatedSteaks });
 
-      Alert.alert('Saved steak removed!');
+      showToastMessage('Saved steak removed.');
     } catch (error) {
-      Alert.alert('An error occurred while attempting to remove steak');
+      showToastMessage('Unable to remove saved steak.');
       console.error('Failed to remove favorite steak:', error);
     }
   },

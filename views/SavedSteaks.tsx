@@ -8,6 +8,7 @@ import useSavedSteaksStore from '../stores/SavedSteakStore';
 import EditSavedSteakModal from '../components/EditSavedSteakModal';
 import useSteakStore from '../stores/SteakStore';
 import useTimerStore from '../stores/TimerStore';
+import useToastStore from '../stores/ToastStore';
 import Timer from '../components/Timer';
 import SavedSteaksActions from '../components/SavedSteaksActions';
 import { Menu, IconButton } from 'react-native-paper';
@@ -16,6 +17,7 @@ const SavedSteaks = () => {
     const { removeAnySavedSteakInfo } = useSteakStore();
     const { timerRunning } = useTimerStore();
     const { savedSteaks, removeSavedSteak } = useSavedSteaksStore();
+    const { showToast } = useToastStore();
     const [editingSteak, setEditingSteak] = useState<SavedSteak | null>(null);
     const [editSavedSteakModalVisible, setEditSavedSteakmodalVisible] = useState(false);
     const [activeMenuSteakId, setActiveMenuSteakId] = useState<number | null>(null);
@@ -41,6 +43,7 @@ const SavedSteaks = () => {
                         removeSavedSteak(steak.id);
                         removeAnySavedSteakInfo(steak.id);
                         setActiveMenuSteakId(null);
+                        showToast('Saved steak deleted.');
                     },
                 },
                 {

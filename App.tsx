@@ -11,6 +11,7 @@ import useSavedSteaksStore from './stores/SavedSteakStore';
 import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
 import { PaperProvider } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 const Tab = createBottomTabNavigator();
 
@@ -97,6 +98,7 @@ const App = () => {
               }} />
           </Tab.Navigator>
         </NavigationContainer>
+        <Toast />
       </View>
     </PaperProvider>
   );

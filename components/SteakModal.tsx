@@ -16,6 +16,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
+import useToastStore from '../stores/ToastStore';
 
 interface Props {
   visible: boolean;
@@ -30,6 +31,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
   const [thickness, setThickness] = useState('');
   const [selectedSavedSteak, setSelectedSavedSteak] = useState<SavedSteak | null>(null);
   const { savedSteaks, updateSavedSteak } = useSavedSteaksStore();
+  const { showToast } = useToastStore();
 
   const centerCookOptions = [
     { label: 'Rare', value: 'Rare' },
@@ -74,7 +76,7 @@ const SteakModal: React.FC<Props> = ({ visible, onClose, onSave, editingSteak })
 
   const handleSave = async () => {
     if (personName.length === 0 || centerCook.length === 0 || thickness === '') {
-      Alert.alert('Name, center cook, and thickness must have a value before saving.');
+      showToast('Please fill in the name, cook level, and thickness before saving.');
       return;
     }
 

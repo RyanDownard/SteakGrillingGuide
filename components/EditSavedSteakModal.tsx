@@ -17,6 +17,7 @@ import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useSteakStore from '../stores/SteakStore';
+import useToastStore from '../stores/ToastStore';
 
 interface Props {
   visible: boolean;
@@ -29,6 +30,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
   const [centerCook, setCenterCook] = useState('');
   const { addSavedSteak, updateSavedSteak } = useSavedSteaksStore();
   const { updateSteaksWithSavedId } = useSteakStore();
+  const { showToast } = useToastStore();
 
   const centerCookOptions = [
     { label: 'Rare', value: 'Rare' },
@@ -50,7 +52,7 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
 
   const handleSave = async () => {
     if (personName.length === 0 || centerCook.length === 0) {
-      Alert.alert('Name and center cook must have a value before saving.');
+      showToast('Please enter both the name and cook level before saving.');
       return;
     }
 

@@ -5,6 +5,8 @@
 import 'react-native';
 import React from 'react';
 import Timer from '../components/Timer';
+import SteakProgress from '../components/SteakProgress';
+import { Steak } from '../data/SteakData';
 
 // Note: import explicitly to use the types shipped with jest.
 import {it, expect} from '@jest/globals';
@@ -25,8 +27,19 @@ jest.mock('@fortawesome/react-native-fontawesome', () => ({
   FontAwesomeIcon: 'FontAwesomeIcon',
 }));
 
+jest.mock('react-native-progress', () => ({
+  Bar: 'ProgressBar',
+}));
+
 it('does not render the timer in a SafeAreaView', () => {
   const component = renderer.create(<Timer />);
 
   expect(component.root.findAllByType(require('react-native').SafeAreaView)).toHaveLength(0);
+});
+
+it('renders progress connectors for the steak timeline', () => {
+  const steak = new Steak(1, 'Test', 'Medium', 1.5);
+  const component = renderer.create(<SteakProgress steak={steak} />);
+
+  expect(component.root.findAllByType('ProgressBar')).toHaveLength(2);
 });

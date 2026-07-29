@@ -4,14 +4,16 @@ import useTimerStore from '../stores/TimerStore';
 import { Steak } from '../data/SteakData';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHourglass, faFire, faRotate, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { Bar } from 'react-native-progress';
 
 interface Props {
     steak: Steak;
 }
 
 const SteakProgress: React.FC<Props> = ({ steak }) => {
-    const { timerRunning, remainingTime } = useTimerStore();
-    const firstSideReady = remainingTime <= (steak.firstSideTime + steak.secondSideTime);
+    const { timerRunning, remainingTime, duration } = useTimerStore();
+    const totalTime = steak.firstSideTime + steak.secondSideTime;
+    const firstSideReady = remainingTime <= totalTime;
     const secondSideReady = remainingTime <= steak.secondSideTime;
 
     // Derive per-node state: 'active' | 'past' | 'future'
@@ -28,13 +30,42 @@ const SteakProgress: React.FC<Props> = ({ steak }) => {
     const iconColor = (s: 'active' | 'past' | 'future') =>
         s === 'active' ? '#fff' : s === 'past' ? '#a05830' : '#ccc';
 
-    const lineStyle = (active: boolean) => ({
-        flex: 1,
-        height: 2,
-        backgroundColor: active ? '#d4a880' : '#f0e0d4',
-        marginHorizontal: 2,
-        borderRadius: 2,
-    });
+    const getWaitingProgress = () => {
+        if (!timerRunning) {
+            return 0;
+        }
+
+        const totalWaitTime = Math.max(0, duration - totalTime);
+
+        if (remainingTime <= totalTime) {
+            return 1;
+        }
+
+        if (totalWaitTime <= 0) {
+            return 0;
+        }
+
+        return Math.max(0, Math.min(1, 1 - ((remainingTime - totalTime) / totalWaitTime)));
+    };
+
+    const getFlipProgress = () => {
+        if (!timerRunning) {
+            return 0;
+        }
+
+        if (remainingTime <= steak.secondSideTime) {
+            return 1;
+        }
+
+        if (remainingTime >= totalTime) {
+            return 0;
+        }
+
+        return Math.max(0, Math.min(1, (totalTime - remainingTime) / steak.firstSideTime));
+    };
+
+    const waitingConnectorProgress = getWaitingProgress();
+    const flipConnectorProgress = getFlipProgress();
 
     return (
         <View style={styles.container}>
@@ -50,7 +81,17 @@ const SteakProgress: React.FC<Props> = ({ steak }) => {
                     </View>
                 </View>
 
-                <View style={lineStyle(firstSideReady)} />
+                <View style={styles.connectorTrack}>
+                    <Bar
+                        progress={waitingConnectorProgress}
+                        color="#d4a880"
+                        unfilledColor="transparent"
+                        borderWidth={0}
+                        height={2}
+                        width={null}
+                        style={styles.connectorBar}
+                    />
+                </View>
 
                 {/* Side 1 node */}
                 <View style={styles.stepContainer}>
@@ -63,7 +104,17 @@ const SteakProgress: React.FC<Props> = ({ steak }) => {
                     </View>
                 </View>
 
-                <View style={lineStyle(secondSideReady)} />
+                <View style={styles.connectorTrack}>
+                    <Bar
+                        progress={flipConnectorProgress}
+                        color="#d4a880"
+                        unfilledColor="transparent"
+                        borderWidth={0}
+                        height={2}
+                        width={null}
+                        style={styles.connectorBar}
+                    />
+                </View>
 
                 {/* Side 2 node */}
                 <View style={styles.stepContainer}>
@@ -132,6 +183,19 @@ const styles = StyleSheet.create({
     },
     textSpacing: {
         flex: 1,
+    },
+    connectorTrack: {
+        flex: 1,
+        height: 2,
+        marginHorizontal: 2,
+        borderRadius: 2,
+        backgroundColor: '#f0e0d4',
+        overflow: 'hidden',
+    },
+    connectorBar: {
+        flex: 1,
+        height: 2,
+        borderRadius: 2,
     },
 });
 

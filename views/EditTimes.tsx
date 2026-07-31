@@ -135,7 +135,6 @@ const EditTimes = () => {
             )}
 
             <View style={styles.headerSection}>
-                <Text style={styles.pageTitle}>Edit Default Times</Text>
                 <Text style={styles.pageDescription}>
                     Fine-tune each doneness so your favorite steaks are ready the way you like.
                 </Text>
@@ -185,13 +184,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         paddingTop: 14,
         paddingBottom: 8,
-    },
-    pageTitle: {
-        fontSize: 26,
-        fontWeight: '700',
-        fontFamily: 'CormorantGaramond-Bold',
-        color: '#2a1a0e',
-        marginBottom: 4,
     },
     pageDescription: {
         fontSize: 15,

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import { theme } from '../styles/theme';
 
 interface GrillInfoModalProps {
   visible: boolean;
@@ -114,19 +115,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(46, 30, 20, 0.65)',
+    backgroundColor: theme.colors.overlay,
     paddingHorizontal: 16,
     paddingVertical: 24,
   },
   modalContent: {
     width: '100%',
     maxWidth: 480,
-    backgroundColor: '#fdf8f4',
+    backgroundColor: theme.colors.background,
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#ecdccc',
-    shadowColor: '#5a3d2a',
+    borderColor: theme.colors.border,
+    shadowColor: theme.colors.shadow,
     shadowOpacity: 0.16,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   headerAccent: {
     height: 4,
     borderRadius: 999,
-    backgroundColor: '#c97a45',
+    backgroundColor: theme.colors.accent,
     marginBottom: 16,
   },
   modalHeader: {
@@ -151,32 +152,32 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#2a1a0e',
+    color: theme.colors.text,
     fontFamily: 'Avenir-Book',
   },
   modalSubtitle: {
     marginTop: 4,
     fontSize: 13,
-    color: '#8b6a56',
+    color: theme.colors.textMuted,
   },
   closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f6ebdf',
+    backgroundColor: theme.colors.cardMuted,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 18,
-    color: '#8b6a56',
+    color: theme.colors.textMuted,
     fontWeight: '600',
   },
   scrollContent: {
     paddingBottom: 8,
   },
   noticeBox: {
-    backgroundColor: '#fffdf9',
+    backgroundColor: theme.colors.surface,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#efe2d4',
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   iconStyling: {
-    borderColor: '#c97a45',
+    borderColor: theme.colors.accent,
   },
   innerIconStyling: {
     borderWidth: 2,
@@ -209,11 +210,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingVertical: 12,
     borderRadius: 999,
-    backgroundColor: '#c97a45',
+    backgroundColor: theme.colors.accent,
     alignItems: 'center',
   },
   closeActionText: {
-    color: '#fff',
+    color: theme.colors.white,
     fontSize: 15,
     fontWeight: '700',
   },

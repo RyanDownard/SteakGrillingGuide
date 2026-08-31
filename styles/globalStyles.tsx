@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { theme } from './theme';
 
 const globalStyles = StyleSheet.create({
     modalOverlay: {
@@ -9,7 +10,7 @@ const globalStyles = StyleSheet.create({
     },
     modalContent: {
         width: '90%',
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.white,
         borderRadius: 10,
         padding: 20,
         elevation: 5,
@@ -23,18 +24,18 @@ const globalStyles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: theme.colors.text,
     },
     closeButton: {
         fontSize: 20,
-        color: '#333',
+        color: theme.colors.text,
         padding: 10,
     },
     modalSubtitle: {
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#555',
+        color: theme.colors.textMuted,
     },
     modalBody: {
         marginBottom: 20,
@@ -42,13 +43,13 @@ const globalStyles = StyleSheet.create({
     modalFooter: {
         alignSelf: 'flex-end',
         marginTop: 10,
-        backgroundColor: '#007BFF',
+        backgroundColor: theme.colors.info,
         paddingVertical: 8,
         paddingHorizontal: 20,
         borderRadius: 5,
     },
     modalFooterText: {
-        color: '#fff',
+        color: theme.colors.white,
         fontSize: 16,
     },
     modalContainer: {
@@ -68,7 +69,7 @@ const globalStyles = StyleSheet.create({
     },
     modalWarning: {
         fontSize: 16,
-        color: 'red',
+        color: theme.colors.danger,
         marginBottom: 10,
     },
     button: {
@@ -77,7 +78,7 @@ const globalStyles = StyleSheet.create({
         borderRadius: 5,
     },
     buttonText: {
-        color: '#fff',
+        color: theme.colors.white,
         fontSize: 16,
     },
     disabledButton: {
@@ -100,7 +101,7 @@ const globalStyles = StyleSheet.create({
         borderColor: '#e3cf17',
     },
     deleteButton: {
-        borderColor: '#c70404',
+        borderColor: theme.colors.danger,
     },
 
     label: {
@@ -110,16 +111,16 @@ const globalStyles = StyleSheet.create({
     },
     input: {
         height: 45,
-        borderColor: '#ccc',
+        borderColor: theme.colors.border,
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 15,
-        textDecorationColor: 'red',
+        textDecorationColor: theme.colors.danger,
     },
     dropdown: {
         height: 45,
-        borderColor: '#ccc',
+        borderColor: theme.colors.border,
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
@@ -132,7 +133,7 @@ const globalStyles = StyleSheet.create({
     },
     selectedTextStyle: {
         fontSize: 14,
-        color: '#333',
+        color: theme.colors.text,
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -140,10 +141,10 @@ const globalStyles = StyleSheet.create({
         marginTop: 20,
     },
     cancelButton: {
-        backgroundColor: '#d9534f',
+        backgroundColor: theme.colors.danger,
     },
     saveButton: {
-        backgroundColor: '#5cb85c',
+        backgroundColor: theme.colors.success,
     },
     actionButtonsContainer: {
         flexDirection: 'row',
@@ -161,20 +162,20 @@ const globalStyles = StyleSheet.create({
         alignItems: 'center',
     },
     badButton: {
-        backgroundColor: '#d9534f',
+        backgroundColor: theme.colors.danger,
     },
     goodButton: {
-        backgroundColor: '#5cb85c',
+        backgroundColor: theme.colors.success,
     },
     infoButton: {
-        backgroundColor: '#007BFF',
+        backgroundColor: theme.colors.info,
     },
     goodButtonOutline: {
-        borderColor: '#5cb85c',
-        color: '#5cb85c',
+        borderColor: theme.colors.success,
+        color: theme.colors.success,
     },
     badButtonOutline: {
-        borderColor: '#c70404',
+        borderColor: theme.colors.danger,
     },
     infoButtonOutline: {
         borderColor: '#029af2',
@@ -188,7 +189,7 @@ const globalStyles = StyleSheet.create({
         paddingVertical: 15,
         fontFamily: 'Avenir-Book',
         backgroundColor: '#575555',
-        color: '#ffffff',
+        color: theme.colors.white,
     },
     card: {
         paddingTop: 10,
@@ -196,21 +197,21 @@ const globalStyles = StyleSheet.create({
         marginBottom: 5,
         marginLeft: 10,
         marginRight: 10,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.card,
         shadowRadius: 5,
-        shadowColor: '#000',
+        shadowColor: theme.colors.black,
         shadowOpacity: 0.25,
         shadowOffset: { width: 0, height: 5 },
     },
     dangerContainer: {
-        backgroundColor: '#c30212ff',
+        backgroundColor: theme.colors.dangerDeep,
         padding: 5,
         borderRadius: 5,
         marginTop: 5,
         marginBottom: 5,
     },
     textDangerWhite: {
-        color: '#fff',
+        color: theme.colors.white,
         textAlign: 'center',
         fontSize: 16,
         marginVertical: 10,

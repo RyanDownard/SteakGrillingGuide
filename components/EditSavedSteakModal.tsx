@@ -18,6 +18,7 @@ import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useSteakStore from '../stores/SteakStore';
 import useToastStore from '../stores/ToastStore';
+import { theme } from '../styles/theme';
 
 interface Props {
   visible: boolean;
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(46, 30, 20, 0.65)',
+    backgroundColor: theme.colors.overlay,
     paddingHorizontal: 16,
     paddingVertical: 24,
   },
@@ -178,12 +179,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '100%',
-    backgroundColor: '#fdf8f4',
+    backgroundColor: theme.colors.background,
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#ecdccc',
-    shadowColor: '#5a3d2a',
+    borderColor: theme.colors.border,
+    shadowColor: theme.colors.shadow,
     shadowOpacity: 0.16,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   headerAccent: {
     height: 4,
     borderRadius: 999,
-    backgroundColor: '#c97a45',
+    backgroundColor: theme.colors.accent,
     marginBottom: 16,
   },
   modalHeader: {
@@ -208,25 +209,25 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#2a1a0e',
+    color: theme.colors.text,
     fontFamily: 'Avenir-Book',
   },
   modalSubtitle: {
     marginTop: 4,
     fontSize: 13,
-    color: '#8b6a56',
+    color: theme.colors.textMuted,
   },
   closeButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f6ebdf',
+    backgroundColor: theme.colors.cardMuted,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 18,
-    color: '#8b6a56',
+    color: theme.colors.textMuted,
     fontWeight: '600',
   },
   scrollContent: {
@@ -278,13 +279,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryButton: {
-    backgroundColor: '#c97a45',
+    backgroundColor: theme.colors.accent,
   },
   secondaryButton: {
     backgroundColor: '#8d6b56',
   },
   buttonText: {
-    color: '#fff',
+    color: theme.colors.white,
     fontSize: 15,
     fontWeight: '700',
   },

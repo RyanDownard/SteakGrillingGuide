@@ -19,6 +19,7 @@ import globalStyles from '../styles/globalStyles.tsx';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { theme } from '../styles/theme';
 
 const Home = () => {
   const { duration, timerRunning, timerComplete, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime, setTimerComplete } = useTimerStore();
@@ -342,7 +343,7 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf8f4',
+    backgroundColor: theme.colors.background,
   },
   longestTime: {
     textAlign: 'center',
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     fontWeight: 'bold',
-    color: '#5cb85c',
+    color: theme.colors.success,
   },
   prepText: {
     paddingVertical: 8,
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   resetText: {
-    color: '#5cb85c',
+    color: theme.colors.success,
   },
   resetButton: {
     width: 150,

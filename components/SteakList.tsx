@@ -11,6 +11,7 @@ import useTimerStore from '../stores/TimerStore';
 import SteakProgress from './SteakProgress';
 import { Menu, IconButton } from 'react-native-paper';
 import useSteakStore from '../stores/SteakStore';
+import { theme } from '../styles/theme';
 
 interface Props {
     steak: Steak;
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
     emptyStateTitle: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#2a1a0e',
+        color: theme.colors.text,
         marginBottom: 8,
         textAlign: 'center',
     },
@@ -241,8 +242,8 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#f0e8df',
-        backgroundColor: '#ffffff',
-        shadowColor: 'black',
+        backgroundColor: theme.colors.card,
+        shadowColor: theme.colors.black,
         marginHorizontal: 15,
         marginVertical: 7,
         padding: 5,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
         fontSize: 26,
         marginVertical: 8,
         fontFamily: 'CormorantGaramond-Bold',
-        color: '#2a1a0e',
+        color: theme.colors.text,
     },
     steakCookDetails: {
         flexDirection: 'row',
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#e8d8cc',
-        backgroundColor: '#fdf8f4',
+        backgroundColor: theme.colors.background,
         paddingHorizontal: 15,
         flexDirection: 'row',
     },
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginBottom: 3,
         fontFamily: 'DMSans-Regular',
-        color: '#a08070',
+        color: theme.colors.textSoft,
         letterSpacing: 0.08,
         textTransform: 'uppercase',
     },
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontFamily: 'CourierPrime-Regular',
         fontWeight: 700,
-        color: '#2a1a0e',
+        color: theme.colors.text,
     },
     detailsItemPadding: {
         paddingHorizontal: 3,

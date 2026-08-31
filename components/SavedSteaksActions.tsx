@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { theme } from '../styles/theme';
 
 interface Props {
     onAddSavedSteak: () => void;
@@ -31,18 +32,18 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     addButton: {
-        backgroundColor: '#2a1a0e',
+        backgroundColor: theme.colors.text,
         borderRadius: 18,
         paddingVertical: 17,
         alignItems: 'center',
-        shadowColor: '#2a1a0e',
+        shadowColor: theme.colors.text,
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.25,
         shadowRadius: 16,
         elevation: 6,
     },
     addText: {
-        color: '#fdf8f4',
+        color: theme.colors.background,
         fontFamily: 'DMSans',
         fontSize: 16,
         fontWeight: '600',

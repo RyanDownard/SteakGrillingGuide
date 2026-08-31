@@ -12,27 +12,28 @@ import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
 import { PaperProvider } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
+import { theme } from './styles/theme';
 
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
   headerStyle: {
-    backgroundColor: '#fdf8f4',
+    backgroundColor: theme.colors.background,
     shadowOpacity: 0,
     elevation: 0,
   },
-  headerTintColor: '#2a1a0e',
+  headerTintColor: theme.colors.text,
   headerTitleStyle: {
-    fontFamily: 'CormorantGaramond-Bold',
+    fontFamily: theme.typography.heading,
     fontSize: 22,
     fontWeight: '700' as const,
   },
   headerTitleAlign: 'center' as const,
-  tabBarActiveTintColor: '#f46421',
-  tabBarInactiveTintColor: '#a08070',
+  tabBarActiveTintColor: theme.colors.accent,
+  tabBarInactiveTintColor: theme.colors.textSoft,
   tabBarStyle: {
-    backgroundColor: '#fffdf9',
-    borderTopColor: '#e8d8cc',
+    backgroundColor: theme.colors.surface,
+    borderTopColor: theme.colors.border,
   },
 };
 

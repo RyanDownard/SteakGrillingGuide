@@ -5,6 +5,7 @@ import useSteakStore from '../stores/SteakStore';
 import { formatTime } from '../data/Helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { theme } from '../styles/theme';
 
 interface TimerProps {
     onInfoPress?: () => void;
@@ -31,7 +32,7 @@ const Timer: React.FC<TimerProps> = ({ onInfoPress }) => {
                         accessibilityRole="button"
                         accessibilityLabel="Show grilling info"
                     >
-                        <FontAwesomeIcon icon={faCircleInfo} size={16} color="#0f766e" />
+                        <FontAwesomeIcon icon={faCircleInfo} size={16} color={theme.colors.info} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -51,11 +52,11 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         paddingVertical: 5,
         paddingHorizontal: 14,
-        backgroundColor: '#fff7f0',
+        backgroundColor: theme.colors.surfaceAlt,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: '#f0d8c3',
-        shadowColor: '#000',
+        borderColor: theme.colors.borderSoft,
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
         shadowRadius: 2,
@@ -71,8 +72,8 @@ const styles = StyleSheet.create({
         fontSize: 11,
         textTransform: 'uppercase',
         letterSpacing: 0.8,
-        color: '#a08070',
-        fontFamily: 'DMSans-Regular',
+        color: theme.colors.textSoft,
+        fontFamily: theme.typography.body,
     },
     infoButton: {
         width: 32,
@@ -80,10 +81,10 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#fffdf9',
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderColor: '#d1fae5',
-        shadowColor: '#000',
+        borderColor: theme.colors.infoSoft,
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
         shadowRadius: 2,
@@ -92,8 +93,8 @@ const styles = StyleSheet.create({
     time: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#2a1a0e',
-        fontFamily: 'CourierPrime-Regular',
+        color: theme.colors.text,
+        fontFamily: theme.typography.mono,
         marginTop: 2,
     },
 });

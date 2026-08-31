@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../styles/theme';
 
 interface TableProps {
     headers: string[];
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 10,
         paddingHorizontal: 12,
-        backgroundColor: '#fbf4ec',
+        backgroundColor: theme.colors.cardMuted,
     },
     tableRow: {
         flexDirection: 'row',
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     },
     cellText: {
         textAlign: 'center',
-        color: '#2a1a0e',
+        color: theme.colors.text,
         fontFamily: 'DMSans-Regular',
         fontSize: 14,
     },

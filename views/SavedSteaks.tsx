@@ -12,6 +12,7 @@ import useToastStore from '../stores/ToastStore';
 import Timer from '../components/Timer';
 import SavedSteaksActions from '../components/SavedSteaksActions';
 import { Menu, IconButton } from 'react-native-paper';
+import { theme } from '../styles/theme';
 
 const SavedSteaks = () => {
     const { removeAnySavedSteakInfo } = useSteakStore();
@@ -131,7 +132,7 @@ export default SavedSteaks;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fdf8f4',
+        backgroundColor: theme.colors.background,
     },
     listContentContainer: {
         paddingTop: 12,
@@ -152,8 +153,8 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#f0e8df',
-        backgroundColor: '#ffffff',
-        shadowColor: '#000',
+        backgroundColor: theme.colors.card,
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
         shadowRadius: 2,
@@ -167,13 +168,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '700',
         fontFamily: 'CormorantGaramond-Bold',
-        color: '#2a1a0e',
+        color: theme.colors.text,
         marginBottom: 4,
     },
     savedSteakCook: {
         fontSize: 14,
         fontFamily: 'DMSans-Regular',
-        color: '#a08070',
+        color: theme.colors.textSoft,
     },
     menuAnchor: {
         marginRight: -8,
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
     emptyStateTitle: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#2a1a0e',
+        color: theme.colors.text,
         marginBottom: 8,
         textAlign: 'center',
     },

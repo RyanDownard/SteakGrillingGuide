@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Text, StyleSheet, SafeAreaView, Alert, Linking, View, TouchableOpacity } from 'react-native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
@@ -18,10 +19,23 @@ import { Steak } from '../data/SteakData.tsx';
 import globalStyles from '../styles/globalStyles.tsx';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { theme } from '../styles/theme';
 
+const HomeHeaderInfoButton = ({ onPress }: { onPress: () => void }) => (
+  <TouchableOpacity
+    style={styles.headerInfoButton}
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel="Before you grill tips"
+    accessibilityHint="Opens grilling preparation and safety reminders"
+  >
+    <FontAwesomeIcon icon={faCircleInfo} size={19} color={theme.colors.accentDeep} />
+  </TouchableOpacity>
+);
+
 const Home = () => {
+  const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
   const { duration, timerRunning, timerComplete, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime, setTimerComplete } = useTimerStore();
   const { steaks, addSteak, clearSteaks, editSteak, updateSteaks } = useSteakStore();
   const { showToast } = useToastStore();
@@ -31,6 +45,18 @@ const Home = () => {
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
   const insets = useSafeAreaInsets();
+
+  const openGrillInfo = useCallback(() => setBeforeYouGrillVisible(true), []);
+  const renderHeaderInfoButton = useCallback(
+    () => <HomeHeaderInfoButton onPress={openGrillInfo} />,
+    [openGrillInfo],
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: renderHeaderInfoButton,
+    });
+  }, [navigation, renderHeaderInfoButton]);
 
   library.add(fas);
 
@@ -277,7 +303,7 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Timer onInfoPress={() => setBeforeYouGrillVisible(true)} />
+      <Timer />
 
       {timerComplete && (
         <View style={styles.completeContainer}>
@@ -344,6 +370,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  headerInfoButton: {
+    width: 44,
+    height: 44,
+    marginRight: theme.spacing.sm,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
   },
   longestTime: {
     textAlign: 'center',

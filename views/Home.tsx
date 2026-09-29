@@ -1,31 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Text, StyleSheet, SafeAreaView, Alert, Linking, View, TouchableOpacity } from 'react-native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SteakModal from '../components/SteakModal';
 import BeforeYouGrill from '../components/BeforeYouGrill';
 import StartTimerModal from '../components/StartTimerModal.tsx';
-import TopButtons from '../components/TopButtons';
+import HomeActions from '../components/HomeActions.tsx';
 import SteakList from '../components/SteakList.tsx';
+import Timer from '../components/Timer';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import notifee, { TimestampTrigger, TriggerType, AuthorizationStatus } from '@notifee/react-native';
 import StopTimerModal from '../components/StopTimerModal.tsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useTimerStore from '../stores/TimerStore.tsx';
 import useSteakStore from '../stores/SteakStore.tsx';
+import useToastStore from '../stores/ToastStore';
 import { Steak } from '../data/SteakData.tsx';
 import globalStyles from '../styles/globalStyles.tsx';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { theme } from '../styles/theme';
 
+const HomeHeaderInfoButton = ({ onPress }: { onPress: () => void }) => (
+  <TouchableOpacity
+    style={styles.headerInfoButton}
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel="Before you grill tips"
+    accessibilityHint="Opens grilling preparation and safety reminders"
+  >
+    <FontAwesomeIcon icon={faCircleInfo} size={19} color={theme.colors.accentDeep} />
+  </TouchableOpacity>
+);
 
 const Home = () => {
+  const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
   const { duration, timerRunning, timerComplete, startStoreTimer, stopStoreTimer, setDuration, setTimerRunning, setEndTime, setRemainingTime, setTimerComplete } = useTimerStore();
   const { steaks, addSteak, clearSteaks, editSteak, updateSteaks } = useSteakStore();
+  const { showToast } = useToastStore();
   const [modalVisible, setModalVisible] = useState(false);
   const [stopTimerModalVisible, setStopTimerModalVisible] = useState(false);
   const [beforeYouGrillVisible, setBeforeYouGrillVisible] = useState(false);
   const [startTimeModalVisible, setStartTimerModalVisible] = useState(false);
   const [editingSteak, setEditingSteak] = useState<Steak | null>(null);
+  const insets = useSafeAreaInsets();
+
+  const openGrillInfo = useCallback(() => setBeforeYouGrillVisible(true), []);
+  const renderHeaderInfoButton = useCallback(
+    () => <HomeHeaderInfoButton onPress={openGrillInfo} />,
+    [openGrillInfo],
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: renderHeaderInfoButton,
+    });
+  }, [navigation, renderHeaderInfoButton]);
 
   library.add(fas);
 
@@ -253,8 +284,7 @@ const Home = () => {
           } else {
             // If the timer expired, reset
             await AsyncStorage.removeItem('steakTimerData');
-            Alert.alert('Unexpected Close',
-              "The app closed unexpectedly, if it's on us, we hope your steaks still turned out great and apologize for the inconvinence.");
+            showToast('The app closed unexpectedly, but your timer has been reset.');
           }
         }
       } catch (error) {
@@ -265,7 +295,7 @@ const Home = () => {
     if (steaks !== undefined && steaks.length === 0) {
       loadSteakData();
     }
-  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks, steaks]);
+  }, [setEndTime, setRemainingTime, setTimerRunning, updateSteaks, steaks, showToast]);
 
   useEffect(() => {
     checkShowBeforeYouGrillModal();
@@ -273,23 +303,7 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopButtons
-        onAdd={() => handleOnAddSteak()}
-        onPause={() => {
-          showStopTimerModal();
-        }}
-        onInfo={() => setBeforeYouGrillVisible(true)}
-        onStart={() => setStartTimerModalVisible(true)}
-        allDisabled={timerComplete}
-        addSteakEnabled={!timerRunning}
-        pauseEnabled={timerRunning}
-        startEnabled={!timerRunning && steaks.length > 0}
-      />
-      {(!steaks || steaks.length === 0 && !timerComplete) && (
-        <Text onPress={() => setModalVisible(true)} style={styles.noneAddedText}>
-          No Steaks Added
-        </Text>
-      )}
+      <Timer />
 
       {timerComplete && (
         <View style={styles.completeContainer}>
@@ -313,7 +327,8 @@ const Home = () => {
           steaks={steaks}
           onEdit={handleEdit}
           onDelete={showDeleteConfirm}
-          actionsDisabled={timerRunning} />
+          actionsDisabled={timerRunning}
+          bottomPadding={insets.bottom + 100} />
       )}
 
       <SteakModal
@@ -341,6 +356,12 @@ const Home = () => {
         onClose={() => setStartTimerModalVisible(false)}
         onStart={startTimer}
       />
+      <HomeActions
+        hasSteak={steaks.length > 0}
+        onAddSteak={() => handleOnAddSteak()}
+        onStartCook={() => setStartTimerModalVisible(true)}
+        onStopCook={() => showStopTimerModal()}
+    />
     </SafeAreaView>
   );
 };
@@ -348,7 +369,18 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
+  },
+  headerInfoButton: {
+    width: 44,
+    height: 44,
+    marginRight: theme.spacing.sm,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
   },
   longestTime: {
     textAlign: 'center',
@@ -358,11 +390,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'black',
-  },
-  noneAddedText: {
-    textAlign: 'center',
-    margin: 20,
-    fontSize: 20,
   },
   completeContainer: {
     flex: 1,
@@ -374,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     fontWeight: 'bold',
-    color: '#5cb85c',
+    color: theme.colors.success,
   },
   prepText: {
     paddingVertical: 8,
@@ -386,7 +413,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   resetText: {
-    color: '#5cb85c',
+    color: theme.colors.success,
   },
   resetButton: {
     width: 150,

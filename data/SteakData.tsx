@@ -10,6 +10,8 @@ interface Duration {
 
 interface CookData {
   CenterCook: string;
+  BackgroundColor: string;
+  TextColor: string;
   Durations: Duration[];
 }
 

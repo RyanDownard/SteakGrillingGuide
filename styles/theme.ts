@@ -1,0 +1,77 @@
+export const theme = {
+  colors: {
+    background: '#fdf8f4',
+    surface: '#fffdf9',
+    surfaceAlt: '#fff7f0',
+    card: '#ffffff',
+    cardMuted: '#f6ebdf',
+    border: '#ecdccc',
+    borderSoft: '#f0d8c3',
+    accent: '#c07040',
+    accentDeep: '#7a2e1a',
+    accentSoft: '#f3c9a8',
+    text: '#2a1a0e',
+    textMuted: '#8b6a56',
+    textSoft: '#a08070',
+    success: '#5cb85c',
+    danger: '#d9534f',
+    dangerDeep: '#c30212ff',
+    info: '#007BFF',
+    infoSoft: '#d1fae5',
+    white: '#ffffff',
+    black: '#000000',
+    overlay: 'rgba(46, 30, 20, 0.65)',
+    shadow: '#5a3d2a',
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+  },
+  radii: {
+    sm: 8,
+    md: 12,
+    lg: 14,
+    xl: 18,
+  },
+  typography: {
+    heading: 'CormorantGaramond-Bold',
+    body: 'DMSans-Regular',
+    bodyBold: 'DMSans-Bold',
+    mono: 'CourierPrime-Regular',
+    label: {
+      fontSize: 11,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase' as const,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700' as const,
+    },
+    timer: {
+      fontSize: 24,
+      fontWeight: '700' as const,
+    },
+  },
+  shadows: {
+    soft: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    raised: {
+      shadowColor: '#5a3d2a',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.35,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+  },
+};
+
+export type AppTheme = typeof theme;

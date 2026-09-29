@@ -7,12 +7,18 @@ import {
   TouchableOpacity,
   Keyboard,
   Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { SavedSteak } from '../data/SteakData';
+import { Steak, SavedSteak } from '../data/SteakData';
 import globalStyles from '../styles/globalStyles';
 import useSavedSteaksStore from '../stores/SavedSteakStore';
 import useSteakStore from '../stores/SteakStore';
+import useToastStore from '../stores/ToastStore';
+import { theme } from '../styles/theme';
 
 interface Props {
   visible: boolean;
@@ -23,9 +29,9 @@ interface Props {
 const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }) => {
   const [personName, setPersonName] = useState('');
   const [centerCook, setCenterCook] = useState('');
-  const { updateSavedSteak } = useSavedSteaksStore();
+  const { addSavedSteak, updateSavedSteak } = useSavedSteaksStore();
   const { updateSteaksWithSavedId } = useSteakStore();
-
+  const { showToast } = useToastStore();
 
   const centerCookOptions = [
     { label: 'Rare', value: 'Rare' },
@@ -39,29 +45,32 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
     if (editingSteak) {
       setPersonName(editingSteak.personName);
       setCenterCook(editingSteak.centerCook);
-    }
-    else {
+    } else {
       setPersonName('');
       setCenterCook('');
     }
-
   }, [editingSteak]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (personName.length === 0 || centerCook.length === 0) {
-      Alert.alert('Name, center cook, and thickness must have a value before saving.');
+      showToast('Please enter both the name and cook level before saving.');
       return;
     }
 
-    editingSteak!.personName = personName;
-    editingSteak!.centerCook = centerCook;
+    if (editingSteak) {
+      editingSteak.personName = personName;
+      editingSteak.centerCook = centerCook;
 
-    updateSavedSteak(editingSteak!);
-    updateSteaksWithSavedId(editingSteak!);
+      await updateSavedSteak(editingSteak);
+      updateSteaksWithSavedId(editingSteak);
+    } else {
+      const newSteak = new Steak(0, personName, centerCook, 1);
+      await addSavedSteak(newSteak);
+    }
+
     onClose();
     clearInputs();
   };
-
 
   const clearInputs = () => {
     setPersonName('');
@@ -88,60 +97,198 @@ const EditSavedSteakModal: React.FC<Props> = ({ visible, onClose, editingSteak }
       onRequestClose={handleClose}
       presentationStyle={'overFullScreen'}
     >
-      <View style={globalStyles.modalOverlay}>
-        <View style={globalStyles.modalContent}>
-          <View style={globalStyles.modalHeader}>
-            <Text style={globalStyles.modalTitle}>
-              {editingSteak ? 'Edit Steak' : 'Add Steak'}
-            </Text>
-            <TouchableOpacity onPress={handleClose}>
-              <Text style={globalStyles.closeButton}>✕</Text>
-            </TouchableOpacity>
+      <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.keyboardContainer}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.headerAccent} />
+            <View style={styles.modalHeader}>
+              <View style={styles.headerTextWrap}>
+                <Text style={styles.modalTitle}>
+                  {editingSteak ? 'Edit Saved Steak' : 'Add Saved Steak'}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  {editingSteak ? 'Update the details for this saved profile.' : 'Save a reusable steak profile for later.'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Person Name</Text>
+                <TextInput
+                  ref={personNameInputRef}
+                  style={[globalStyles.input, styles.fieldInput]}
+                  placeholder="Person Name"
+                  placeholderTextColor={'#a78d7a'}
+                  value={personName}
+                  onChangeText={setPersonName}
+                  enterKeyHint={'done'}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Center Cook</Text>
+                <Dropdown
+                  style={[globalStyles.dropdown, styles.fieldControl]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={[globalStyles.selectedTextStyle, styles.selectedTextStyle]}
+                  data={centerCookOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Center Cook"
+                  value={centerCook}
+                  onFocus={handleDismissKeyboard}
+                  onChange={(item) => setCenterCook(item.value)}
+                />
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={[styles.actionButton, styles.primaryButton]} onPress={handleSave}>
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={handleClose}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-
-          <Text style={globalStyles.label}>Person Name:</Text>
-          <TextInput
-            ref={personNameInputRef}
-            style={globalStyles.input}
-            placeholder="Person Name"
-            placeholderTextColor={'#aaa'}
-            value={personName}
-            onChangeText={setPersonName}
-            enterKeyHint={'done'}
-          />
-
-          <Text style={globalStyles.label}>Center Cook:</Text>
-          <Dropdown
-            style={globalStyles.dropdown}
-            placeholderStyle={globalStyles.placeholderStyle}
-            selectedTextStyle={globalStyles.selectedTextStyle}
-            data={centerCookOptions}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Center Cook"
-            value={centerCook}
-            onFocus={handleDismissKeyboard}
-            onChange={(item) => setCenterCook(item.value)}
-          />
-
-          <View style={globalStyles.buttonContainer}>
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.saveButton]}
-              onPress={handleSave}
-            >
-              <Text style={globalStyles.buttonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[globalStyles.button, globalStyles.cancelButton]}
-              onPress={handleClose}
-            >
-              <Text style={globalStyles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.overlay,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  keyboardContainer: {
+    width: '100%',
+    maxWidth: 480,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: theme.colors.background,
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    shadowColor: theme.colors.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 7,
+  },
+  headerAccent: {
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: theme.colors.accent,
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  headerTextWrap: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: theme.colors.text,
+    fontFamily: 'Avenir-Book',
+  },
+  modalSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: theme.colors.textMuted,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.colors.cardMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: theme.colors.textMuted,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 8,
+  },
+  fieldGroup: {
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#6d4f3b',
+    marginBottom: 6,
+  },
+  fieldInput: {
+    backgroundColor: '#fffdf9',
+    borderColor: '#e2d2c0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 0,
+  },
+  fieldControl: {
+    backgroundColor: '#fffdf9',
+    borderColor: '#e2d2c0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 0,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: '#a78d7a',
+  },
+  selectedTextStyle: {
+    color: '#2f241d',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 10,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryButton: {
+    backgroundColor: theme.colors.accent,
+  },
+  secondaryButton: {
+    backgroundColor: '#8d6b56',
+  },
+  buttonText: {
+    color: theme.colors.white,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});
 
 export default EditSavedSteakModal;

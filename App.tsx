@@ -7,12 +7,35 @@ import SavedSteaks from './views/SavedSteaks';
 import { faSave, faHome, faClock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import notifee from '@notifee/react-native';
-import Timer from './components/Timer';
 import useSavedSteaksStore from './stores/SavedSteakStore';
 import useSteakStore from './stores/SteakStore';
 import EditTimes from './views/EditTimes';
+import { PaperProvider } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
+import { theme } from './styles/theme';
 
 const Tab = createBottomTabNavigator();
+
+const screenOptions = {
+  headerStyle: {
+    backgroundColor: theme.colors.background,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  headerTintColor: theme.colors.text,
+  headerTitleStyle: {
+    fontFamily: theme.typography.heading,
+    fontSize: 22,
+    fontWeight: '700' as const,
+  },
+  headerTitleAlign: 'center' as const,
+  tabBarActiveTintColor: theme.colors.accent,
+  tabBarInactiveTintColor: theme.colors.textSoft,
+  tabBarStyle: {
+    backgroundColor: theme.colors.surface,
+    borderTopColor: theme.colors.border,
+  },
+};
 
 const homeIcon = ({ color, size }: { color: string; size: number }) => (
   <FontAwesomeIcon icon={faHome} size={size} color={color} />
@@ -49,32 +72,36 @@ const App = () => {
   }, [loadSavedSteaks, loadOverrides]);
 
   return (
-    <View style={styles.container}>
-      <NavigationContainer>
-        <Timer />
-        <Tab.Navigator>
-          <Tab.Screen
-            name="Home"
-            component={Home}
-            options={{
-              headerTitle: 'Steak Grilling Guide',
-              tabBarIcon: homeIcon,
-            }} />
-          <Tab.Screen
-            name="Saved Steaks"
-            component={SavedSteaks}
-            options={{
-              tabBarIcon: savedSteakIcon,
-            }} />
-          <Tab.Screen
-            name="Edit Times"
-            component={EditTimes}
-            options={{
-              tabBarIcon: timerIcon,
-            }} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </View>
+    <PaperProvider>
+      <View style={styles.container}>
+        <NavigationContainer>
+          <Tab.Navigator screenOptions={screenOptions}>
+            <Tab.Screen
+              name="Home"
+              component={Home}
+              options={{
+                headerTitle: 'Steak Grilling Guide',
+                tabBarIcon: homeIcon,
+              }} />
+            <Tab.Screen
+              name="Saved Steaks"
+              component={SavedSteaks}
+              options={{
+                headerTitle: 'Saved Steaks',
+                tabBarIcon: savedSteakIcon,
+              }} />
+            <Tab.Screen
+              name="Edit Times"
+              component={EditTimes}
+              options={{
+                headerTitle: 'Edit Times',
+                tabBarIcon: timerIcon,
+              }} />
+          </Tab.Navigator>
+        </NavigationContainer>
+        <Toast />
+      </View>
+    </PaperProvider>
   );
 };
 
